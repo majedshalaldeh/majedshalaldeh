@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>محاكاة عزم القصور الذاتي | الأستاذ ماجد شلالدة</title>
+    <style>
+        :root { --bg-color: #0b1329; --card-bg: #1c2541; --accent: #b5179e; --text: #ffffff; }
+        body { font-family: system-ui, sans-serif; background-color: var(--bg-color); color: var(--text); padding: 20px; }
+        .watermark { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://squarespace-cdn.com'); background-size: 180px; opacity: 0.02; pointer-events: none; z-index: 0; transform: rotate(-15deg) scale(1.2); }
+        .container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+        .btn { text-decoration: none; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--accent); color: var(--accent); display: inline-block; margin-bottom: 20px; }
+        .sim-box { background: var(--card-bg); border-radius: 12px; padding: 30px; text-align: center; }
+        .control-group { margin: 20px 0; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .control-group input, .control-group select { padding: 10px; border-radius: 6px; border: 1px solid #3a506b; background: #0b1329; color: #fff; width: 150px; text-align: center; }
+        .result-box { font-size: 1.8rem; color: var(--accent); font-weight: bold; margin-top: 25px; padding: 15px; background: rgba(181, 23, 158, 0.1); border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="watermark"></div>
+    <div class="container">
+        <a href="rotation.html" class="btn">⬅ العودة للحركة الدورانية</a>
+        <div class="sim-box">
+            <h1>🎡 عزم القصور الذاتي للأشكال الهندسية (I)</h1>
+            <p>إعداد الأستاذ ماجد شلالدة</p>
+            <div class="control-group">
+                <label>شكل الجسم الدوار:<br>
+                    <select id="shape" onchange="calc()">
+                        <option value="1">حلقة دائرية رقيقة (I = m·r²)</option>
+                        <option value="0.5">أسطوانة أو قرص صلب (I = 0.5·m·r²)</option>
+                        <option value="0.4">كرة صلبة متجانسة (I = 0.4·m·r²)</option>
+                    </select>
+                </label>
+                <label>الكتلة (m) بالكغم:<br><input type="number" id="m" value="4" oninput="calc()"></label>
+                <label>نصف القطر (r) بالمتر:<br><input type="number" id="r" value="1.5" oninput="calc()"></label>
+            </div>
+            <div class="result-box" id="result">عزم القصور الذاتي (I) = 9.00 كغم·م²</div>
+        </div>
+    </div>
+    <script>
+        function calc() {
+            let factor = parseFloat(document.getElementById('shape').value);
+            let m = parseFloat(document.getElementById('m').value) || 0;
+            let r = parseFloat(document.getElementById('r').value) || 0;
+            let inertia = factor * m * r * r;
+            document.getElementById('result').innerText = `عزم القصور الذاتي (I) = ${inertia.toFixed(2)} كغم·م²`;
+        }
+    </script>
+</body>
+</html>
