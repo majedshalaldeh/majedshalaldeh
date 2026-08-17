@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شدة التيار الكهربائي | الأستاذ ماجد شلالدة</title>
+<style>
+:root{
+  --bg:#0b1329;
+  --main:#1c2541;
+  --sub:#3a506b;
+  --text:#fff;
+  --green:#06d6a0;
+  --cyan:#00b4d8;
+  --gold:#ffd166;
+}
+*{box-sizing:border-box}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  margin:0;
+  padding:20px;
+  min-height:100vh;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+.top-nav{
+  display:flex;
+  justify-content:flex-start;
+  margin-bottom:20px;
+}
+.top-nav a{
+  text-decoration:none;
+  color:#fff;
+  background:#263d62;
+  border:1px solid #4a6588;
+  padding:9px 15px;
+  border-radius:10px;
+  font-weight:700;
+  transition:.2s;
+}
+.top-nav a:hover{
+  border-color:var(--cyan);
+  transform:translateY(-2px);
+}
+header{
+  text-align:center;
+  margin-bottom:45px;
+}
+.main-logo{
+  width:130px;
+  height:130px;
+  object-fit:cover;
+  border-radius:50%;
+  box-shadow:0 4px 25px rgba(0,180,216,.2);
+}
+h1{
+  font-size:2.6rem;
+  color:var(--green);
+  margin:14px 0 5px;
+}
+.teacher{
+  font-size:1.25rem;
+  color:var(--gold);
+  font-weight:bold;
+  margin:5px;
+}
+.phone{
+  direction:ltr;
+  color:#a5a5a5;
+  font-size:1.05rem;
+}
+header p{
+  color:#d0d7e2;
+  font-size:1.1rem;
+  max-width:700px;
+  margin:15px auto;
+  line-height:1.8;
+}
+.main-section{
+  background:var(--main);
+  border-radius:16px;
+  padding:30px;
+  margin-bottom:35px;
+  border:1px solid rgba(255,255,255,.05);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+.section-title{
+  color:var(--green);
+  font-size:1.8rem;
+  margin:0 0 25px;
+  padding-bottom:10px;
+  border-bottom:3px solid var(--green);
+  display:inline-block;
+}
+.sub-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+.sub-card{
+  background:var(--sub);
+  border-radius:12px;
+  padding:22px;
+  text-decoration:none;
+  color:#fff;
+  min-height:155px;
+  border:1px solid transparent;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  transition:.25s;
+}
+.sub-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--green);
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+}
+.sub-card h3{
+  margin:0 0 10px;
+  font-size:1.3rem;
+}
+.sub-card p{
+  margin:0;
+  color:#ddd;
+  line-height:1.7;
+  font-size:.96rem;
+}
+.icon{
+  font-size:2rem;
+  margin-bottom:10px;
+}
+footer{
+  text-align:center;
+  color:#8797ad;
+  margin-top:25px;
+}
+@media(max-width:600px){
+  body{padding:12px}
+  h1{font-size:2rem}
+  .main-section{padding:20px}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="top-nav">
+    <a href="index.html">⌂ الصفحة الرئيسية</a>
+  </div>
+
+  <header>
+    <img src="logo.png" alt="شعار الأستاذ ماجد شلالدة" class="main-logo">
+    <h1>شدة التيار الكهربائي</h1>
+    <div class="teacher">إعداد: الأستاذ ماجد شلالدة</div>
+    <div class="phone">0599870176</div>
+    <p>
+      فهرس المحاكاة التعليمية الخاصة بشدة التيار الكهربائي،
+      اختر المحاكاة المناسبة للانتقال إليها.
+    </p>
+  </header>
+
+  <main>
+    <section class="main-section">
+      <h2 class="section-title">⚡ محاكاة شدة التيار الكهربائي</h2>
+
+      <div class="sub-grid">
+
+        <a href="current_basic.html" class="sub-card">
+          <div class="icon">⚡</div>
+          <h3>شدة التيار الكهربائي</h3>
+          <p>محاكاة مفهوم شدة التيار والعلاقة بين كمية الشحنة والزمن.</p>
+        </a>
+
+        <a href="current_charge_time.html" class="sub-card">
+          <div class="icon">🔋</div>
+          <h3>الشحنة والزمن وشدة التيار</h3>
+          <p>دراسة كيفية تغير شدة التيار عند تغير كمية الشحنة والزمن.</p>
+        </a>
+
+        <a href="current_graph.html" class="sub-card">
+          <div class="icon">📈</div>
+          <h3>منحنى التيار مع الزمن</h3>
+          <p>تمثيل شدة التيار بيانيًا ودراسة التغيرات خلال فترة زمنية.</p>
+        </a>
+
+        <a href="current_average.html" class="sub-card">
+          <div class="icon">🧮</div>
+          <h3>شدة التيار المتوسطة</h3>
+          <p>حساب شدة التيار المتوسطة خلال فترة زمنية محددة.</p>
+        </a>
+
+        <a href="free_electrons.html" class="sub-card">
+          <div class="icon">⚛️</div>
+          <h3>حركة الإلكترونات الحرة داخل الموصل الفلزي</h3>
+          <p>الانتقال إلى صفحة حركة الإلكترونات الحرة داخل الموصل الفلزي.</p>
+        </a>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    المنصة التفاعلية للمحاكاة الفيزيائية — الأستاذ ماجد شلالدة
+  </footer>
+
+</div>
+</body>
+</html>
