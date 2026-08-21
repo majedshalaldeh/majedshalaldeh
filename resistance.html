@@ -178,8 +178,44 @@
   #resetcam:hover{ color:var(--text); border-color:var(--copper); }
 
   @media (max-width: 880px){
-    #app{ grid-template-columns:1fr; grid-template-rows: 52vh 1fr; }
-    #sidebar{ border-right:none; border-top:1px solid var(--line); }
+    #app{ grid-template-columns:1fr; grid-template-rows: 48vh 1fr; height:100vh; height:100dvh; }
+    #sidebar{ border-right:none; border-top:1px solid var(--line); padding:16px 14px 20px 14px; }
+
+    #topbar{ padding:12px 14px 0 14px; gap:6px; }
+    #navbtns{ top:10px; right:14px; flex-wrap:wrap; justify-content:flex-end; max-width:calc(100% - 28px); gap:6px; }
+    .navbtn{ font-size:11px; padding:6px 10px; }
+
+    #titlerow{ flex-direction:column; align-items:flex-start; margin-top:76px; gap:8px; }
+    #title-block img{ width:42px; height:42px; }
+    #title-text h1{ font-size:16px; }
+    #title-text p{ font-size:11px; }
+    #credit{ font-size:11.5px; padding:3px 8px; }
+    #hint{ max-width:none; font-size:10.5px; padding:6px 10px; }
+
+    #readouts{ bottom:10px; right:14px; left:14px; gap:6px; }
+    .metric{ padding:7px 11px; min-width:auto; flex:1 1 calc(50% - 6px); }
+    .metric .k{ font-size:9.5px; }
+    .metric .v{ font-size:15px; }
+    .metric.formula{ flex-basis:100%; order:5; }
+    .metric.formula .v{ font-size:11px; line-height:1.4; }
+
+    #resetcam{ top:10px; left:14px; font-size:11px; padding:6px 10px; }
+  }
+
+  @media (max-width: 480px){
+    #app{ grid-template-rows: 42vh 1fr; }
+    #navbtns{ top:8px; right:10px; }
+    .navbtn{ font-size:10px; padding:5px 8px; gap:4px; }
+    #titlerow{ margin-top:70px; }
+    #title-text h1{ font-size:14.5px; }
+    #title-text p{ display:none; }
+    #hint{ display:none; }
+    #readouts{ bottom:8px; right:10px; left:10px; }
+    .metric{ padding:6px 9px; }
+    .metric .v{ font-size:13.5px; }
+    #resetcam{ top:8px; left:10px; padding:5px 9px; font-size:10px; }
+    #sidebar{ padding:14px 12px 18px 12px; }
+    .section-label{ margin:16px 0 8px 0; }
   }
 </style>
 </head>
@@ -200,7 +236,7 @@
             <div id="credit">إعداد الأستاذ <b>ماجد شلالده</b> — 0599870176</div>
           </div>
         </div>
-        <div id="hint">اسحب لتدوير المشهد، وحرّك عجلة الفأرة للتكبير والتصغير</div>
+        <div id="hint">اسحب لتدوير المشهد، وحرّك عجلة الفأرة أو استخدم إصبعين للتكبير والتصغير</div>
       </div>
     </div>
     <button id="resetcam">↺ إعادة ضبط الكاميرا</button>
@@ -655,11 +691,50 @@ function applyCamera(){
 }
 applyCamera();
 
+const activePointers = new Map();
 let dragging = false, lastX=0, lastY=0;
-renderer.domElement.addEventListener('pointerdown', e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; });
-window.addEventListener('pointerup', ()=> dragging=false);
+let pinchStartDist = null, pinchStartCamDist = null;
+
+function pointersDistance(){
+  const pts = Array.from(activePointers.values());
+  const dx = pts[0].x-pts[1].x, dy = pts[0].y-pts[1].y;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+
+renderer.domElement.addEventListener('pointerdown', e=>{
+  renderer.domElement.setPointerCapture && renderer.domElement.setPointerCapture(e.pointerId);
+  activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if (activePointers.size === 1){
+    dragging = true; lastX=e.clientX; lastY=e.clientY;
+  } else if (activePointers.size === 2){
+    dragging = false;
+    pinchStartDist = pointersDistance();
+    pinchStartCamDist = camDist;
+  }
+});
+window.addEventListener('pointerup', e=>{
+  activePointers.delete(e.pointerId);
+  if (activePointers.size < 2){ pinchStartDist = null; }
+  if (activePointers.size === 1){
+    const p = Array.from(activePointers.values())[0];
+    dragging = true; lastX = p.x; lastY = p.y;
+  } else if (activePointers.size === 0){
+    dragging = false;
+  }
+});
+window.addEventListener('pointercancel', e=>{ activePointers.delete(e.pointerId); dragging=false; pinchStartDist=null; });
 window.addEventListener('pointermove', e=>{
-  if(!dragging) return;
+  if (!activePointers.has(e.pointerId)) return;
+  activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+  if (activePointers.size === 2 && pinchStartDist){
+    const d = pointersDistance();
+    const scale = pinchStartDist / Math.max(d, 1);
+    camDist = pinchStartCamDist * scale;
+    applyCamera();
+    return;
+  }
+  if (!dragging || activePointers.size !== 1) return;
   const dx = e.clientX-lastX, dy = e.clientY-lastY;
   lastX=e.clientX; lastY=e.clientY;
   camAngleA -= dx*0.0055;
@@ -671,6 +746,7 @@ renderer.domElement.addEventListener('wheel', e=>{
   camDist += e.deltaY*0.01;
   applyCamera();
 }, { passive:false });
+renderer.domElement.style.touchAction = 'none';
 document.getElementById('resetcam').addEventListener('click', ()=>{
   camAngleA = Math.atan2(DEFAULT_CAM.x, DEFAULT_CAM.z);
   camAngleE = Math.asin(DEFAULT_CAM.y / DEFAULT_CAM.length());
