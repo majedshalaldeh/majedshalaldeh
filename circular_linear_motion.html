@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>القصور الذاتي الدوراني لمجموعة كتل نقطية</title>
+<title>العلاقة بين الحركة الدائرية والحركة الخطية</title>
 <style>
   :root{
     --bg-deep:#04070d;
@@ -191,10 +191,9 @@
     padding:16px 20px 18px; width:min(300px, 88vw);
   }
   #controlPanel h3{
-    margin:10px 0 10px; font-size:12px; letter-spacing:2px; color:var(--text);
+    margin:0 0 10px; font-size:12px; letter-spacing:2px; color:var(--text);
     text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;
   }
-  #controlPanel h3:first-child{margin-top:0;}
   .ctrlRow{display:flex; justify-content:space-between; align-items:baseline; font-size:12px; margin-top:10px;}
   .ctrlRow .plabel{color:var(--text-dim); letter-spacing:0.3px;}
   .ctrlRow .pval{color:var(--amber); font-weight:700; direction:ltr;}
@@ -215,33 +214,43 @@
   .btnRow{display:flex; gap:8px; margin-top:14px;}
   .btnRow button{
     flex:1; font-family:inherit; font-size:12px; letter-spacing:1px;
-    padding:10px 8px; border-radius:2px; cursor:pointer;
+    padding:10px 6px; border-radius:2px; cursor:pointer;
     border:1px solid var(--line); transition:border-color 0.2s, color 0.2s;
     background:rgba(58,160,255,0.1); color:var(--field-cool);
   }
   .btnRow button:hover{border-color:var(--field-cool);}
+  #resetBtn{background:rgba(255,90,60,0.1)!important; color:var(--field-hot)!important;}
+  #resetBtn:hover{border-color:var(--field-hot)!important;}
 
-  #resultPanel{
+  #hudPanel{
     position:fixed; top:140px; left:22px; z-index:5;
     background:rgba(6,11,20,0.82); border:1px solid var(--line); border-radius:2px;
-    padding:16px 20px 18px; width:270px;
+    padding:16px 20px 18px; width:275px;
   }
-  #resultPanel h3{
-    margin:0 0 12px; font-size:13px; letter-spacing:2px; color:var(--text);
-    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;
+  #hudPanel h3{
+    margin:10px 0 8px; font-size:11px; letter-spacing:2px; color:var(--text);
+    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:6px;
   }
-  .resultRow{display:flex; justify-content:space-between; font-size:13px; margin:8px 0; color:var(--text-dim);}
-  .resultRow b{color:var(--text); direction:ltr;}
-  .resultRow.highlight{margin-top:12px; padding-top:12px; border-top:1px solid var(--line);}
-  .resultRow.highlight b{color:var(--amber); font-size:17px;}
-  #resultPanel .formula{font-size:12px; color:var(--text-dim); direction:ltr; text-align:center; margin-top:4px;}
-  #vertexList{margin-top:12px; padding-top:10px; border-top:1px solid var(--line); max-height:170px; overflow-y:auto;}
-  #vertexList .vRow{display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-dim); margin:4px 0; direction:ltr;}
-  #vertexList .vRow b{color:var(--field-cool);}
+  #hudPanel h3:first-child{margin-top:0;}
+  .hudRow{display:flex; justify-content:space-between; font-size:12.5px; margin:6px 0; color:var(--text-dim);}
+  .hudRow b{color:var(--text); direction:ltr;}
+  .hudRow.pair{padding:4px 6px; border-radius:2px;}
+  .hudRow.pair.circ{background:rgba(58,160,255,0.07);}
+  .hudRow.pair.lin{background:rgba(255,90,60,0.07);}
+
+  #legend{
+    position:fixed; top:140px; right:22px; z-index:5;
+    background:rgba(6,11,20,0.75); border:1px solid var(--line); border-radius:2px;
+    padding:16px 20px; font-size:12.5px; color:var(--text-dim); max-width:250px;
+  }
+  #legend h3{margin:0 0 10px; font-size:12px; letter-spacing:2px; color:var(--text); text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;}
+  #legend .factRow{margin:8px 0; line-height:1.6; direction:ltr; text-align:left;}
+  #legend .factRow b{color:var(--field-cool);}
 
   @media (max-width:640px){
     #controlPanel{display:none;}
-    #resultPanel{display:none;}
+    #hudPanel{display:none;}
+    #legend{display:none;}
   }
 </style>
 </head>
@@ -249,47 +258,52 @@
 
 <div id="canvasHolder"></div>
 
-<!-- عدّل رابط href أدناه ليشير إلى ملف صفحتك الرئيسية -->
+<!-- عدّل الروابط أدناه لتشير إلى ملفات صفحاتك الفعلية -->
 <div id="nav">
- <a class="field" href="rotation.html"><span class="arrow">↩</span> العودة للحركة الدورانية</a>
+  <a class="field" href="rotation.html"><span class="arrow">↩</span> العودة للحركة الدورانية</a>
   <a class="home" href="index.html"><span class="arrow">⌂</span> العودة للصفحة الرئيسية</a>
 </div>
 
 <div id="title">
-  <h1>القصور الذاتي الدوراني</h1>
-  <p>I = Σ mᵢrᵢ² — لمجموعة كتل نقطية على رؤوس شكل هندسي</p>
+  <h1>العلاقة بين الحركة الدائرية والحركة الخطية</h1>
+  <p>s = rθ &nbsp;|&nbsp; v = rω &nbsp;|&nbsp; aₜ = rα &nbsp;|&nbsp; a_c = rω²</p>
   <div class="credit">إعداد الأستاذ <span>ماجد شلالده</span><span class="dot">•</span><span class="phone">0599870176</span></div>
 </div>
 
-<div id="resultPanel">
-  <h3>النتائج</h3>
-  <div class="resultRow"><span>الكتلة الكلية M</span><b id="mTotalVal">—</b></div>
-  <div class="resultRow highlight"><span>القصور الدوراني I = Σmᵢrᵢ&sup2;</span><b id="iVal">—</b></div>
-  <div class="formula">نصف قطر الدوران k = √(I/M)</div>
-  <div class="resultRow"><span>k</span><b id="kVal">—</b></div>
-  <div id="vertexList"></div>
+<div id="legend">
+  <h3>الدليل</h3>
+  <div class="factRow"><b>الكرة الزرقاء</b>: نقطة تتحرك على مسار دائري.</div>
+  <div class="factRow"><b>السهم الأزرق</b>: السرعة الخطية المماسية v.</div>
+  <div class="factRow"><b>السهم الأحمر</b>: التسارع المركزي a_c (نحو المركز).</div>
+  <div class="factRow"><b>السهم الكهرماني</b>: التسارع المماسي aₜ (باتجاه الحركة أو عكسها).</div>
+</div>
+
+<div id="hudPanel">
+  <h3>الحركة الدائرية</h3>
+  <div class="hudRow pair circ"><span>الزاوية θ</span><b id="thetaVal">0.00 rad</b></div>
+  <div class="hudRow pair circ"><span>السرعة الزاوية ω</span><b id="omegaVal">0.00 rad/s</b></div>
+  <div class="hudRow pair circ"><span>التسارع الزاوي α</span><b id="alphaVal">0.00 rad/s²</b></div>
+  <h3>الحركة المماسية</h3>
+  <div class="hudRow pair lin"><span>الإزاحة s = rθ</span><b id="sVal">0.00 m</b></div>
+  <div class="hudRow pair lin"><span>السرعة v = rω</span><b id="vVal">0.00 m/s</b></div>
+  <div class="hudRow pair lin"><span>التسارع المماسي aₜ = rα</span><b id="atVal">0.00 m/s²</b></div>
+  <div class="hudRow pair lin"><span>التسارع المركزي a_c = rω&sup2;</span><b id="acVal">0.00 m/s²</b></div>
+  <div class="hudRow pair lin"><span>التسارع الكلي |a|</span><b id="aTotalVal">0.00 m/s²</b></div>
 </div>
 
 <div id="controlPanel">
-  <h3>الشكل الهندسي</h3>
-  <div class="ctrlRow"><span class="plabel">عدد الرؤوس N</span><span id="nval" class="pval">4</span></div>
-  <input id="nSlider" type="range" min="3" max="8" step="1" value="4">
-  <div class="ctrlRow"><span class="plabel">نصف قطر الشكل R (m)</span><span id="rShapeVal" class="pval">1.5</span></div>
-  <input id="rShapeSlider" type="range" min="0.3" max="3" step="0.05" value="1.5">
-  <div class="ctrlRow"><span class="plabel">كتلة كل نقطة m (kg)</span><span id="mval" class="pval">1.0</span></div>
-  <input id="mSlider" type="range" min="0.1" max="5" step="0.1" value="1">
-
-  <h3>محور الدوران</h3>
-  <div class="ctrlRow"><span class="plabel">إزاحة المحور أفقيًا X (m)</span><span id="axVal" class="pval">0.0</span></div>
-  <input id="axSlider" type="range" min="-3" max="3" step="0.05" value="0">
-  <div class="ctrlRow"><span class="plabel">إزاحة المحور أفقيًا Z (m)</span><span id="azVal" class="pval">0.0</span></div>
-  <input id="azSlider" type="range" min="-3" max="3" step="0.05" value="0">
-  <div class="ctrlRow"><span class="plabel">ميل المحور نحو X (°)</span><span id="tiltXVal" class="pval">0</span></div>
-  <input id="tiltXSlider" type="range" min="-90" max="90" step="1" value="0">
-  <div class="ctrlRow"><span class="plabel">ميل المحور نحو Z (°)</span><span id="tiltZVal" class="pval">0</span></div>
-  <input id="tiltZSlider" type="range" min="-90" max="90" step="1" value="0">
+  <h3>معطيات الحركة</h3>
+  <div class="ctrlRow"><span class="plabel">نصف القطر r (m)</span><span id="rval" class="pval">1.5</span></div>
+  <input id="rSlider" type="range" min="0.5" max="3" step="0.05" value="1.5">
+  <div class="ctrlRow"><span class="plabel">السرعة الزاوية الابتدائية ω₀ (rad/s)</span><span id="w0val" class="pval">2.0</span></div>
+  <input id="w0Slider" type="range" min="-10" max="10" step="0.1" value="2">
+  <div class="ctrlRow"><span class="plabel">التسارع الزاوي α (rad/s&sup2;)</span><span id="aval" class="pval">0.0</span></div>
+  <input id="aSlider" type="range" min="-5" max="5" step="0.1" value="0">
+  <div class="ctrlRow"><span class="plabel">سرعة العرض</span><span id="playSpeedVal" class="pval">1.0×</span></div>
+  <input id="playSpeedSlider" type="range" min="0.1" max="4" step="0.1" value="1">
   <div class="btnRow">
-    <button id="resetAxisBtn">إعادة المحور للمركز</button>
+    <button id="playBtn">تشغيل</button>
+    <button id="resetBtn">إعادة</button>
   </div>
 </div>
 
@@ -307,7 +321,7 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   scene.fog = new THREE.FogExp2(0x04070d, 0.014);
 
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
-  camera.position.set(6, 6.5, 8);
+  camera.position.set(7, 8, 10);
 
   const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -318,22 +332,22 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
   controls.minDistance = 2;
-  controls.maxDistance = 50;
-  controls.target.set(0, 0, 0);
+  controls.maxDistance = 60;
+  controls.target.set(0, 1.5, -2.5);
 
   // ---------- lighting ----------
   scene.add(new THREE.AmbientLight(0x223344, 1.2));
   const key = new THREE.PointLight(0x6fb4ff, 1.4, 60);
-  key.position.set(6, 8, 5);
+  key.position.set(6, 9, 5);
   scene.add(key);
   const rim = new THREE.PointLight(0xff7a4d, 0.6, 60);
-  rim.position.set(-5, -3, -5);
+  rim.position.set(-6, -3, -6);
   scene.add(rim);
 
   const grid = new THREE.GridHelper(30, 30, 0x14243a, 0x0c1626);
   scene.add(grid);
 
-  // ---------- floor logo ----------
+  // ---------- floor logo (off to the side) ----------
   const logoTexture = new THREE.TextureLoader().load(LOGO_DATA_URI);
   logoTexture.encoding = THREE.sRGBEncoding;
   const logoMesh = new THREE.Mesh(
@@ -341,166 +355,186 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
     new THREE.MeshBasicMaterial({map: logoTexture, transparent:true, opacity:0.35, depthWrite:false})
   );
   logoMesh.rotation.x = -Math.PI/2;
-  logoMesh.position.set(0, 0.015, 0);
+  logoMesh.position.set(0, 0.02, 0);
   scene.add(logoMesh);
+  const logoGlow = new THREE.Mesh(
+    new THREE.RingGeometry(2.1, 2.6, 96),
+    new THREE.MeshBasicMaterial({color:0x1c3352, transparent:true, opacity:0.28, side:THREE.DoubleSide, depthWrite:false})
+  );
+  logoGlow.rotation.x = -Math.PI/2;
+  logoGlow.position.set(0, 0.01, 0);
+  scene.add(logoGlow);
 
   // ============================================================
-  // SHAPE: regular N-gon lying flat in the XZ plane, point masses at vertices
+  // CIRCULAR TRACK + MARKER
   // ============================================================
-  const shapeGroup = new THREE.Group();
-  scene.add(shapeGroup);
+  // raised up along Y so the whole rotating assembly floats above the ground
+  const motionGroup = new THREE.Group();
+  motionGroup.position.y = 1.5;
+  scene.add(motionGroup);
 
-  let N=4, rShape=1.5, mass=1.0;
-  let vertexMeshes = [], shapeOutline = null;
+  const centerPost = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.06,0.06,0.4,12),
+    new THREE.MeshPhysicalMaterial({color:0x7f95ab, roughness:0.4, metalness:0.5})
+  );
+  centerPost.position.y = 0.2;
+  motionGroup.add(centerPost);
 
-  const massMat = new THREE.MeshPhysicalMaterial({color:0xff3b30, roughness:0.3, metalness:0.2});
-
-  function computeVertices(){
+  let r = 1.5;
+  let circleTrack = null;
+  function buildCircleTrack(){
+    if(circleTrack){ motionGroup.remove(circleTrack); circleTrack.geometry.dispose(); circleTrack.material.dispose(); }
     const pts = [];
-    for(let i=0;i<N;i++){
-      const t = i*(Math.PI*2/N) - Math.PI/2;
-      pts.push(new THREE.Vector3(Math.cos(t)*rShape, 0, Math.sin(t)*rShape));
+    const SEG = 96;
+    for(let i=0;i<=SEG;i++){
+      const t=(i/SEG)*Math.PI*2;
+      pts.push(new THREE.Vector3(Math.cos(t)*r, 0.02, Math.sin(t)*r));
     }
-    return pts;
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineDashedMaterial({color:0x3aa0ff, dashSize:0.15, gapSize:0.1, transparent:true, opacity:0.6});
+    circleTrack = new THREE.Line(geo, mat);
+    circleTrack.computeLineDistances();
+    motionGroup.add(circleTrack);
   }
+  buildCircleTrack();
 
-  function buildShape(){
-    while(shapeGroup.children.length){
-      const m = shapeGroup.children.pop();
-      if(m.geometry) m.geometry.dispose();
-      if(m.material) m.material.dispose();
-    }
-    vertexMeshes = [];
-    const verts = computeVertices();
+  const circMarker = new THREE.Mesh(new THREE.SphereGeometry(0.14,20,20), new THREE.MeshPhysicalMaterial({color:0x3aa0ff, roughness:0.3, metalness:0.2}));
+  motionGroup.add(circMarker);
 
-    const outlinePts = verts.concat([verts[0]]);
-    const outlineGeo = new THREE.BufferGeometry().setFromPoints(outlinePts);
-    shapeOutline = new THREE.Line(outlineGeo, new THREE.LineBasicMaterial({color:0x8fa7bf, transparent:true, opacity:0.7}));
-    shapeGroup.add(shapeOutline);
-
-    verts.forEach(v=>{
-      const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.14, 20, 20), massMat);
-      sphere.position.copy(v);
-      shapeGroup.add(sphere);
-      vertexMeshes.push(sphere);
-    });
-  }
-  buildShape();
+  const radiusLine = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0.03,0), new THREE.Vector3(1,0.03,0)]),
+    new THREE.LineBasicMaterial({color:0x7f95ab, transparent:true, opacity:0.5})
+  );
+  motionGroup.add(radiusLine);
 
   // ============================================================
-  // ROTATION AXIS: a line through point A with direction d (unit vector)
+  // VECTOR ARROWS (velocity + accelerations, on both markers)
   // ============================================================
-  const AXIS_HALF = 5;
-  const axisGeo = new THREE.CylinderGeometry(0.025, 0.025, AXIS_HALF*2, 10);
-  const axisMat = new THREE.MeshBasicMaterial({color:0xffb238, transparent:true, opacity:0.85});
-  const axisMesh = new THREE.Mesh(axisGeo, axisMat);
-  scene.add(axisMesh);
+  function makeArrow(color, thicknessScale=1){
+    const grp = new THREE.Group();
+    const mat = new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.95});
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.035*thicknessScale,0.035*thicknessScale,1,8), mat);
+    shaft.position.y = 0.5;
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.1*thicknessScale,0.26*thicknessScale,10), mat);
+    head.position.y = 1.0;
+    grp.add(shaft); grp.add(head);
+    // shaft/head are authored along local +Y — no extra baseline rotation needed
+    return {grp, mat};
+  }
+  // tangential velocity, centripetal acceleration, tangential acceleration —
+  // all shown directly on the rotating point (no separate straight-line analogue)
+  const vArrowC = makeArrow(0x3aa0ff);
+  const acArrow = makeArrow(0xff3b30);
+  const atArrowC = makeArrow(0xffb238);
+  motionGroup.add(vArrowC.grp, acArrow.grp, atArrowC.grp);
 
-  // perpendicular "moment arm" dashed lines, one per vertex (pool sized for max N)
-  const armPool = [];
-  const MAX_N = 8;
-  for(let i=0;i<MAX_N;i++){
-    const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,1)]);
-    const mat = new THREE.LineDashedMaterial({color:0x3aa0ff, dashSize:0.1, gapSize:0.07, transparent:true, opacity:0.75});
-    const line = new THREE.Line(geo, mat);
-    scene.add(line);
-    armPool.push(line);
+  function pointArrow(arrowObj, origin, dirVec, length, minLen=0.03){
+    arrowObj.grp.visible = length > minLen;
+    if(length <= minLen) return;
+    arrowObj.grp.position.copy(origin);
+    arrowObj.grp.scale.set(1, length, 1);
+    const defaultDir = new THREE.Vector3(0,1,0); // matches the shaft/head geometry's authored +Y axis
+    const quat = new THREE.Quaternion().setFromUnitVectors(defaultDir, dirVec.clone().normalize());
+    arrowObj.grp.quaternion.copy(quat);
   }
 
-  let axisX=0, axisZ=0, tiltXdeg=0, tiltZdeg=0;
+  const V_SCALE = 0.35, A_SCALE = 0.12;
 
-  function axisPointAndDir(){
-    const A = new THREE.Vector3(axisX, 0, axisZ);
-    let d = new THREE.Vector3(0,1,0);
-    d.applyAxisAngle(new THREE.Vector3(1,0,0), tiltXdeg*Math.PI/180);
-    d.applyAxisAngle(new THREE.Vector3(0,0,1), tiltZdeg*Math.PI/180);
-    d.normalize();
-    return {A, d};
-  }
+  // ---------- state ----------
+  let w0=2, alpha=0, playSpeed=1;
+  let simTime=0, theta=0, playing=false;
+  let theta0Start = 0;
 
   // ---------- UI wiring ----------
-  const nSlider=document.getElementById('nSlider'), nval=document.getElementById('nval');
-  const rShapeSlider=document.getElementById('rShapeSlider'), rShapeVal=document.getElementById('rShapeVal');
-  const mSlider=document.getElementById('mSlider'), mval=document.getElementById('mval');
-  const axSlider=document.getElementById('axSlider'), axVal=document.getElementById('axVal');
-  const azSlider=document.getElementById('azSlider'), azVal=document.getElementById('azVal');
-  const tiltXSlider=document.getElementById('tiltXSlider'), tiltXVal=document.getElementById('tiltXVal');
-  const tiltZSlider=document.getElementById('tiltZSlider'), tiltZVal=document.getElementById('tiltZVal');
-  const resetAxisBtn=document.getElementById('resetAxisBtn');
+  const rSlider=document.getElementById('rSlider'), rvalEl=document.getElementById('rval');
+  const w0Slider=document.getElementById('w0Slider'), w0valEl=document.getElementById('w0val');
+  const aSlider=document.getElementById('aSlider'), avalEl=document.getElementById('aval');
+  const playSpeedSlider=document.getElementById('playSpeedSlider'), playSpeedVal=document.getElementById('playSpeedVal');
+  const playBtn=document.getElementById('playBtn'), resetBtn=document.getElementById('resetBtn');
 
-  const mTotalVal=document.getElementById('mTotalVal'), iVal=document.getElementById('iVal'), kVal=document.getElementById('kVal');
-  const vertexList=document.getElementById('vertexList');
+  const thetaVal=document.getElementById('thetaVal'), omegaVal=document.getElementById('omegaVal'), alphaVal=document.getElementById('alphaVal');
+  const sVal=document.getElementById('sVal'), vVal=document.getElementById('vVal'), atVal=document.getElementById('atVal'),
+        acVal=document.getElementById('acVal'), aTotalVal=document.getElementById('aTotalVal');
 
-  function updateAll(){
-    const {A, d} = axisPointAndDir();
-
-    // position the axis cylinder to pass through A along direction d
-    axisMesh.position.copy(A);
-    const up = new THREE.Vector3(0,1,0);
-    axisMesh.quaternion.setFromUnitVectors(up, d);
-
-    const verts = vertexMeshes.map(s=>s.position);
-    let totalI = 0;
-    let rows = '';
-    for(let i=0;i<MAX_N;i++){
-      if(i < verts.length){
-        const V = verts[i];
-        const AV = V.clone().sub(A);
-        const along = d.clone().multiplyScalar(AV.dot(d));
-        const perp = AV.clone().sub(along);
-        const r = perp.length();
-        const foot = A.clone().add(along);
-
-        armPool[i].visible = r > 0.03;
-        if(r > 0.03){
-          armPool[i].geometry.setFromPoints([V, foot]);
-          armPool[i].computeLineDistances();
-        }
-
-        totalI += mass*r*r;
-        rows += `<div class="vRow"><span>نقطة ${i+1}: r=${r.toFixed(2)}m</span><b>${(mass*r*r).toFixed(2)}</b></div>`;
-      } else {
-        armPool[i].visible = false;
-      }
-    }
-
-    const mTotal = mass*N;
-    const k = mTotal>0 ? Math.sqrt(totalI/mTotal) : 0;
-    mTotalVal.textContent = mTotal.toFixed(2) + ' kg';
-    iVal.textContent = totalI.toFixed(3) + ' kg·m²';
-    kVal.textContent = k.toFixed(3) + ' m';
-    vertexList.innerHTML = rows;
+  function updateHud(theta, omega){
+    const s = r*theta;
+    const v = r*omega;
+    const at = r*alpha;
+    const ac = r*omega*omega;
+    const aTotal = Math.sqrt(at*at + ac*ac);
+    thetaVal.textContent = theta.toFixed(2) + ' rad';
+    omegaVal.textContent = omega.toFixed(2) + ' rad/s';
+    alphaVal.textContent = alpha.toFixed(2) + ' rad/s²';
+    sVal.textContent = s.toFixed(2) + ' m';
+    vVal.textContent = v.toFixed(2) + ' m/s';
+    atVal.textContent = at.toFixed(2) + ' m/s²';
+    acVal.textContent = ac.toFixed(2) + ' m/s²';
+    aTotalVal.textContent = aTotal.toFixed(2) + ' m/s²';
+    return {s, v, at, ac};
   }
 
-  nSlider.addEventListener('input', e=>{
-    N=parseInt(e.target.value,10); nval.textContent=N;
-    buildShape(); updateAll();
-  });
-  rShapeSlider.addEventListener('input', e=>{
-    rShape=parseFloat(e.target.value); rShapeVal.textContent=rShape.toFixed(2);
-    buildShape(); updateAll();
-  });
-  mSlider.addEventListener('input', e=>{
-    mass=parseFloat(e.target.value); mval.textContent=mass.toFixed(1);
-    updateAll();
-  });
-  axSlider.addEventListener('input', e=>{ axisX=parseFloat(e.target.value); axVal.textContent=axisX.toFixed(2); updateAll(); });
-  azSlider.addEventListener('input', e=>{ axisZ=parseFloat(e.target.value); azVal.textContent=axisZ.toFixed(2); updateAll(); });
-  tiltXSlider.addEventListener('input', e=>{ tiltXdeg=parseFloat(e.target.value); tiltXVal.textContent=tiltXdeg.toFixed(0); updateAll(); });
-  tiltZSlider.addEventListener('input', e=>{ tiltZdeg=parseFloat(e.target.value); tiltZVal.textContent=tiltZdeg.toFixed(0); updateAll(); });
+  function layout(theta, omega){
+    const {s, v, at, ac} = updateHud(theta, omega);
 
-  resetAxisBtn.addEventListener('click', ()=>{
-    axisX=0; axisZ=0; tiltXdeg=0; tiltZdeg=0;
-    axSlider.value=0; azSlider.value=0; tiltXSlider.value=0; tiltZSlider.value=0;
-    axVal.textContent='0.00'; azVal.textContent='0.00'; tiltXVal.textContent='0'; tiltZVal.textContent='0';
-    updateAll();
+    // circular marker position + radius guide line
+    const cx = Math.cos(theta)*r, cz = Math.sin(theta)*r;
+    circMarker.position.set(cx, 0.14, cz);
+    radiusLine.geometry.setFromPoints([new THREE.Vector3(0,0.03,0), new THREE.Vector3(cx,0.03,cz)]);
+
+    // tangential direction at that point (direction of increasing theta)
+    const tangentPos = new THREE.Vector3(-Math.sin(theta), 0, Math.cos(theta)); // fixed geometric tangent (+theta direction)
+    const radialOut = new THREE.Vector3(Math.cos(theta), 0, Math.sin(theta));
+
+    const originC = new THREE.Vector3(cx, 0.14, cz);
+    pointArrow(vArrowC, originC, tangentPos.clone().multiplyScalar(Math.sign(v)||1), Math.abs(v)*V_SCALE);
+    pointArrow(acArrow, originC, radialOut.clone().multiplyScalar(-1), Math.abs(ac)*A_SCALE);
+    pointArrow(atArrowC, originC, tangentPos.clone().multiplyScalar(Math.sign(at)||1), Math.abs(at)*A_SCALE);
+  }
+
+  rSlider.addEventListener('input', e=>{
+    r=parseFloat(e.target.value); rvalEl.textContent=r.toFixed(2);
+    buildCircleTrack();
+    layout(theta, w0+alpha*simTime);
+  });
+  w0Slider.addEventListener('input', e=>{
+    w0=parseFloat(e.target.value); w0valEl.textContent=w0.toFixed(1);
+    if(!playing){ layout(theta, w0+alpha*simTime); }
+  });
+  aSlider.addEventListener('input', e=>{
+    alpha=parseFloat(e.target.value); avalEl.textContent=alpha.toFixed(1);
+    if(!playing){ layout(theta, w0+alpha*simTime); }
+  });
+  playSpeedSlider.addEventListener('input', e=>{
+    playSpeed=parseFloat(e.target.value); playSpeedVal.textContent=playSpeed.toFixed(1)+'×';
   });
 
-  updateAll();
+  playBtn.addEventListener('click', ()=>{
+    playing = !playing;
+    playBtn.textContent = playing ? 'إيقاف' : 'تشغيل';
+  });
+  resetBtn.addEventListener('click', ()=>{
+    playing = false;
+    playBtn.textContent = 'تشغيل';
+    simTime = 0; theta = 0; theta0Start = 0;
+    layout(0, w0);
+  });
 
-  // ---------- render loop (static scene; OrbitControls still needs updating for damping) ----------
+  layout(0, w0);
+
+  // ---------- animation loop ----------
+  const clock = new THREE.Clock();
+
   function animate(){
     requestAnimationFrame(animate);
+    const dt = Math.min(clock.getDelta(), 0.05);
+
+    if(playing){
+      simTime += dt*playSpeed;
+      const omega = w0 + alpha*simTime;
+      theta = theta0Start + w0*simTime + 0.5*alpha*simTime*simTime;
+      layout(theta, omega);
+    }
+
     controls.update();
     renderer.render(scene, camera);
   }
