@@ -251,9 +251,9 @@
 
 <!-- عدّل رابط href أدناه ليشير إلى ملف صفحتك الرئيسية -->
 <div id="nav">
-   <a class="home" href="index.html"><span class="arrow">⌂</span> العودة للصفحة الرئيسية</a>
-   <a class="field" href="rotation.html"><span class="arrow">↩</span> العودة للحركة الدورانية</a>
-</div>
+<a class="home" href="index.html"><span class="arrow">⌂</span> العودة للصفحة الرئيسية</a>
+  <a class="field" href="rotation.html"><span class="arrow">↩</span> العودة للحركة الدورانية</a>
+  </div>
 
 <div id="title">
   <h1>القصور الذاتي الدوراني</h1>
@@ -272,18 +272,35 @@
 
 <div id="controlPanel">
   <h3>الشكل الهندسي</h3>
-  <div class="ctrlRow"><span class="plabel">عدد الرؤوس N</span><span id="nval" class="pval">4</span></div>
-  <input id="nSlider" type="range" min="3" max="8" step="1" value="4">
-  <div class="ctrlRow"><span class="plabel">نصف قطر الشكل R (m)</span><span id="rShapeVal" class="pval">1.5</span></div>
-  <input id="rShapeSlider" type="range" min="0.3" max="3" step="0.05" value="1.5">
+  <div class="ctrlRow"><span class="plabel">نوع الشكل</span>
+    <select id="shapeTypeSelect" style="background:rgba(10,18,32,0.9); color:var(--amber); border:1px solid var(--line); border-radius:2px; font-family:inherit; font-size:12px; padding:3px 6px;">
+      <option value="polygon">مضلع منتظم</option>
+      <option value="rect">مستطيل</option>
+    </select>
+  </div>
+  <div id="polygonControls">
+    <div class="ctrlRow"><span class="plabel">عدد الرؤوس N</span><span id="nval" class="pval">4</span></div>
+    <input id="nSlider" type="range" min="3" max="8" step="1" value="4">
+    <div class="ctrlRow"><span class="plabel">نصف قطر الشكل R (m)</span><span id="rShapeVal" class="pval">1.5</span></div>
+    <input id="rShapeSlider" type="range" min="0.3" max="3" step="0.05" value="1.5">
+  </div>
+  <div id="rectControls" style="display:none;">
+    <div class="ctrlRow"><span class="plabel">طول المستطيل (m)</span><span id="rectWVal" class="pval">3.0</span></div>
+    <input id="rectWSlider" type="range" min="0.5" max="6" step="0.05" value="3">
+    <div class="ctrlRow"><span class="plabel">عرض المستطيل (m)</span><span id="rectHVal" class="pval">2.0</span></div>
+    <input id="rectHSlider" type="range" min="0.5" max="6" step="0.05" value="2">
+  </div>
   <div class="ctrlRow"><span class="plabel">كتلة كل نقطة m (kg)</span><span id="mval" class="pval">1.0</span></div>
   <input id="mSlider" type="range" min="0.1" max="5" step="0.1" value="1">
 
   <h3>محور الدوران</h3>
+  <div class="ctrlRow" style="font-size:11px; color:var(--text-dim); margin-top:-2px;">💡 يمكنك أيضًا سحب المقبض الذهبي في المشهد بالماوس</div>
   <div class="ctrlRow"><span class="plabel">إزاحة المحور أفقيًا X (m)</span><span id="axVal" class="pval">0.0</span></div>
   <input id="axSlider" type="range" min="-3" max="3" step="0.05" value="0">
   <div class="ctrlRow"><span class="plabel">إزاحة المحور أفقيًا Z (m)</span><span id="azVal" class="pval">0.0</span></div>
   <input id="azSlider" type="range" min="-3" max="3" step="0.05" value="0">
+  <div class="ctrlRow"><span class="plabel">إزاحة المحور رأسيًا Y (m)</span><span id="ayVal" class="pval">0.0</span></div>
+  <input id="aySlider" type="range" min="-3" max="3" step="0.05" value="0">
   <div class="ctrlRow"><span class="plabel">ميل المحور نحو X (°)</span><span id="tiltXVal" class="pval">0</span></div>
   <input id="tiltXSlider" type="range" min="-90" max="90" step="1" value="0">
   <div class="ctrlRow"><span class="plabel">ميل المحور نحو Z (°)</span><span id="tiltZVal" class="pval">0</span></div>
@@ -352,13 +369,23 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   const shapeGroup = new THREE.Group();
   scene.add(shapeGroup);
 
-  let N=4, rShape=1.5, mass=1.0;
+  let shapeType = 'polygon'; // 'polygon' | 'rect'
+  let N=4, rShape=1.5, rectW=3.0, rectH=2.0, mass=1.0;
   let vertexMeshes = [], vertexPositions = [], shapeOutline = null;
   const VERT_RADIUS = 0.14;
 
   const massMat = new THREE.MeshPhysicalMaterial({color:0xff3b30, roughness:0.3, metalness:0.2});
 
   function computeVertices(){
+    if(shapeType === 'rect'){
+      const hw = rectW/2, hh = rectH/2;
+      return [
+        new THREE.Vector3(-hw, 0, -hh),
+        new THREE.Vector3( hw, 0, -hh),
+        new THREE.Vector3( hw, 0,  hh),
+        new THREE.Vector3(-hw, 0,  hh),
+      ];
+    }
     const pts = [];
     for(let i=0;i<N;i++){
       const t = i*(Math.PI*2/N) - Math.PI/2;
@@ -404,6 +431,14 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   const axisMesh = new THREE.Mesh(axisGeo, axisMat);
   scene.add(axisMesh);
 
+  // draggable handle at the axis's base point (on the ground, y=0) — grab
+  // and drag this with the mouse to reposition the axis in the XZ plane
+  const axisHandle = new THREE.Mesh(
+    new THREE.SphereGeometry(0.16, 20, 20),
+    new THREE.MeshBasicMaterial({color:0xffb238})
+  );
+  scene.add(axisHandle);
+
   // perpendicular "moment arm" dashed lines, one per vertex (pool sized for max N)
   const armPool = [];
   const MAX_N = 8;
@@ -415,10 +450,10 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
     armPool.push(line);
   }
 
-  let axisX=0, axisZ=0, tiltXdeg=0, tiltZdeg=0, tiltYdeg=0;
+  let axisX=0, axisY=0, axisZ=0, tiltXdeg=0, tiltZdeg=0, tiltYdeg=0;
 
   function axisPointAndDir(){
-    const A = new THREE.Vector3(axisX, 0, axisZ);
+    const A = new THREE.Vector3(axisX, axisY, axisZ);
     let d = new THREE.Vector3(0,1,0);
     d.applyAxisAngle(new THREE.Vector3(1,0,0), tiltXdeg*Math.PI/180);
     d.applyAxisAngle(new THREE.Vector3(0,0,1), tiltZdeg*Math.PI/180);
@@ -428,11 +463,17 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   }
 
   // ---------- UI wiring ----------
+  const shapeTypeSelect=document.getElementById('shapeTypeSelect');
+  const polygonControls=document.getElementById('polygonControls');
+  const rectControls=document.getElementById('rectControls');
   const nSlider=document.getElementById('nSlider'), nval=document.getElementById('nval');
   const rShapeSlider=document.getElementById('rShapeSlider'), rShapeVal=document.getElementById('rShapeVal');
+  const rectWSlider=document.getElementById('rectWSlider'), rectWVal=document.getElementById('rectWVal');
+  const rectHSlider=document.getElementById('rectHSlider'), rectHVal=document.getElementById('rectHVal');
   const mSlider=document.getElementById('mSlider'), mval=document.getElementById('mval');
   const axSlider=document.getElementById('axSlider'), axVal=document.getElementById('axVal');
   const azSlider=document.getElementById('azSlider'), azVal=document.getElementById('azVal');
+  const aySlider=document.getElementById('aySlider'), ayVal=document.getElementById('ayVal');
   const tiltXSlider=document.getElementById('tiltXSlider'), tiltXVal=document.getElementById('tiltXVal');
   const tiltZSlider=document.getElementById('tiltZSlider'), tiltZVal=document.getElementById('tiltZVal');
   const tiltYSlider=document.getElementById('tiltYSlider'), tiltYVal=document.getElementById('tiltYVal');
@@ -448,6 +489,7 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
     axisMesh.position.copy(A);
     const up = new THREE.Vector3(0,1,0);
     axisMesh.quaternion.setFromUnitVectors(up, d);
+    axisHandle.position.set(A.x, A.y, A.z);
 
     const verts = vertexPositions; // true flat positions — physics uses these, not the raised sphere meshes
     let totalI = 0;
@@ -478,7 +520,7 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
       }
     }
 
-    const mTotal = mass*N;
+    const mTotal = mass*verts.length;
     const k = mTotal>0 ? Math.sqrt(totalI/mTotal) : 0;
     mTotalVal.textContent = mTotal.toFixed(2) + ' kg';
     iVal.textContent = totalI.toFixed(3) + ' kg·m²';
@@ -494,24 +536,87 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
     rShape=parseFloat(e.target.value); rShapeVal.textContent=rShape.toFixed(2);
     buildShape(); updateAll();
   });
+  shapeTypeSelect.addEventListener('change', e=>{
+    shapeType = e.target.value;
+    polygonControls.style.display = shapeType==='polygon' ? '' : 'none';
+    rectControls.style.display = shapeType==='rect' ? '' : 'none';
+    buildShape(); updateAll();
+  });
+  rectWSlider.addEventListener('input', e=>{
+    rectW=parseFloat(e.target.value); rectWVal.textContent=rectW.toFixed(2);
+    buildShape(); updateAll();
+  });
+  rectHSlider.addEventListener('input', e=>{
+    rectH=parseFloat(e.target.value); rectHVal.textContent=rectH.toFixed(2);
+    buildShape(); updateAll();
+  });
   mSlider.addEventListener('input', e=>{
     mass=parseFloat(e.target.value); mval.textContent=mass.toFixed(1);
     updateAll();
   });
   axSlider.addEventListener('input', e=>{ axisX=parseFloat(e.target.value); axVal.textContent=axisX.toFixed(2); updateAll(); });
   azSlider.addEventListener('input', e=>{ axisZ=parseFloat(e.target.value); azVal.textContent=axisZ.toFixed(2); updateAll(); });
+  aySlider.addEventListener('input', e=>{ axisY=parseFloat(e.target.value); ayVal.textContent=axisY.toFixed(2); updateAll(); });
   tiltXSlider.addEventListener('input', e=>{ tiltXdeg=parseFloat(e.target.value); tiltXVal.textContent=tiltXdeg.toFixed(0); updateAll(); });
   tiltZSlider.addEventListener('input', e=>{ tiltZdeg=parseFloat(e.target.value); tiltZVal.textContent=tiltZdeg.toFixed(0); updateAll(); });
   tiltYSlider.addEventListener('input', e=>{ tiltYdeg=parseFloat(e.target.value); tiltYVal.textContent=tiltYdeg.toFixed(0); updateAll(); });
 
   resetAxisBtn.addEventListener('click', ()=>{
-    axisX=0; axisZ=0; tiltXdeg=0; tiltZdeg=0; tiltYdeg=0;
-    axSlider.value=0; azSlider.value=0; tiltXSlider.value=0; tiltZSlider.value=0; tiltYSlider.value=0;
-    axVal.textContent='0.00'; azVal.textContent='0.00'; tiltXVal.textContent='0'; tiltZVal.textContent='0'; tiltYVal.textContent='0';
+    axisX=0; axisY=0; axisZ=0; tiltXdeg=0; tiltZdeg=0; tiltYdeg=0;
+    axSlider.value=0; aySlider.value=0; azSlider.value=0; tiltXSlider.value=0; tiltZSlider.value=0; tiltYSlider.value=0;
+    axVal.textContent='0.00'; ayVal.textContent='0.00'; azVal.textContent='0.00'; tiltXVal.textContent='0'; tiltZVal.textContent='0'; tiltYVal.textContent='0';
     updateAll();
   });
 
   updateAll();
+
+  // ---------- mouse-drag the axis handle to reposition the axis ----------
+  const raycaster = new THREE.Raycaster();
+  const mouseNDC = new THREE.Vector2();
+  const groundPlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0); // y = 0
+  const dragPoint = new THREE.Vector3();
+  let dragging = false;
+  const AXIS_RANGE = 3; // matches the axSlider/azSlider min/max
+
+  function setMouseNDC(evt){
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouseNDC.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
+    mouseNDC.y = -((evt.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
+  renderer.domElement.addEventListener('pointerdown', (evt)=>{
+    setMouseNDC(evt);
+    raycaster.setFromCamera(mouseNDC, camera);
+    const hit = raycaster.intersectObject(axisHandle)[0];
+    if(hit){
+      dragging = true;
+      // match the drag plane to the axis's current height so X/Z dragging
+      // stays visually accurate no matter how high or low the axis sits
+      groundPlane.constant = -axisY;
+      controls.enabled = false;
+      renderer.domElement.style.cursor = 'grabbing';
+    }
+  });
+
+  window.addEventListener('pointermove', (evt)=>{
+    if(!dragging) return;
+    setMouseNDC(evt);
+    raycaster.setFromCamera(mouseNDC, camera);
+    if(raycaster.ray.intersectPlane(groundPlane, dragPoint)){
+      axisX = Math.max(-AXIS_RANGE, Math.min(AXIS_RANGE, dragPoint.x));
+      axisZ = Math.max(-AXIS_RANGE, Math.min(AXIS_RANGE, dragPoint.z));
+      axSlider.value = axisX; azSlider.value = axisZ;
+      axVal.textContent = axisX.toFixed(2); azVal.textContent = axisZ.toFixed(2);
+      updateAll();
+    }
+  });
+
+  window.addEventListener('pointerup', ()=>{
+    if(!dragging) return;
+    dragging = false;
+    controls.enabled = true;
+    renderer.domElement.style.cursor = 'auto';
+  });
 
   // ---------- render loop (static scene; OrbitControls still needs updating for damping) ----------
   function animate(){
