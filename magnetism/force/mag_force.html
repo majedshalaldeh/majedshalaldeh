@@ -152,6 +152,29 @@ h1{
     line-height:1.8;
 }
 
+.sim-select{
+    display:block;
+    width:100%;
+    margin-top:16px;
+    padding:11px 14px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,.18);
+    background:#1c2541;
+    color:#fff;
+    font-family:inherit;
+    font-size:1rem;
+    cursor:pointer;
+    outline:none;
+}
+.sim-select:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 2px rgba(255,209,102,.15);
+}
+.sim-select option{
+    background:#1c2541;
+    color:#fff;
+}
+
 .go{
     display:inline-block;
     margin-top:16px;
@@ -211,15 +234,20 @@ footer{
 
     <div class="cards">
 
-        <a href="mag_force1.html" class="card">
+        <div class="card">
             <span class="icon">🧲</span>
             <h3>القوة المغناطيسية</h3>
+            <select class="sim-select" onchange="if(this.value) window.location.href=this.value;" onclick="event.stopPropagation();">
+                <option value="">اختر نوع المحاكاة</option>
+                <option value="mag_force_2d.html">القوة المغناطيسية 2D</option>
+                <option value="mag_force_3d.html">القوة المغناطيسية 3D</option>
+            </select>
             <p>
                 الانتقال إلى المحاكاة الأساسية للقوة المغناطيسية
                 وتأثير المجال المغناطيسي في الجسيمات المشحونة.
             </p>
-            <span class="go">الانتقال إلى القوة المغناطيسية ←</span>
-        </a>
+            <span class="go">اختر نوع المحاكاة من القائمة أعلاه</span>
+        </div>
 
         <a href="velocity_selector.html" class="card">
             <span class="icon">⚡🧲</span>
