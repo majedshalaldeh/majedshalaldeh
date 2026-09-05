@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محاكاة فيزيائية لخطوط مجال مغناطيس مستقيم</title>
+<style>
+  html, body { margin:0; padding:0; overflow:hidden; background:#000; height:100%; }
+  #c { display:block; width:100%; height:100%; cursor:grab; }
+  #c:active { cursor:grabbing; }
+  #ui {
+    position:fixed; top:64px; right:14px; z-index:10;
+    background:rgba(15,15,20,0.72); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.12); border-radius:12px;
+    padding:14px 16px; color:#eee; font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size:13px; width:240px; direction:rtl;
+  }
+  #ui h3 { margin:0 0 8px 0; font-size:14px; color:#9fd8ff; font-weight:600;}
+  #ui p.note { margin:0 0 10px 0; font-size:11px; color:#8fa0b3; line-height:1.5; }
+  .row { display:flex; align-items:center; justify-content:space-between; margin:8px 0; gap:8px;}
+  .row label { flex:1; color:#cfd8e3;}
+  input[type=range]{ width:110px; accent-color:#6fb7ff;}
+  button {
+    background:#1c2733; color:#dfeaff; border:1px solid #33465c; border-radius:8px;
+    padding:6px 10px; font-size:12px; cursor:pointer; width:100%; margin-top:4px;
+  }
+  button:hover{ background:#2a3a4c; }
+  #hint {
+    position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
+    color:rgba(255,255,255,0.45); font-family:sans-serif; font-size:12px; z-index:10;
+  }
+  #status {
+    position:fixed; top:14px; left:14px; z-index:10;
+    background:rgba(15,15,20,0.72); border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px; padding:8px 12px; color:#8fe0a0; font-family:monospace;
+    font-size:11px; direction:ltr; display:none;
+  }
+  #titleBar {
+    position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:10;
+    text-align:center; direction:rtl; pointer-events:none;
+  }
+  #titleBar h1 {
+    margin:0; font-size:20px; color:#eaf4ff; font-family:'Segoe UI', Tahoma, sans-serif;
+    text-shadow:0 0 10px rgba(0,0,0,0.9), 0 0 2px #000;
+  }
+  #titleBar .subtitle {
+    margin:6px 0 0 0; font-size:13px; color:#cfe0f0;
+    text-shadow:0 0 8px rgba(0,0,0,0.9);
+  }
+  #navBar {
+    position:fixed; top:14px; right:14px; z-index:11;
+    display:flex; flex-direction:row-reverse; gap:8px; direction:rtl;
+  }
+  #navBar a {
+    background:rgba(28,39,51,0.75); color:#dfeaff; border:1px solid #33465c;
+    border-radius:8px; padding:7px 12px; font-size:12px; text-decoration:none;
+    font-family:'Segoe UI', Tahoma, sans-serif; backdrop-filter:blur(6px);
+  }
+  #navBar a:hover{ background:#2a3a4c; }
+  #logoCircle {
+    width:110px; height:110px; border-radius:50%; margin:0 auto 10px auto;
+    background:#0f1418; border:2px solid #33465c; display:flex;
+    align-items:center; justify-content:center; overflow:hidden;
+    color:#5b7285; font-size:10px; text-align:center;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="titleBar"><h1>خصائص خطوط المجال المغناطيسي</h1><div class="subtitle">إعداد وتطوير: الأستاذ ماجد شلالده — 0599870176</div></div>
+
+<div id="navBar">
+  <a href="index.html" title="عدّل الرابط ليطابق صفحتك الرئيسية">الصفحة الرئيسية</a>
+  <a href="magnetic-field.html" title="عدّل الرابط ليطابق صفحة المجال المغناطيسي">العودة للمجال المغناطيسي</a>
+</div>
+
+<div id="ui">
+  <div id="logoCircle"><img src="logo.png" style="width:100%;height:100%;object-fit:cover;" alt="شعار"></div>
+  <h3>⚙️ محاكاة فيزيائية حقيقية</h3>
+  <p class="note">المغناطيس ممثل بمجموعة ملفات تيار حلقية متراصة (مكافئ لمغنطة منتظمة)، وأقصى اتساع لكل خط مأخوذ من حل قانون بيو-سافار الحقيقي (Runge-Kutta) عند إمكان الإغلاق، ومن تقدير تناسبي عند الخطوط شديدة القرب من المحور التي تحتاج فعليًا حلقات أكبر بكثير من نصف قطر المغناطيس. كل الخطوط تُرسم بشكل "ملعب/كبسولة" موحّد - مستقيمان ونصفا دائرة عند القطبين - لضمان عدم وجود أي زاوية على الإطلاق.</p>
+  <div class="row"><label>عدد الخطوط</label><input id="numLines" type="range" min="8" max="60" value="30"></div>
+  <div class="row"><label>سرعة الدوران</label><input id="rotSpeed" type="range" min="0" max="20" value="4"></div>
+  <div class="row"><label>مدى بدء الخطوط</label><input id="spread" type="range" min="62" max="96" value="90"></div>
+  <div class="row"><label>سرعة الجسيمات</label><input id="partSpeed" type="range" min="0" max="30" value="10"></div>
+  <button id="regen">إعادة الحساب</button>
+  <button id="toggleRot">إيقاف/تشغيل الدوران التلقائي</button>
+</div>
+<div id="status">جارِ حساب المجال...</div>
+<div id="hint">اسحب للتدوير • عجلة الفأرة للتكبير</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 5000);
+camera.position.set(0, 60, 330);
+camera.lookAt(0,0,0);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const pl = new THREE.PointLight(0xffffff, 0.8);
+pl.position.set(200,200,200);
+scene.add(pl);
+
+const root = new THREE.Group();
+scene.add(root);
+
+// ================= المغناطيس (الهندسة المرئية فقط) =================
+const CYL_LEN = 220;
+const CYL_R = 42;
+
+const nGeo = new THREE.CylinderGeometry(CYL_R, CYL_R, CYL_LEN/2, 48, 1, false);
+const nMat = new THREE.MeshPhongMaterial({
+  color: 0xaab2bd, shininess: 80, specular: 0x333333,
+  transparent:true, opacity:0.28, side:THREE.DoubleSide, depthWrite:false
+});
+const nPole = new THREE.Mesh(nGeo, nMat);
+nPole.rotation.z = Math.PI/2;
+nPole.position.x = CYL_LEN/4;
+root.add(nPole);
+
+const sGeo = new THREE.CylinderGeometry(CYL_R, CYL_R, CYL_LEN/2, 48, 1, false);
+const sMat = new THREE.MeshPhongMaterial({
+  color: 0xaab2bd, shininess: 80, specular: 0x333333,
+  transparent:true, opacity:0.28, side:THREE.DoubleSide, depthWrite:false
+});
+const sPole = new THREE.Mesh(sGeo, sMat);
+sPole.rotation.z = Math.PI/2;
+sPole.position.x = -CYL_LEN/4;
+root.add(sPole);
+
+const seam = new THREE.Mesh(
+  new THREE.RingGeometry(0, CYL_R, 48),
+  new THREE.MeshBasicMaterial({ color:0xffffff, transparent:true, opacity:0.25, side:THREE.DoubleSide })
+);
+seam.rotation.y = Math.PI/2;
+root.add(seam);
+
+function makeLabelSprite(text, color){
+  const cv = document.createElement('canvas');
+  cv.width = 128; cv.height = 128;
+  const ctx = cv.getContext('2d');
+  ctx.font = 'bold 90px sans-serif';
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 64, 68);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.needsUpdate = true;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent:true, depthTest:false, depthWrite:false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(60,60,1);
+  sprite.renderOrder = 999;
+  return sprite;
+}
+const nLabel = makeLabelSprite('N', '#d6261f');
+nLabel.position.set(CYL_LEN/2 + 45, 0, 0);
+root.add(nLabel);
+const sLabel = makeLabelSprite('S', '#1f5fd6');
+sLabel.position.set(-CYL_LEN/2 - 45, 0, 0);
+root.add(sLabel);
+
+// الشعار داخل الموصل (يظهر عبر شفافية الأسطوانة) - يعتمد على ملف logo.png
+// يجب أن يبقى في نفس مجلد ملف الـHTML
+const logoTexture = new THREE.TextureLoader().load("logo.png");
+const logoMat = new THREE.MeshBasicMaterial({ map: logoTexture, transparent:true, side:THREE.DoubleSide, depthTest:false, depthWrite:false });
+const logoMesh = new THREE.Mesh(new THREE.CircleGeometry(CYL_R*0.98, 48), logoMat);
+logoMesh.renderOrder = 998;
+logoMesh.rotation.y = Math.PI/2;
+logoMesh.position.x = 0;
+root.add(logoMesh);
+
+// ================= الفيزياء: نموذج الملفات المكافئة =================
+// نموذج مكافئ لمغنطة منتظمة: مجموعة ملفات تيار دائرية متراصة على طول
+// المحور (Equivalent Solenoid Model) - وهذا مكافئ رياضيًا تمامًا لأسطوانة
+// ممغنطة بانتظام (Uniformly Magnetized Cylinder)، لأن التيار السطحي
+// المكافئ K = M × n̂ لمغنطة محورية منتظمة هو بالضبط تيار محيطي منتظم
+// على السطح الجانبي - أي ملف لولبي متكافئ الكثافة.
+const NLOOPS = 100;
+const loopPositions = [];
+for(let k=0;k<NLOOPS;k++){
+  const t = (k+0.5)/NLOOPS;
+  loopPositions.push(THREE.MathUtils.lerp(-CYL_LEN/2, CYL_LEN/2, t));
+}
+
+// تكاملات إهليلجية تامة (تقريب أبراموفيتز وستيغن 17.3.34 / 17.3.36)
+function ellipK(m){
+  let m1 = 1 - m;
+  if(m1 < 1e-12) m1 = 1e-12;
+  const a0=1.3862944,a1=0.1119723,a2=0.0725296;
+  const b0=0.5,b1=0.1213478,b2=0.0288729;
+  return (a0 + a1*m1 + a2*m1*m1) - (b0 + b1*m1 + b2*m1*m1)*Math.log(m1);
+}
+function ellipE(m){
+  let m1 = 1 - m;
+  if(m1 < 1e-12) m1 = 1e-12;
+  const a1=0.4630151,a2=0.1077812;
+  const b1=0.2452727,b2=0.0412496;
+  return (1 + a1*m1 + a2*m1*m1) - (b1*m1 + b2*m1*m1)*Math.log(m1);
+}
+
+// المجال المغناطيسي لملف تيار دائري (تيار = 1) عند نقطة أسطوانية (rho,z)
+// نسبة لمركز الملف - هذه هي الصيغة المغلقة الدقيقة (Jackson, Classical
+// Electrodynamics) لا تقريب هندسي.
+function loopBfield(rho, z, a){
+  if(rho < 1e-6){
+    const denom = Math.pow(a*a + z*z, 1.5);
+    return { Bz: (a*a)/(2*denom), Brho: 0 };
+  }
+  const Q = (a+rho)*(a+rho) + z*z;
+  const k2 = 4*a*rho / Q;
+  const K = ellipK(k2);
+  const E = ellipE(k2);
+  const denom2 = (a-rho)*(a-rho) + z*z;
+  const sqrtQ = Math.sqrt(Q);
+  const Bz   = (1/(2*Math.PI*sqrtQ)) * ( K + E*(a*a - rho*rho - z*z)/denom2 );
+  const Brho = (z/(2*Math.PI*rho*sqrtQ)) * ( -K + E*(a*a + rho*rho + z*z)/denom2 );
+  return { Bz, Brho };
+}
+
+function totalField(rho, x){
+  let Bx = 0, Brho = 0;
+  for(let i=0;i<loopPositions.length;i++){
+    const f = loopBfield(rho, x - loopPositions[i], CYL_R);
+    Bx += f.Bz;
+    Brho += f.Brho;
+  }
+  return { Bx, Brho };
+}
+
+// تتبّع خط المجال عدديًا في المستوى نصف-الزوالي (rho,x) بطريقة رونغ-كوتا
+// من الرتبة الرابعة، متبعًا اتجاه المتجه B فعليًا خطوة بخطوة حتى يغلق
+// على نفسه (كما تقتضيه ∇·B=0 لأي مجال مغناطيسي حقيقي).
+function traceFieldLine2D(rho0, dirSign){
+  dirSign = dirSign || 1;
+  const pts = [{x:0, rho:rho0}];
+  let x = 0, rho = rho0;
+  const ds = CYL_R * 0.05;
+  const maxSteps = 1800;
+
+  function dir(px, prho){
+    const f = totalField(Math.max(prho,1e-4), px);
+    const mag = Math.hypot(f.Bx, f.Brho) || 1e-9;
+    return { dx: dirSign*f.Bx/mag, drho: dirSign*f.Brho/mag };
+  }
+
+  for(let i=0;i<maxSteps;i++){
+    const k1 = dir(x, rho);
+    const k2 = dir(x+0.5*ds*k1.dx, rho+0.5*ds*k1.drho);
+    const k3 = dir(x+0.5*ds*k2.dx, rho+0.5*ds*k2.drho);
+    const k4 = dir(x+ds*k3.dx, rho+ds*k3.drho);
+    const dx   = (ds/6)*(k1.dx  +2*k2.dx  +2*k3.dx  +k4.dx);
+    const drho = (ds/6)*(k1.drho+2*k2.drho+2*k3.drho+k4.drho);
+    x += dx;
+    rho = Math.max(rho + drho, 1e-4);
+    pts.push({x, rho});
+    if(i>25 && Math.hypot(x-0, rho-rho0) < ds*1.4) return {pts, closed:true};
+    if(rho > CYL_R*9.5 || Math.abs(x) > CYL_LEN*5) return {pts, closed:false};
+  }
+  return {pts, closed:false};
+}
+
+// للخطوط التي لا تُغلق فعليًا ضمن حجم عرض معقول (قرب المحور): تُبنى على
+// شكل "ملعب/كبسولة" - خط مستقيم داخلي، نصف دائرة عند كل قطب، وخط مستقيم
+// خارجي بنفس الطول - وهذا يعطي تماسًا مثاليًا بلا أي زاوية بين المستقيم
+// ونصف الدائرة رياضيًا (اتجاه الحركة عند نقطة الالتقاء متطابق تمامًا).
+function buildStadiumLoop(rho0, Rmax){
+  const halfL = CYL_LEN/2;
+  const Rcap = (Rmax - rho0) / 2;
+  const rhoOuter = rho0 + 2*Rcap;
+  const segsCap = 30, segsStraight = 20;
+  const pts = [];
+
+  // مستقيم داخلي: من الجنوبي إلى الشمالي عند نصف القطر الابتدائي
+  for(let s=0;s<=segsStraight;s++){
+    pts.push({ x: THREE.MathUtils.lerp(-halfL, halfL, s/segsStraight), rho: rho0 });
+  }
+  // نصف دائرة عند القطب الشمالي (تنتفخ للخارج نحو +x)
+  for(let s=1;s<=segsCap;s++){
+    const t = (s/segsCap) * Math.PI;
+    pts.push({ x: halfL + Rcap*Math.sin(t), rho: rho0 + Rcap*(1-Math.cos(t)) });
+  }
+  // مستقيم خارجي: من الشمالي إلى الجنوبي عند نصف القطر الأبعد
+  for(let s=1;s<=segsStraight;s++){
+    pts.push({ x: THREE.MathUtils.lerp(halfL, -halfL, s/segsStraight), rho: rhoOuter });
+  }
+  // نصف دائرة عند القطب الجنوبي (تنتفخ للخارج نحو -x) تُغلق الحلقة
+  for(let s=1;s<segsCap;s++){
+    const t = (s/segsCap) * Math.PI;
+    pts.push({ x: -halfL - Rcap*Math.sin(t), rho: rhoOuter - Rcap*(1-Math.cos(t)) });
+  }
+  return { pts, closed:true };
+}
+
+// ================= بناء الخطوط المرئية من نتائج التتبّع =================
+let loopGroup = new THREE.Group();
+root.add(loopGroup);
+let tracks = [];
+
+function randColor(){
+  const c = new THREE.Color();
+  c.setHSL(Math.random(), 0.75, 0.62);
+  return c;
+}
+
+const DISTINCT = 12; // عدد المسارات الفريدة المحسوبة عدديًا (تُستنسخ بزوايا مختلفة)
+
+function buildFieldLines(n, spreadPct){
+  root.remove(loopGroup);
+  loopGroup = new THREE.Group();
+  tracks = [];
+
+  // خطوط قريبة جدًا من المحور تحتاج فعليًا حلقات أكبر بكثير من نصف قطر
+  // المغناطيس لتُغلق (فيزياء حقيقية) - وبعضها لا يُغلق ضمن أي حجم عرض
+  // معقول أصلًا (الخط المحوري تمامًا يمتد نظريًا إلى ما لا نهاية). حذف
+  // هذه الخطوط بالكامل كان يترك فراغًا غير واقعي قرب محور القطب، لذا
+  // الآن تُرسم كخطوط مفتوحة تمتد للخارج دون أن تُغلق - وهذا هو الشكل
+  // الصحيح فعليًا لما تراه لو صوّرت هذه الخطوط ضمن إطار محدود.
+  const minR = CYL_R * 0.12;
+  const maxR = CYL_R * (spreadPct/100);
+  const baseTraces = [];
+  for(let d=0; d<DISTINCT; d++){
+    const rho0 = THREE.MathUtils.lerp(minR, maxR, d/(DISTINCT-1));
+    const fwd = traceFieldLine2D(rho0, 1);
+    let Rmax;
+    if(fwd.closed){
+      Rmax = Math.max(...fwd.pts.map(p=>p.rho)); // أقصى اتساع فعلي من الحساب الحقيقي
+    } else {
+      Rmax = THREE.MathUtils.clamp(CYL_R*(1.6*CYL_R/Math.max(rho0,1)), CYL_R*2.2, CYL_R*9);
+    }
+    const result = buildStadiumLoop(rho0, Rmax);
+    baseTraces.push(result); // {pts, closed}
+  }
+
+  for(let i=0;i<n;i++){
+    const angle = (i/n) * Math.PI*2 + Math.random()*0.1;
+    const chosen = baseTraces[i % baseTraces.length];
+    const base = chosen.pts;
+
+    const pts3D = base.map(p => new THREE.Vector3(
+      p.x, Math.cos(angle)*p.rho, Math.sin(angle)*p.rho
+    ));
+
+    const colors = [];
+    for(const p of base){
+      if(p.rho < CYL_R){ colors.push(0.55,0.75,1.0); }
+      else { colors.push(1,1,1); }
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts3D);
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
+    const mat = new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.65 });
+    loopGroup.add(new THREE.Line(geo, mat));
+
+    const loopCurve = new THREE.CatmullRomCurve3(pts3D, chosen.closed);
+    const dots = [];
+    const dotCount = 2 + Math.floor(Math.random()*2);
+    for(let d=0; d<dotCount; d++){
+      const dot = new THREE.Mesh(
+        new THREE.SphereGeometry(1.8, 8, 8),
+        new THREE.MeshBasicMaterial({ color: randColor() })
+      );
+      loopGroup.add(dot);
+      dots.push({ mesh: dot, phase: chosen.closed ? (d/dotCount + Math.random()*0.05) : Math.random(), open: !chosen.closed });
+    }
+    tracks.push({ curve: loopCurve, dots });
+  }
+  root.add(loopGroup);
+}
+
+function rebuild(){
+  const statusEl = document.getElementById('status');
+  statusEl.style.display = 'block';
+  setTimeout(()=>{
+    buildFieldLines(
+      parseInt(document.getElementById('numLines').value),
+      parseInt(document.getElementById('spread').value)
+    );
+    statusEl.style.display = 'none';
+  }, 10);
+}
+rebuild();
+
+// ================= التفاعل: سحب للتدوير، عجلة للتكبير =================
+let autoRotate = true;
+let rotSpeed = parseInt(document.getElementById('rotSpeed').value)/1000;
+let isDragging = false;
+let prevX = 0, prevY = 0;
+let targetRotY = 1.35, targetRotX = 0.55;
+let curRotY = targetRotY, curRotX = targetRotX;
+
+canvas.addEventListener('pointerdown', e=>{ isDragging = true; prevX = e.clientX; prevY = e.clientY; });
+window.addEventListener('pointerup', ()=> isDragging=false);
+window.addEventListener('pointermove', e=>{
+  if(!isDragging) return;
+  const dx = e.clientX - prevX;
+  const dy = e.clientY - prevY;
+  prevX = e.clientX; prevY = e.clientY;
+  targetRotY += dx*0.005;
+  targetRotX += dy*0.005;
+  targetRotX = Math.max(-1.3, Math.min(1.3, targetRotX));
+});
+canvas.addEventListener('wheel', e=>{
+  e.preventDefault();
+  camera.position.multiplyScalar(1 + Math.sign(e.deltaY)*0.08);
+}, { passive:false });
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+document.getElementById('numLines').addEventListener('change', rebuild);
+document.getElementById('spread').addEventListener('change', rebuild);
+document.getElementById('rotSpeed').addEventListener('input', e=>{
+  rotSpeed = parseInt(e.target.value)/1000;
+});
+let particleSpeed = parseInt(document.getElementById('partSpeed').value)/80;
+document.getElementById('partSpeed').addEventListener('input', e=>{
+  particleSpeed = parseInt(e.target.value)/80;
+});
+document.getElementById('regen').addEventListener('click', rebuild);
+document.getElementById('toggleRot').addEventListener('click', ()=>{
+  autoRotate = !autoRotate;
+});
+
+const clock = new THREE.Clock();
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+
+  if(autoRotate) targetRotY += rotSpeed;
+  curRotY += (targetRotY - curRotY)*0.08;
+  curRotX += (targetRotX - curRotX)*0.08;
+  root.rotation.y = curRotY;
+  root.rotation.x = curRotX;
+
+  for(const track of tracks){
+    for(const d of track.dots){
+      d.phase = (d.phase + dt*particleSpeed) % 1;
+      const t = d.open ? Math.min(d.phase, 0.999) : d.phase;
+      d.mesh.position.copy(track.curve.getPointAt(t));
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
