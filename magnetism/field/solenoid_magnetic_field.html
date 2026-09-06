@@ -192,7 +192,7 @@
 
 <!-- عدّل روابط href أدناه لتشير إلى ملفات صفحاتك الفعلية -->
 <div id="nav">
-  <a class="field" href="mag_field.html"><span class="arrow">↩</span> العودة لصفحة المجال المغناطيسي</a>
+  <a class="field" href="mag_field.html"><span class="arrow">↩</span> االعودة لصفحة المجال المغناطيسي</a>
   <a class="home" href="../../index.html"><span class="arrow">⌂</span> العودة للصفحة الرئيسية</a>
 </div>
 
@@ -318,9 +318,9 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   rim.position.set(-10, -6, -10);
   scene.add(rim);
 
-  const grid = new THREE.GridHelper(40, 40, 0x14243a, 0x0c1626);
-  grid.position.y = -9;
-  scene.add(grid);
+  // (ground grid removed — it kept visually overlapping the coil from the
+  // default camera angle no matter where it was repositioned, since the
+  // coil now lies horizontal and its footprint spans a wide vertical range)
 
   // ---------- circular floor logo ----------
   const logoTexture = new THREE.TextureLoader().load(LOGO_DATA_URI);
@@ -381,7 +381,7 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
     for(let i=0;i<=HELIX_SEG;i++) helixPts.push(helixPoint(i/HELIX_SEG));
     helixPath = new THREE.CatmullRomCurve3(helixPts, false);
 
-    const wireGeo = new THREE.TubeGeometry(helixPath, HELIX_SEG, 0.13, 12, false);
+    const wireGeo = new THREE.TubeGeometry(helixPath, HELIX_SEG, 0.1, 12, false);
     const wireMat = new THREE.MeshPhysicalMaterial({
       color: 0x8fa7bf, transparent:true, opacity:0.3,
       roughness:0.15, metalness:0.4, transmission:0.5, side:THREE.DoubleSide, depthWrite:false
@@ -425,8 +425,8 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   const innerGroup = new THREE.Group();
   spinGroup.add(innerGroup);
   const innerArrows = [];
-  const shaftGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.6, 8);
-  const headGeo = new THREE.ConeGeometry(0.13, 0.32, 10);
+  const shaftGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.6, 8);
+  const headGeo = new THREE.ConeGeometry(0.1, 0.28, 10);
 
   for(let i=0;i<N_INNER;i++){
     const y = -L/2 + 0.4 + (i/(N_INNER-1))*(L-0.8);
@@ -502,26 +502,63 @@ const LOGO_DATA_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAY
   buildTurnLoops();
 
   // ============================================================
-  // FIELD: sparse curved return field lines outside the coil
-  // (bar-magnet-like external field, illustrative)
+  // FIELD: sparse return field lines outside the coil, shaped like a
+  // "stadium" (straight side + semicircular caps at the poles) — flat
+  // along most of the coil's length, rounding only near each end,
+  // matching the reference outline instead of a smooth continuous bulge.
   // ============================================================
   const N_RETURN = 12;
   const returnGroup = new THREE.Group();
   spinGroup.add(returnGroup);
   const returnLines = [];
 
+  function stadiumPoints(phi){
+    const innerR = R*0.55;   // where the line meets the coil, near each pole
+    const outerR = R*2.2;    // radius of the long straight side
+    const filletR = (outerR-innerR)/2;
+    const midR = (outerR+innerR)/2;
+    const pts = [];
+
+    // top cap: semicircle centered at (midR, +L/2), bulging toward +y,
+    // from the near-coil point (angle π) to the straight side (angle 0)
+    const TOP_STEPS = 14;
+    for(let i=0;i<=TOP_STEPS;i++){
+      const a = Math.PI - (i/TOP_STEPS)*Math.PI; // π → 0
+      const rho = midR + filletR*Math.cos(a);
+      const y = L/2 + filletR*Math.sin(a);
+      pts.push(new THREE.Vector3(Math.cos(phi)*rho, y, Math.sin(phi)*rho));
+    }
+    // straight side at constant outer radius, spanning the coil's length
+    const SIDE_STEPS = 6;
+    for(let i=1;i<SIDE_STEPS;i++){
+      const y = L/2 - (i/SIDE_STEPS)*L;
+      pts.push(new THREE.Vector3(Math.cos(phi)*outerR, y, Math.sin(phi)*outerR));
+    }
+    // bottom cap: semicircle centered at (midR, -L/2), bulging toward -y,
+    // from the straight side (angle 0) to the near-coil point (angle -π)
+    const BOT_STEPS = 14;
+    for(let i=0;i<=BOT_STEPS;i++){
+      const a = -(i/BOT_STEPS)*Math.PI; // 0 → -π
+      const rho = midR + filletR*Math.cos(a);
+      const y = -L/2 + filletR*Math.sin(a);
+      pts.push(new THREE.Vector3(Math.cos(phi)*rho, y, Math.sin(phi)*rho));
+    }
+    // inner return: straight segment back up through the interior of the
+    // coil (at the same near-coil radius), closing the loop into a
+    // complete circuit — real field lines are always closed loops
+    const IN_STEPS = 8;
+    for(let i=1;i<IN_STEPS;i++){
+      const y = -L/2 + (i/IN_STEPS)*L;
+      pts.push(new THREE.Vector3(Math.cos(phi)*innerR, y, Math.sin(phi)*innerR));
+    }
+    return pts;
+  }
+
   for(let i=0;i<N_RETURN;i++){
     const phi = (i/N_RETURN)*Math.PI*2;
-    const bulge = R*2.6;
-    const pts = [
-      new THREE.Vector3(Math.cos(phi)*R*0.55, L/2+0.1, Math.sin(phi)*R*0.55),
-      new THREE.Vector3(Math.cos(phi)*bulge, L/2*0.55, Math.sin(phi)*bulge),
-      new THREE.Vector3(Math.cos(phi)*bulge*1.15, 0, Math.sin(phi)*bulge*1.15),
-      new THREE.Vector3(Math.cos(phi)*bulge, -L/2*0.55, Math.sin(phi)*bulge),
-      new THREE.Vector3(Math.cos(phi)*R*0.55, -L/2-0.1, Math.sin(phi)*R*0.55)
-    ];
-    const curve = new THREE.CatmullRomCurve3(pts);
-    const geo = new THREE.TubeGeometry(curve, 64, 0.025, 6, false);
+    const pts = stadiumPoints(phi);
+    const curve = new THREE.CatmullRomCurve3(pts, true);
+    const geo = new THREE.TubeGeometry(curve, 120, 0.016, 6, true);
     const mat = new THREE.MeshBasicMaterial({color:0x3aa0ff, transparent:true, opacity:0.0});
     const mesh = new THREE.Mesh(geo, mat);
     returnGroup.add(mesh);
