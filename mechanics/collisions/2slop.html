@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>محاكاة تصادم كرتين | مختبر الفيزياء التفاعلي</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
@@ -14,27 +14,28 @@
     --line:#1c2740;
     --text-0:#e8edf7;
     --text-1:#8fa0bf;
-    --ball1:#3fb6ff;
-    --ball1-dim:#1c4a6b;
-    --ball2:#ffb43f;
-    --ball2-dim:#6b4c1c;
+    --ball1:#0044ff;
+    --ball1-dim:#0d2e80;
+    --ball2:#ff0000;
+    --ball2-dim:#7a0f0f;
     --danger:#ff5a5a;
     --ok:#3ee08a;
     --radius:14px;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{
     margin:0; padding:0; width:100%; height:100%; overflow:hidden;
     background:var(--bg-0);
     font-family:"Segoe UI","Tahoma","Cairo",Arial,sans-serif;
     color:var(--text-0);
+    overscroll-behavior:none;
   }
   #scene-holder{ position:fixed; inset:0; }
   #scene-holder canvas{ display:block; touch-action:none; }
 
   /* ---------- top bar ---------- */
   .brand{
-    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    position:fixed; top:calc(16px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%);
     pointer-events:auto; text-align:center;
     background:var(--panel);
     border:1px solid var(--panel-border);
@@ -44,13 +45,14 @@
     font-size:14px;
     line-height:1.5;
     z-index:20;
+    max-width:min(78vw, 420px);
   }
   .brand b{ color:var(--text-0); font-size:15px; display:block; }
   .brand span{ color:var(--text-1); font-size:12px; }
   .brand .credit-line{ color:#6c81ab; font-size:11px; margin-top:3px; }
 
   .nav-buttons{
-    position:fixed; top:16px; right:16px; z-index:20;
+    position:fixed; top:calc(16px + env(safe-area-inset-top)); right:calc(16px + env(safe-area-inset-right)); z-index:20;
     pointer-events:auto;
     display:flex; gap:8px;
     direction:ltr; flex-direction:row-reverse; /* guarantees home stays at the very corner regardless of page direction */
@@ -75,10 +77,10 @@
 
   /* ---------- readouts (top-left) ---------- */
   .readouts{
-    position:fixed; top:90px; left:16px; z-index:15;
+    position:fixed; top:96px; left:calc(16px + env(safe-area-inset-left)); z-index:15;
     background:var(--panel); border:1px solid var(--panel-border);
     backdrop-filter:blur(10px); border-radius:var(--radius);
-    padding:14px 16px; width:230px;
+    padding:14px 16px; width:230px; max-height:60vh; overflow-y:auto;
     font-size:12.5px;
   }
   .readouts h3{ margin:0 0 10px; font-size:13px; color:var(--text-1); font-weight:600; }
@@ -106,13 +108,14 @@
 
   /* ---------- control dock (bottom) ---------- */
   .dock{
-    position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+    position:fixed; bottom:calc(14px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
     z-index:20; width:min(96vw, 880px);
     background:var(--panel); border:1px solid var(--panel-border);
     backdrop-filter:blur(12px); border-radius:18px;
     padding:14px 18px 10px;
     display:grid; grid-template-columns:1fr auto 1fr; gap:14px;
     align-items:start;
+    max-height:44vh; overflow-y:auto;
   }
   .side-controls{ display:flex; flex-direction:column; gap:9px; }
   .side-controls .title{
@@ -123,11 +126,15 @@
   .ctrl label{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-1); }
   .ctrl label em{ color:var(--text-0); font-style:normal; font-weight:600; }
   input[type=range]{
-    -webkit-appearance:none; width:100%; height:5px; border-radius:3px;
-    background:#1c2740; outline:none;
+    -webkit-appearance:none; width:100%; height:8px; border-radius:4px;
+    background:#1c2740; outline:none; touch-action:pan-x;
   }
   input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+    -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+    background:var(--text-0); cursor:pointer; border:3px solid #0d1526;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:22px; height:22px; border-radius:50%;
     background:var(--text-0); cursor:pointer; border:3px solid #0d1526;
   }
   .side-controls.left input[type=range]::-webkit-slider-thumb{ background:var(--ball1); }
@@ -137,8 +144,9 @@
   .mid-controls .ctrl{ width:140px; }
   .action-btns{ display:flex; gap:8px; }
   .action-btns button{
-    border:none; border-radius:10px; padding:9px 16px; font-size:13px; cursor:pointer;
+    border:none; border-radius:10px; padding:11px 18px; font-size:13px; cursor:pointer;
     font-family:inherit; font-weight:600; transition:filter .15s, transform .1s;
+    min-height:44px;
   }
   .action-btns button:active{ transform:translateY(1px); }
   #startBtn{ background:linear-gradient(180deg,#3fd18a,#22a866); color:#04170d; }
@@ -147,9 +155,9 @@
   .action-btns button:disabled{ opacity:.4; cursor:not-allowed; filter:none; }
 
   .credit{
-    position:fixed; bottom:6px; left:50%; transform:translateX(-50%);
+    position:fixed; bottom:calc(6px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
     font-size:10.5px; color:#546488; z-index:5; letter-spacing:.2px;
-    pointer-events:none;
+    pointer-events:none; text-align:center; width:92vw;
   }
 
   .hint{
@@ -159,12 +167,46 @@
   }
 
   @media (max-width:760px){
-    .dock{ grid-template-columns:1fr; }
-    .mid-controls{ order:-1; flex-direction:row; justify-content:center; gap:16px; }
-    .mid-controls .ctrl{ display:none; }
-    .readouts{ width:170px; padding:10px 12px; font-size:11px; top:80px; }
+    .brand{ padding:8px 14px; font-size:12px; max-width:64vw; }
+    .brand b{ font-size:12.5px; }
     .brand span{ display:none; }
+    .brand .credit-line{ font-size:9.5px; }
+
+    .nav-btn{ padding:9px 10px; font-size:0; gap:0; }
+    .nav-btn svg{ width:18px; height:18px; }
+
+    .readouts{ width:132px; padding:8px 10px; font-size:10px; top:76px; max-height:38vh; }
+    .readouts h3{ font-size:11px; margin-bottom:6px; }
+    .logo-badge{ width:40px; height:40px; margin-bottom:5px; }
+    #log-box{ max-height:60px; }
+
+    .dock{
+      grid-template-columns:1fr 1fr; grid-template-areas:
+        "left right"
+        "mid mid";
+      padding:10px 12px 8px; gap:8px; width:94vw; max-height:50vh;
+    }
+    .side-controls.left{ grid-area:left; }
+    .side-controls.right{ grid-area:right; }
+    .mid-controls{ grid-area:mid; flex-direction:row; justify-content:center; align-items:center; gap:10px; padding-top:6px; border-top:1px solid var(--line); }
+    .mid-controls .ctrl{ display:none; }
+    .side-controls .title{ font-size:11px; }
+    .ctrl label{ font-size:10.5px; }
+    .action-btns button{ padding:10px 14px; font-size:12.5px; }
+
     .hint{ display:none; }
+    .credit{ font-size:9px; }
+  }
+
+  @media (max-width:400px){
+    .readouts{ width:112px; font-size:9px; }
+    .brand{ max-width:56vw; }
+    .brand b{ font-size:11px; }
+  }
+
+  @media (max-height:560px) and (orientation:landscape){
+    .readouts{ max-height:80vh; top:70px; }
+    .dock{ max-height:78vh; }
   }
 </style>
 </head>
@@ -191,10 +233,10 @@
 <div class="readouts">
   <img id="logo-badge" class="logo-badge" alt="شعار المختبر">
   <h3>قراءات حيّة</h3>
-  <div class="row-stat"><span><span class="dot b1"></span>سرعة الكرة الأولى</span><span id="v1">0.00 م/ث</span></div>
-  <div class="row-stat"><span><span class="dot b2"></span>سرعة الكرة الثانية</span><span id="v2">0.00 م/ث</span></div>
-  <div class="row-stat"><span>الزخم الكلي</span><span id="pTotal">0.00 كغ·م/ث</span></div>
-  <div class="row-stat"><span>الطاقة الحركية الآنية</span><span id="keTotal">0.00 جول</span></div>
+  <div class="row-stat"><span><span class="dot b1"></span>سرعة الكرة الأولى</span><span id="v1">0.00 m/s</span></div>
+  <div class="row-stat"><span><span class="dot b2"></span>سرعة الكرة الثانية</span><span id="v2">0.00 m/s</span></div>
+  <div class="row-stat"><span>الزخم الكلي</span><span id="pTotal">0.00 kg·m/s</span></div>
+  <div class="row-stat"><span>الطاقة الحركية الآنية</span><span id="keTotal">0.00 J</span></div>
   <div class="row-stat"><span>عدد الاصطدامات</span><span id="collCount">0</span></div>
   <h3 style="margin-top:10px;">آخر اصطدام</h3>
   <div class="row-stat"><span>الطاقة قبل الاصطدام</span><span id="keBefore">—</span></div>
@@ -207,11 +249,11 @@
   <div class="side-controls left">
     <div class="title"><span class="dot b1"></span> الكرة الأولى (يسار)</div>
     <div class="ctrl">
-      <label>الكتلة <em id="m1val">1.0 كغ</em></label>
+      <label>الكتلة <em id="m1val">1.0 kg</em></label>
       <input type="range" id="m1" min="0.5" max="20" step="0.5" value="1">
     </div>
     <div class="ctrl">
-      <label>ارتفاع المزلق <em id="h1val">3.0 م</em></label>
+      <label>ارتفاع المزلق <em id="h1val">3.0 m</em></label>
       <input type="range" id="h1" min="0.5" max="5" step="0.1" value="3">
     </div>
   </div>
@@ -222,7 +264,7 @@
       <input type="range" id="rest" min="0" max="1" step="0.05" value="1">
     </div>
     <div class="ctrl">
-      <label>تسارع الجاذبية g <em id="gval">9.80 م/ث²</em></label>
+      <label>تسارع الجاذبية g <em id="gval">9.80 m/s²</em></label>
       <input type="range" id="grav" min="1" max="25" step="0.1" value="9.8">
     </div>
     <div class="action-btns">
@@ -234,11 +276,11 @@
   <div class="side-controls right">
     <div class="title"><span class="dot b2"></span> الكرة الثانية (يمين)</div>
     <div class="ctrl">
-      <label>الكتلة <em id="m2val">1.0 كغ</em></label>
+      <label>الكتلة <em id="m2val">1.0 kg</em></label>
       <input type="range" id="m2" min="0.5" max="20" step="0.5" value="1.5">
     </div>
     <div class="ctrl">
-      <label>ارتفاع المزلق <em id="h2val">3.0 م</em></label>
+      <label>ارتفاع المزلق <em id="h2val">3.0 m</em></label>
       <input type="range" id="h2" min="0.5" max="5" step="0.1" value="2">
     </div>
   </div>
@@ -320,11 +362,15 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+  if (THREE.ACESFilmicToneMapping !== undefined) renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.65;
   holder.appendChild(renderer.domElement);
 
   // lighting
-  scene.add(new THREE.HemisphereLight(0x8fb4ff, 0x0a0e18, 0.55));
-  const sun = new THREE.DirectionalLight(0xfff2df, 1.15);
+  scene.add(new THREE.HemisphereLight(0x9fc4ff, 0x1a2338, 0.525));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.275));
+  const sun = new THREE.DirectionalLight(0xfff2df, 0.95);
   sun.position.set(10, 16, 8);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048,2048);
@@ -333,7 +379,7 @@
   sun.shadow.camera.near = 1; sun.shadow.camera.far = 50;
   sun.shadow.bias = -0.0015;
   scene.add(sun);
-  const fillLight = new THREE.DirectionalLight(0x3f6ea8, 0.35);
+  const fillLight = new THREE.DirectionalLight(0x5f8ec8, 0.375);
   fillLight.position.set(-8,6,-10);
   scene.add(fillLight);
 
@@ -428,8 +474,8 @@
   scene.add(logoMesh);
 
   // ---- balls ----
-  const ball1Mat = new THREE.MeshStandardMaterial({ color:0x3fb6ff, roughness:0.25, metalness:0.6, emissive:0x0a3550, emissiveIntensity:0.3 });
-  const ball2Mat = new THREE.MeshStandardMaterial({ color:0xffb43f, roughness:0.25, metalness:0.6, emissive:0x5a3a08, emissiveIntensity:0.3 });
+  const ball1Mat = new THREE.MeshStandardMaterial({ color:0x0044ff, roughness:0.12, metalness:0, emissive:0x0044ff, emissiveIntensity:0.85 });
+  const ball2Mat = new THREE.MeshStandardMaterial({ color:0xff0000, roughness:0.12, metalness:0, emissive:0xff0000, emissiveIntensity:0.85 });
 
   function makeBallMesh(mat){
     const geo = new THREE.SphereGeometry(1, 32, 24);
@@ -465,7 +511,7 @@
   /* ============================================================
      CAMERA ORBIT (manual, mouse/touch drag)
   ============================================================ */
-  let camAzimuth = 0.55, camPolar = 1.05, camDist = 15;
+  let camAzimuth = 0.55, camPolar = 1.05, camDist = 26;
   const target = new THREE.Vector3(0, 1.2, 0);
   function updateCamera(){
     const x = target.x + camDist*Math.sin(camPolar)*Math.sin(camAzimuth);
@@ -489,7 +535,7 @@
   });
   renderer.domElement.addEventListener('wheel', e=>{
     e.preventDefault();
-    camDist = clamp(camDist + e.deltaY*0.012, 6, 50);
+    camDist = clamp(camDist + e.deltaY*0.015, 6, 60);
     updateCamera();
   }, { passive:false });
 
@@ -553,12 +599,12 @@
   const logBox = el('log-box');
 
   function syncLabels(){
-    el('m1val').textContent = params.m1.toFixed(1)+' كغ';
-    el('m2val').textContent = params.m2.toFixed(1)+' كغ';
-    el('h1val').textContent = params.h1.toFixed(1)+' م';
-    el('h2val').textContent = params.h2.toFixed(1)+' م';
+    el('m1val').textContent = params.m1.toFixed(1)+' kg';
+    el('m2val').textContent = params.m2.toFixed(1)+' kg';
+    el('h1val').textContent = params.h1.toFixed(1)+' m';
+    el('h2val').textContent = params.h2.toFixed(1)+' m';
     el('eval').textContent = params.rest.toFixed(2);
-    el('gval').textContent = params.g.toFixed(2)+' م/ث²';
+    el('gval').textContent = params.g.toFixed(2)+' m/s²';
   }
   function setControlsEnabled(enabled){
     [m1Range,m2Range,h1Range,h2Range].forEach(inp => inp.disabled = !enabled);
@@ -659,14 +705,14 @@
 
       collisionCount++;
       el('collCount').textContent = String(collisionCount);
-      el('keBefore').textContent = keBefore.toFixed(2)+' جول';
-      el('keAfter').textContent = keAfter.toFixed(2)+' جول';
-      el('keDelta').textContent = (keDelta>=0?'+':'')+keDelta.toFixed(2)+' جول';
+      el('keBefore').textContent = keBefore.toFixed(2)+' J';
+      el('keAfter').textContent = keAfter.toFixed(2)+' J';
+      el('keDelta').textContent = (keDelta>=0?'+':'')+keDelta.toFixed(2)+' J';
 
       const intensity = clamp(relSpeed/8, 0, 1);
       playCollisionSound(intensity);
 
-      addLog('💥 اصطدام رقم <b>'+collisionCount+'</b> — الطاقة: '+keBefore.toFixed(1)+' ← '+keAfter.toFixed(1)+' جول (Δ='+keDelta.toFixed(1)+')');
+      addLog('💥 اصطدام رقم <b>'+collisionCount+'</b> — الطاقة: '+keBefore.toFixed(1)+' ← '+keAfter.toFixed(1)+' J (Δ='+keDelta.toFixed(1)+')');
     }
 
     // rolling rotation (visual only)
@@ -681,12 +727,12 @@
   }
 
   function updateReadouts(){
-    el('v1').textContent = ball1.vx.toFixed(2)+' م/ث';
-    el('v2').textContent = ball2.vx.toFixed(2)+' م/ث';
+    el('v1').textContent = ball1.vx.toFixed(2)+' m/s';
+    el('v2').textContent = ball2.vx.toFixed(2)+' m/s';
     const p = params.m1*ball1.vx + params.m2*ball2.vx;
     const ke = 0.5*params.m1*ball1.vx*ball1.vx + 0.5*params.m2*ball2.vx*ball2.vx;
-    el('pTotal').textContent = p.toFixed(2)+' كغ·م/ث';
-    el('keTotal').textContent = ke.toFixed(2)+' جول';
+    el('pTotal').textContent = p.toFixed(2)+' kg·m/s';
+    el('keTotal').textContent = ke.toFixed(2)+' J';
   }
 
   function animate(){
