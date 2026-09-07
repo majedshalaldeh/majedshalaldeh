@@ -14,10 +14,10 @@
     --line:#1c2740;
     --text-0:#e8edf7;
     --text-1:#8fa0bf;
-    --ball1:#0044ff;
-    --ball1-dim:#0d2e80;
-    --ball2:#ff0000;
-    --ball2-dim:#7a0f0f;
+    --ball1:#29c5ff;
+    --ball1-dim:#0d3d57;
+    --ball2:#ff2020;
+    --ball2-dim:#7a0a0a;
     --danger:#ff5a5a;
     --ok:#3ee08a;
     --radius:14px;
@@ -301,6 +301,7 @@
   const RAMP_LEN = GROUND_HALF - FLAT_HALF; // horizontal run of each ramp
   const TRACK_WIDTH = 3.6;
   const THICK = 0.35;
+  const FLOOR_Y = -0.42; // floor sits just beneath the track's underside so nothing looks like it's floating
 
   function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
   function radiusFromMass(m){ return 0.22 + 0.20*Math.cbrt(m); }
@@ -364,13 +365,13 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
   if (THREE.ACESFilmicToneMapping !== undefined) renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.65;
+  renderer.toneMappingExposure = 0.52;
   holder.appendChild(renderer.domElement);
 
   // lighting
-  scene.add(new THREE.HemisphereLight(0x9fc4ff, 0x1a2338, 0.525));
-  scene.add(new THREE.AmbientLight(0xffffff, 0.275));
-  const sun = new THREE.DirectionalLight(0xfff2df, 0.95);
+  scene.add(new THREE.HemisphereLight(0x9fc4ff, 0x1a2338, 0.42));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.22));
+  const sun = new THREE.DirectionalLight(0xfff2df, 0.76);
   sun.position.set(10, 16, 8);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048,2048);
@@ -379,7 +380,7 @@
   sun.shadow.camera.near = 1; sun.shadow.camera.far = 50;
   sun.shadow.bias = -0.0015;
   scene.add(sun);
-  const fillLight = new THREE.DirectionalLight(0x5f8ec8, 0.375);
+  const fillLight = new THREE.DirectionalLight(0x5f8ec8, 0.3);
   fillLight.position.set(-8,6,-10);
   scene.add(fillLight);
 
@@ -388,12 +389,12 @@
   const floorMat = new THREE.MeshStandardMaterial({ color:0x0c1524, roughness:1, metalness:0 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI/2;
-  floor.position.y = -2.02;
+  floor.position.y = FLOOR_Y;
   floor.receiveShadow = true;
   scene.add(floor);
 
   const gridHelper = new THREE.GridHelper(90, 30, 0x22314f, 0x141d33);
-  gridHelper.position.y = -2.0;
+  gridHelper.position.y = FLOOR_Y + 0.02;
   scene.add(gridHelper);
 
   // ---- track group (rebuilt whenever ramp heights change) ----
@@ -438,15 +439,19 @@
     [-1,1].forEach(side=>{
       const railGeo = new THREE.BoxGeometry(GROUND_HALF*2+0.4, 0.12, 0.12);
       const rail = new THREE.Mesh(railGeo, edgeMat);
-      rail.position.set(0, -0.3, side*(TRACK_WIDTH/2+0.06));
+      rail.position.set(0, -THICK, side*(TRACK_WIDTH/2+0.06));
       trackGroup.add(rail);
     });
 
-    // small vertical support posts under ramp tops for realism
-    [[-GROUND_HALF, params.h1],[GROUND_HALF, params.h2]].forEach(([px,ph])=>{
-      const postGeo = new THREE.CylinderGeometry(0.09,0.09, Math.max(ph,0.4), 12);
+    // vertical support posts reaching all the way down to the floor, so the track
+    // visibly rests on legs instead of appearing to float above the ground
+    [[-GROUND_HALF, params.h1],[GROUND_HALF, params.h2],[0,0]].forEach(([px,ph])=>{
+      const topY = ph - THICK/2;
+      const bottomY = FLOOR_Y;
+      const height = Math.max(topY - bottomY, 0.1);
+      const postGeo = new THREE.CylinderGeometry(0.09,0.09, height, 12);
       const post = new THREE.Mesh(postGeo, edgeMat);
-      post.position.set(px, (ph)/2 - THICK/2, TRACK_WIDTH/2 - 0.15);
+      post.position.set(px, (topY+bottomY)/2, TRACK_WIDTH/2 - 0.15);
       post.castShadow = true;
       trackGroup.add(post);
       const post2 = post.clone();
@@ -474,8 +479,8 @@
   scene.add(logoMesh);
 
   // ---- balls ----
-  const ball1Mat = new THREE.MeshStandardMaterial({ color:0x0044ff, roughness:0.12, metalness:0, emissive:0x0044ff, emissiveIntensity:0.85 });
-  const ball2Mat = new THREE.MeshStandardMaterial({ color:0xff0000, roughness:0.12, metalness:0, emissive:0xff0000, emissiveIntensity:0.85 });
+  const ball1Mat = new THREE.MeshStandardMaterial({ color:0x29c5ff, roughness:0.2, metalness:0, emissive:0x0a4a7a, emissiveIntensity:0.4 });
+  const ball2Mat = new THREE.MeshStandardMaterial({ color:0xff2020, roughness:0.2, metalness:0, emissive:0x7a0a0a, emissiveIntensity:0.4 });
 
   function makeBallMesh(mat){
     const geo = new THREE.SphereGeometry(1, 32, 24);
