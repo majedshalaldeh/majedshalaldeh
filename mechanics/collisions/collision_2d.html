@@ -31,6 +31,21 @@
   #panel h1 { font-size: 17px; margin: 0 0 4px 0; color: #9fd3ff; }
   #panel .sub { font-size: 12px; color: #8a93ab; margin-bottom: 12px; }
 
+  #statsPanel {
+    position: absolute;
+    top: 78px;
+    left: 16px;
+    width: 300px;
+    max-height: calc(100vh - 94px);
+    overflow-y: auto;
+    background: linear-gradient(160deg, rgba(20,26,46,0.93), rgba(10,14,26,0.93));
+    border: 1px solid rgba(120,150,255,0.25);
+    border-radius: 16px;
+    padding: 18px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+
   #topTitle {
     position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
     text-align: center; z-index: 5; pointer-events: none;
@@ -114,14 +129,14 @@
     <h3><span class="dot r"></span> الكرة الأولى (حمراء)</h3>
     <div class="row"><label>الكتلة (kg)</label><input id="m1" type="range" min="0.5" max="15" step="0.1" value="3"><span class="val" id="m1v">3.0</span></div>
     <div class="row"><label>السرعة (m/s)</label><input id="sp1" type="range" min="0" max="10" step="0.1" value="4"><span class="val" id="sp1v">4.0</span></div>
-    <div class="row"><label>زاوية الإطلاق (°)</label><input id="ang1" type="range" min="0" max="359" step="1" value="0"><span class="val" id="ang1v">0°</span></div>
+    <div class="row"><label>الزاوية عن محور +X (°)</label><input id="ang1" type="range" min="0" max="359" step="1" value="210"><span class="val" id="ang1v">210°</span></div>
   </div>
 
   <div class="ball-block b2">
     <h3><span class="dot b"></span> الكرة الثانية (زرقاء)</h3>
     <div class="row"><label>الكتلة (kg)</label><input id="m2" type="range" min="0.5" max="15" step="0.1" value="3"><span class="val" id="m2v">3.0</span></div>
     <div class="row"><label>السرعة (m/s)</label><input id="sp2" type="range" min="0" max="10" step="0.1" value="4"><span class="val" id="sp2v">4.0</span></div>
-    <div class="row"><label>زاوية الإطلاق (°)</label><input id="ang2" type="range" min="0" max="359" step="1" value="180"><span class="val" id="ang2v">180°</span></div>
+    <div class="row"><label>الزاوية عن محور +X (°)</label><input id="ang2" type="range" min="0" max="359" step="1" value="240"><span class="val" id="ang2v">240°</span></div>
   </div>
 
   <div class="section-title">نوع التصادم والزمن</div>
@@ -137,10 +152,15 @@
     <button id="resetBtn">↺ إعادة ضبط</button>
     <button id="muteBtn">🔊</button>
   </div>
+</div>
 
+<div id="statsPanel">
+  <div class="section-title" style="margin-top:0">القراءات الحية</div>
   <div class="legend">
     <span><span class="swatch dashed" style="border-color:#c9cfe0; opacity:0.5"></span> المسار قبل التصادم</span>
     <span><span class="swatch dashed" style="border-color:#c9cfe0"></span> المسار بعد التصادم</span>
+    <span><span class="swatch dashed" style="border-color:#b388ff"></span> محصلة الزخم قبل</span>
+    <span><span class="swatch dashed" style="border-color:#7dffcf"></span> محصلة الزخم بعد</span>
   </div>
 
   <div id="stats">
@@ -301,8 +321,8 @@ function computeStartPositions() {
   const a1 = state.ang1 * Math.PI/180, a2 = state.ang2 * Math.PI/180;
   const L1 = state.sp1 * T, L2 = state.sp2 * T;
   return {
-    p1: { x: -Math.cos(a1)*L1, z: -Math.sin(a1)*L1 },
-    p2: { x: -Math.cos(a2)*L2, z: -Math.sin(a2)*L2 }
+    p1: { x: -Math.cos(a1)*L1, z: Math.sin(a1)*L1 },
+    p2: { x: -Math.cos(a2)*L2, z: Math.sin(a2)*L2 }
   };
 }
 
@@ -383,18 +403,22 @@ function momentumEndpoint(px, pz) {
 }
 function updateMomentumLines() {
   const show = document.getElementById('showMomentum').checked;
+  const afterOccurred = state.collisions >= 1;
   momentumBeforeLine.visible = show;
-  momentumAfterLine.visible = show;
+  momentumAfterLine.visible = show && afterOccurred;
   if (!show) return;
   const origin = new THREE.Vector3(0, 0.05, 0);
   const beforePt = momentumEndpoint(state.p_initial[0], state.p_initial[1]);
-  momentumBeforeLine.geometry.setFromPoints([origin, beforePt]);
+  const beforePtMirror = new THREE.Vector3(-beforePt.x, beforePt.y, -beforePt.z);
+  momentumBeforeLine.geometry.setFromPoints([origin, beforePtMirror]);
   momentumBeforeLine.computeLineDistances();
-  const curPx = state.m1*v1.vx + state.m2*v2.vx;
-  const curPz = state.m1*v1.vz + state.m2*v2.vz;
-  const afterPt = momentumEndpoint(curPx, curPz);
-  momentumAfterLine.geometry.setFromPoints([origin, afterPt]);
-  momentumAfterLine.computeLineDistances();
+  if (afterOccurred) {
+    const curPx = state.m1*v1.vx + state.m2*v2.vx;
+    const curPz = state.m1*v1.vz + state.m2*v2.vz;
+    const afterPt = momentumEndpoint(curPx, curPz);
+    momentumAfterLine.geometry.setFromPoints([origin, afterPt]);
+    momentumAfterLine.computeLineDistances();
+  }
 }
 
 // ================= الصوت =================
@@ -457,14 +481,14 @@ document.getElementById('collisionsBtn').addEventListener('click', () => {
 
 // ================= الحالة =================
 const state = {
-  m1:3, m2:3, sp1:4, sp2:4, ang1:0, ang2:180,
+  m1:3, m2:3, sp1:4, sp2:4, ang1:210, ang2:240,
   e:1, timeScale:1, running:false, collisions:0, p_initial:[0,0], e_initial:0,
   multiCollisions: true
 };
 
 function velFromSpeedAngle(sp, angDeg) {
   const a = angDeg * Math.PI/180;
-  return { vx: sp*Math.cos(a), vz: sp*Math.sin(a) };
+  return { vx: sp*Math.cos(a), vz: -sp*Math.sin(a) };
 }
 
 let v1 = {vx:0,vz:0}, v2 = {vx:0,vz:0};
@@ -491,6 +515,7 @@ function initState() {
   updateArrow(arrow1, ball1, v1.vx, v1.vz);
   updateArrow(arrow2, ball2, v2.vx, v2.vz);
   buildTrails();
+  buildMomentumLines();
   updateStats();
 }
 initState();
@@ -529,6 +554,7 @@ document.getElementById('multiToggle').addEventListener('click', () => {
   btn.style.background = state.multiCollisions ? 'rgba(80,160,255,0.15)' : 'rgba(255,120,120,0.15)';
   btn.style.borderColor = state.multiCollisions ? 'rgba(80,160,255,0.35)' : 'rgba(255,120,120,0.35)';
 });
+document.getElementById('showMomentum').addEventListener('change', updateMomentumLines);
 
 function updateStats() {
   const s1 = Math.hypot(v1.vx, v1.vz), a1 = (Math.atan2(v1.vz, v1.vx)*180/Math.PI+360)%360;
@@ -546,6 +572,7 @@ function updateStats() {
   const cls = Math.abs(deltaKE) > 0.01 ? 'warn' : '';
   document.getElementById('s_de').innerHTML = `<span class="${cls}">${sign}${deltaKE.toFixed(2)} (${sign}${pct.toFixed(1)}%)</span>`;
   document.getElementById('s_c').textContent = state.collisions;
+  updateMomentumLines();
 }
 
 // ================= حلقة المحاكاة =================

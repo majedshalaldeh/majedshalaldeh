@@ -18,6 +18,8 @@
     --ball1-dim:#0d3d57;
     --ball2:#ff2020;
     --ball2-dim:#7a0a0a;
+    --ball3:#33dd77;
+    --ball3-dim:#0f5a2e;
     --danger:#ff5a5a;
     --ok:#3ee08a;
     --radius:14px;
@@ -90,6 +92,7 @@
   .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-left:6px; }
   .dot.b1{ background:var(--ball1); }
   .dot.b2{ background:var(--ball2); }
+  .dot.b3{ background:var(--ball3); }
 
   #log-box{
     margin-top:10px; max-height:110px; overflow-y:auto;
@@ -102,7 +105,7 @@
   #log-box::-webkit-scrollbar-thumb{ background:#28395c; border-radius:4px; }
 
   .logo-badge{
-    display:block; width:58px; height:58px; margin:0 auto 8px;
+    display:block; width:116px; height:116px; margin:0 auto 10px;
     border-radius:50%;
   }
 
@@ -177,7 +180,7 @@
 
     .readouts{ width:132px; padding:8px 10px; font-size:10px; top:76px; max-height:38vh; }
     .readouts h3{ font-size:11px; margin-bottom:6px; }
-    .logo-badge{ width:40px; height:40px; margin-bottom:5px; }
+    .logo-badge{ width:80px; height:80px; margin-bottom:6px; }
     #log-box{ max-height:60px; }
 
     .dock{
@@ -235,6 +238,7 @@
   <h3>قراءات حيّة</h3>
   <div class="row-stat"><span><span class="dot b1"></span>سرعة الكرة الأولى</span><span id="v1">0.00 m/s</span></div>
   <div class="row-stat"><span><span class="dot b2"></span>سرعة الكرة الثانية</span><span id="v2">0.00 m/s</span></div>
+  <div class="row-stat" id="v3row" style="display:none;"><span><span class="dot b3"></span>سرعة الكرة الثالثة</span><span id="v3">0.00 m/s</span></div>
   <div class="row-stat"><span>الزخم الكلي</span><span id="pTotal">0.00 kg·m/s</span></div>
   <div class="row-stat"><span>الطاقة الحركية الآنية</span><span id="keTotal">0.00 J</span></div>
   <div class="row-stat"><span>عدد الاصطدامات</span><span id="collCount">0</span></div>
@@ -242,6 +246,10 @@
   <div class="row-stat"><span>الطاقة قبل الاصطدام</span><span id="keBefore">—</span></div>
   <div class="row-stat"><span>الطاقة بعد الاصطدام</span><span id="keAfter">—</span></div>
   <div class="row-stat"><span>التغيّر ΔKE</span><span id="keDelta">—</span></div>
+  <h3 style="margin-top:10px;">الارتفاع بعد الاصطدام الأول</h3>
+  <div class="row-stat"><span><span class="dot b1"></span>الكرة الأولى</span><span id="peak1">—</span></div>
+  <div class="row-stat"><span><span class="dot b2"></span>الكرة الثانية</span><span id="peak2">—</span></div>
+  <div class="row-stat" id="peak3row" style="display:none;"><span><span class="dot b3"></span>الكرة الثالثة</span><span id="peak3">—</span></div>
   <div id="log-box"></div>
 </div>
 
@@ -266,6 +274,18 @@
     <div class="ctrl">
       <label>تسارع الجاذبية g <em id="gval">9.80 m/s²</em></label>
       <input type="range" id="grav" min="1" max="25" step="0.1" value="9.8">
+    </div>
+    <div class="ctrl">
+      <label>قتامة الخلفية <em id="bgval">0%</em></label>
+      <input type="range" id="bgDark" min="0" max="100" step="1" value="0">
+    </div>
+    <div class="ctrl" style="flex-direction:row; align-items:center; justify-content:center; gap:6px;">
+      <input type="checkbox" id="enable3" style="width:16px;height:16px;">
+      <label for="enable3" style="display:inline; font-size:11.5px; color:var(--text-1);"><span class="dot b3" style="display:inline-block;"></span>كرة ثالثة في المنتصف</label>
+    </div>
+    <div class="ctrl" id="m3ctrl" style="display:none;">
+      <label>كتلة الكرة الثالثة <em id="m3val">1.0 kg</em></label>
+      <input type="range" id="m3" min="0.5" max="20" step="0.5" value="1">
     </div>
     <div class="action-btns">
       <button id="startBtn">▶ ابدأ المحاكاة</button>
@@ -326,13 +346,15 @@
      STATE
   ============================================================ */
   // mu = 0: surfaces are perfectly smooth / frictionless, as requested.
-  const params = { m1:1.0, m2:1.5, h1:3.0, h2:2.0, rest:1.0, mu:0.0, g:9.8 };
+  const params = { m1:1.0, m2:1.5, m3:1.0, h1:3.0, h2:2.0, rest:1.0, mu:0.0, g:9.8, enable3:false };
   let running = false;
   let collisionCount = 0;
+  let firstCollisionHappened = false;
   let audioCtx = null;
 
-  const ball1 = { x:0, vx:0, r:radiusFromMass(params.m1), mesh:null, stopped:true };
-  const ball2 = { x:0, vx:0, r:radiusFromMass(params.m2), mesh:null, stopped:true };
+  const ball1 = { x:0, vx:0, r:radiusFromMass(params.m1), mesh:null, stopped:true, airborne:false, vy:0, height:0, m:params.m1, peakHeightAfterCollision:0 };
+  const ball2 = { x:0, vx:0, r:radiusFromMass(params.m2), mesh:null, stopped:true, airborne:false, vy:0, height:0, m:params.m2, peakHeightAfterCollision:0 };
+  const ball3 = { x:0, vx:0, r:radiusFromMass(params.m3), mesh:null, stopped:true, airborne:false, vy:0, height:0, m:params.m3, peakHeightAfterCollision:0 };
 
   function startXFor(side, r){
     return side < 0 ? (-GROUND_HALF + r*0.9) : (GROUND_HALF - r*0.9);
@@ -341,10 +363,19 @@
   function placeAtStart(){
     ball1.r = radiusFromMass(params.m1);
     ball2.r = radiusFromMass(params.m2);
+    ball3.r = radiusFromMass(params.m3);
+    ball1.m = params.m1; ball2.m = params.m2; ball3.m = params.m3;
     ball1.x = startXFor(-1, ball1.r);
     ball2.x = startXFor(1, ball2.r);
-    ball1.vx = 0; ball2.vx = 0;
+    ball3.x = 0;
+    ball1.vx = 0; ball2.vx = 0; ball3.vx = 0;
+    ball1.airborne = false; ball2.airborne = false; ball3.airborne = false;
+    ball1.vy = 0; ball2.vy = 0; ball3.vy = 0;
+    ball1.peakHeightAfterCollision = 0; ball2.peakHeightAfterCollision = 0; ball3.peakHeightAfterCollision = 0;
+    firstCollisionHappened = false;
     ball1.stopped = false; ball2.stopped = false;
+    ball3.stopped = !params.enable3;
+    if (ball3.mesh) ball3.mesh.visible = params.enable3;
   }
   placeAtStart();
 
@@ -481,6 +512,7 @@
   // ---- balls ----
   const ball1Mat = new THREE.MeshStandardMaterial({ color:0x29c5ff, roughness:0.2, metalness:0, emissive:0x0a4a7a, emissiveIntensity:0.4 });
   const ball2Mat = new THREE.MeshStandardMaterial({ color:0xff2020, roughness:0.2, metalness:0, emissive:0x7a0a0a, emissiveIntensity:0.4 });
+  const ball3Mat = new THREE.MeshStandardMaterial({ color:0x33dd77, roughness:0.2, metalness:0, emissive:0x0f5a2e, emissiveIntensity:0.4 });
 
   function makeBallMesh(mat){
     const geo = new THREE.SphereGeometry(1, 32, 24);
@@ -491,8 +523,15 @@
   }
   ball1.mesh = makeBallMesh(ball1Mat);
   ball2.mesh = makeBallMesh(ball2Mat);
+  ball3.mesh = makeBallMesh(ball3Mat);
+  ball3.mesh.visible = params.enable3;
 
   function positionBall(ball, h1, h2){
+    if (ball.airborne){
+      ball.mesh.position.set(ball.x, ball.height, 0);
+      ball.mesh.scale.setScalar(ball.r);
+      return;
+    }
     const slope = terrainSlope(ball.x, h1, h2);
     const y = terrainY(ball.x, h1, h2);
     const norm = 1/Math.sqrt(1+slope*slope);
@@ -508,8 +547,11 @@
   function syncBallVisuals(){
     positionBall(ball1, params.h1, params.h2);
     positionBall(ball2, params.h1, params.h2);
+    positionBall(ball3, params.h1, params.h2);
     ball1.mesh.rotation.set(0,0,0);
     ball2.mesh.rotation.set(0,0,0);
+    ball3.mesh.rotation.set(0,0,0);
+    ball3.mesh.visible = params.enable3;
   }
   syncBallVisuals();
 
@@ -599,29 +641,50 @@
      UI WIRING
   ============================================================ */
   const el = id => document.getElementById(id);
-  const m1Range=el('m1'), m2Range=el('m2'), h1Range=el('h1'), h2Range=el('h2'), restRange=el('rest'), gravRange=el('grav');
+  const m1Range=el('m1'), m2Range=el('m2'), h1Range=el('h1'), h2Range=el('h2'), restRange=el('rest'), gravRange=el('grav'), bgDarkRange=el('bgDark');
+  const enable3Check=el('enable3'), m3Range=el('m3'), m3ctrl=el('m3ctrl'), v3row=el('v3row'), peak3row=el('peak3row');
   const startBtn = el('startBtn'), resetBtn = el('resetBtn');
   const logBox = el('log-box');
+
+  const BASE_BG_COLOR = new THREE.Color(0x0a1220);
+  const BLACK_COLOR = new THREE.Color(0x000000);
+  function applyBackgroundDarkness(pct){
+    const t = clamp(pct/100, 0, 1);
+    const c = BASE_BG_COLOR.clone().lerp(BLACK_COLOR, t);
+    scene.background = c;
+    if (scene.fog) scene.fog.color = c;
+  }
 
   function syncLabels(){
     el('m1val').textContent = params.m1.toFixed(1)+' kg';
     el('m2val').textContent = params.m2.toFixed(1)+' kg';
+    el('m3val').textContent = params.m3.toFixed(1)+' kg';
     el('h1val').textContent = params.h1.toFixed(1)+' m';
     el('h2val').textContent = params.h2.toFixed(1)+' m';
     el('eval').textContent = params.rest.toFixed(2);
     el('gval').textContent = params.g.toFixed(2)+' m/s²';
+    el('bgval').textContent = Math.round(parseFloat(bgDarkRange.value))+'%';
   }
   function setControlsEnabled(enabled){
-    [m1Range,m2Range,h1Range,h2Range].forEach(inp => inp.disabled = !enabled);
+    [m1Range,m2Range,h1Range,h2Range,enable3Check,m3Range].forEach(inp => inp.disabled = !enabled);
     startBtn.disabled = enabled ? false : true;
   }
 
   m1Range.addEventListener('input', ()=>{ params.m1 = parseFloat(m1Range.value); syncLabels(); if(!running){ placeAtStart(); syncBallVisuals(); } });
   m2Range.addEventListener('input', ()=>{ params.m2 = parseFloat(m2Range.value); syncLabels(); if(!running){ placeAtStart(); syncBallVisuals(); } });
+  m3Range.addEventListener('input', ()=>{ params.m3 = parseFloat(m3Range.value); syncLabels(); if(!running){ placeAtStart(); syncBallVisuals(); } });
   h1Range.addEventListener('input', ()=>{ params.h1 = parseFloat(h1Range.value); syncLabels(); rebuildTrack(); if(!running){ placeAtStart(); syncBallVisuals(); } });
   h2Range.addEventListener('input', ()=>{ params.h2 = parseFloat(h2Range.value); syncLabels(); rebuildTrack(); if(!running){ placeAtStart(); syncBallVisuals(); } });
   restRange.addEventListener('input', ()=>{ params.rest = parseFloat(restRange.value); syncLabels(); });
   gravRange.addEventListener('input', ()=>{ params.g = parseFloat(gravRange.value); syncLabels(); });
+  bgDarkRange.addEventListener('input', ()=>{ syncLabels(); applyBackgroundDarkness(parseFloat(bgDarkRange.value)); });
+  enable3Check.addEventListener('change', ()=>{
+    params.enable3 = enable3Check.checked;
+    m3ctrl.style.display = params.enable3 ? '' : 'none';
+    v3row.style.display = params.enable3 ? '' : 'none';
+    peak3row.style.display = params.enable3 ? '' : 'none';
+    if(!running){ placeAtStart(); syncBallVisuals(); }
+  });
 
   function addLog(text){
     const div = document.createElement('div');
@@ -637,7 +700,7 @@
     running = true;
     setControlsEnabled(false);
     resetBtn.disabled = false;
-    addLog('▶ بدأت المحاكاة — الكرتان تنزلقان من المزلقين.');
+    addLog('▶ بدأت المحاكاة.');
   });
 
   resetBtn.addEventListener('click', ()=>{
@@ -646,11 +709,12 @@
     el('collCount').textContent = '0';
     placeAtStart();
     syncBallVisuals();
-    ball1.mesh.rotation.set(0,0,0);
-    ball2.mesh.rotation.set(0,0,0);
     el('keBefore').textContent = '—';
     el('keAfter').textContent = '—';
     el('keDelta').textContent = '—';
+    el('peak1').textContent = '—';
+    el('peak2').textContent = '—';
+    el('peak3').textContent = '—';
     setControlsEnabled(true);
     logBox.innerHTML = '';
     addLog('↺ تمت إعادة الضبط.');
@@ -664,9 +728,36 @@
   const clock = new THREE.Clock();
 
   function stepPhysics(dt){
-    [ball1, ball2].forEach((b, idx)=>{
+    const activeBalls = [ball1, ball2, ball3];
+    const labels = ['الأولى','الثانية','الثالثة'];
+
+    activeBalls.forEach((b, idx)=>{
       if (b.stopped) return;
-      const m = idx===0 ? params.m1 : params.m2;
+      const ballLabel = labels[idx];
+
+      if (b.airborne){
+        // free projectile flight: no slope force, no friction, just gravity
+        b.vy -= params.g*dt;
+        b.x += b.vx*dt;
+        b.height += b.vy*dt;
+
+        const groundY = (b.x >= -GROUND_HALF && b.x <= GROUND_HALF)
+          ? terrainY(b.x, params.h1, params.h2)
+          : FLOOR_Y;
+        const landingLevel = groundY + b.r;
+        if (b.height <= landingLevel && b.vy < 0){
+          // landed
+          b.height = landingLevel;
+          b.airborne = false;
+          if (b.x < -GROUND_HALF || b.x > GROUND_HALF){
+            // landed beyond the track, on the distant floor - keep sliding horizontally
+            b.x = clamp(b.x, -GROUND_HALF*3, GROUND_HALF*3);
+          }
+          addLog('⬇ هبطت الكرة '+ballLabel+' بعد انفلاتها من المزلق.');
+        }
+        return;
+      }
+
       const slope = terrainSlope(b.x, params.h1, params.h2);
       const ax = -params.g*slope;
       b.vx += ax*dt;
@@ -680,64 +771,117 @@
 
       b.x += b.vx*dt;
 
-      // edge clamps (top of ramps)
+      // top-of-ramp: if the ball still has outward speed here, it has enough
+      // energy to clear the ramp's designated height, so let it fly off instead
+      // of pinning it to the edge
       const minX = -GROUND_HALF + b.r*0.9;
       const maxX = GROUND_HALF - b.r*0.9;
-      if (b.x < minX){ b.x = minX; if (b.vx < 0) b.vx = 0; }
-      if (b.x > maxX){ b.x = maxX; if (b.vx > 0) b.vx = 0; }
+      if (b.x < minX && b.vx < -1e-3){
+        const len = Math.sqrt(RAMP_LEN*RAMP_LEN + params.h1*params.h1);
+        const cosT = RAMP_LEN/len, sinT = params.h1/len;
+        b.x = minX;
+        b.height = terrainY(b.x, params.h1, params.h2) + b.r;
+        b.vy = Math.abs(b.vx)*sinT;
+        b.vx = b.vx*cosT;
+        b.airborne = true;
+        addLog('🚀 الكرة '+ballLabel+' امتلكت طاقة كافية وانفلتت فوق المزلق!');
+      } else if (b.x > maxX && b.vx > 1e-3){
+        const len = Math.sqrt(RAMP_LEN*RAMP_LEN + params.h2*params.h2);
+        const cosT = RAMP_LEN/len, sinT = params.h2/len;
+        b.x = maxX;
+        b.height = terrainY(b.x, params.h1, params.h2) + b.r;
+        b.vy = Math.abs(b.vx)*sinT;
+        b.vx = b.vx*cosT;
+        b.airborne = true;
+        addLog('🚀 الكرة '+ballLabel+' امتلكت طاقة كافية وانفلتت فوق المزلق!');
+      } else {
+        if (b.x < minX){ b.x = minX; if (b.vx < 0) b.vx = 0; }
+        if (b.x > maxX){ b.x = maxX; if (b.vx > 0) b.vx = 0; }
+      }
     });
 
-    // collision detection (1D along x)
-    const gap = ball2.x - ball1.x;
-    const minGap = ball1.r + ball2.r;
-    if (gap <= minGap && (ball1.vx - ball2.vx) > 0.01){
-      const m1 = params.m1, m2 = params.m2;
-      const u1 = ball1.vx, u2 = ball2.vx;
-      const e = params.rest;
-      const relSpeed = u1 - u2;
-      const keBefore = 0.5*m1*u1*u1 + 0.5*m2*u2*u2;
+    // collision detection (1D): only grounded, active balls can collide;
+    // sort by position and resolve each touching adjacent pair (handles 2 or 3 balls the same way)
+    const grounded = activeBalls
+      .map((b, idx)=>({ b, label: labels[idx] }))
+      .filter(o => !o.b.stopped && !o.b.airborne)
+      .sort((a, b) => a.b.x - b.b.x);
 
-      const v1 = (m1*u1 + m2*u2 + m2*e*(u2-u1)) / (m1+m2);
-      const v2 = (m1*u1 + m2*u2 + m1*e*(u1-u2)) / (m1+m2);
-      ball1.vx = v1; ball2.vx = v2;
-      const keAfter = 0.5*m1*v1*v1 + 0.5*m2*v2*v2;
-      const keDelta = keAfter - keBefore;
+    for (let i = 0; i < grounded.length - 1; i++){
+      const A = grounded[i].b, B = grounded[i+1].b;
+      const gap = B.x - A.x;
+      const minGap = A.r + B.r;
+      if (gap <= minGap && (A.vx - B.vx) > 0.01){
+        const m1 = A.m, m2 = B.m;
+        const u1 = A.vx, u2 = B.vx;
+        const e = params.rest;
+        const relSpeed = u1 - u2;
+        const keBefore = 0.5*m1*u1*u1 + 0.5*m2*u2*u2;
 
-      // separate to avoid sticking/overlap
-      const overlap = minGap - gap;
-      ball1.x -= overlap/2 + 0.001;
-      ball2.x += overlap/2 + 0.001;
+        const v1 = (m1*u1 + m2*u2 + m2*e*(u2-u1)) / (m1+m2);
+        const v2 = (m1*u1 + m2*u2 + m1*e*(u1-u2)) / (m1+m2);
+        A.vx = v1; B.vx = v2;
+        const keAfter = 0.5*m1*v1*v1 + 0.5*m2*v2*v2;
+        const keDelta = keAfter - keBefore;
 
-      collisionCount++;
-      el('collCount').textContent = String(collisionCount);
-      el('keBefore').textContent = keBefore.toFixed(2)+' J';
-      el('keAfter').textContent = keAfter.toFixed(2)+' J';
-      el('keDelta').textContent = (keDelta>=0?'+':'')+keDelta.toFixed(2)+' J';
+        // separate to avoid sticking/overlap
+        const overlap = minGap - gap;
+        A.x -= overlap/2 + 0.001;
+        B.x += overlap/2 + 0.001;
 
-      const intensity = clamp(relSpeed/8, 0, 1);
-      playCollisionSound(intensity);
+        collisionCount++;
+        if (collisionCount === 1) firstCollisionHappened = true;
+        el('collCount').textContent = String(collisionCount);
+        el('keBefore').textContent = keBefore.toFixed(2)+' J';
+        el('keAfter').textContent = keAfter.toFixed(2)+' J';
+        el('keDelta').textContent = (keDelta>=0?'+':'')+keDelta.toFixed(2)+' J';
 
-      addLog('💥 اصطدام رقم <b>'+collisionCount+'</b> — الطاقة: '+keBefore.toFixed(1)+' ← '+keAfter.toFixed(1)+' J (Δ='+keDelta.toFixed(1)+')');
+        const intensity = clamp(relSpeed/8, 0, 1);
+        playCollisionSound(intensity);
+
+        addLog('💥 اصطدام رقم <b>'+collisionCount+'</b> بين الكرة '+grounded[i].label+' والكرة '+grounded[i+1].label+' — الطاقة: '+keBefore.toFixed(1)+' ← '+keAfter.toFixed(1)+' J (Δ='+keDelta.toFixed(1)+')');
+      }
     }
 
     // rolling rotation (visual only)
-    [ball1, ball2].forEach(b=>{
-      if (Math.abs(b.vx) > 1e-4){
+    activeBalls.forEach(b=>{
+      if (!b.stopped && !b.airborne && Math.abs(b.vx) > 1e-4){
         b.mesh.rotation.z -= (b.vx*dt)/Math.max(b.r,0.01);
       }
     });
 
     positionBall(ball1, params.h1, params.h2);
     positionBall(ball2, params.h1, params.h2);
+    if (params.enable3) positionBall(ball3, params.h1, params.h2);
+
+    // track each ball's highest point reached since the first collision (for the readout panel)
+    if (firstCollisionHappened){
+      activeBalls.forEach(b=>{
+        if (b.stopped) return;
+        const currentHeight = b.airborne ? b.height : terrainY(b.x, params.h1, params.h2);
+        if (currentHeight > b.peakHeightAfterCollision) b.peakHeightAfterCollision = currentHeight;
+      });
+    }
   }
 
   function updateReadouts(){
     el('v1').textContent = ball1.vx.toFixed(2)+' m/s';
     el('v2').textContent = ball2.vx.toFixed(2)+' m/s';
-    const p = params.m1*ball1.vx + params.m2*ball2.vx;
-    const ke = 0.5*params.m1*ball1.vx*ball1.vx + 0.5*params.m2*ball2.vx*ball2.vx;
+    let p = params.m1*ball1.vx + params.m2*ball2.vx;
+    let ke = 0.5*params.m1*ball1.vx*ball1.vx + 0.5*params.m2*ball2.vx*ball2.vx;
+    if (params.enable3){
+      el('v3').textContent = ball3.vx.toFixed(2)+' m/s';
+      p += params.m3*ball3.vx;
+      ke += 0.5*params.m3*ball3.vx*ball3.vx;
+    }
     el('pTotal').textContent = p.toFixed(2)+' kg·m/s';
     el('keTotal').textContent = ke.toFixed(2)+' J';
+
+    if (firstCollisionHappened){
+      el('peak1').textContent = ball1.peakHeightAfterCollision.toFixed(2)+' m';
+      el('peak2').textContent = ball2.peakHeightAfterCollision.toFixed(2)+' m';
+      if (params.enable3) el('peak3').textContent = ball3.peakHeightAfterCollision.toFixed(2)+' m';
+    }
   }
 
   function animate(){
