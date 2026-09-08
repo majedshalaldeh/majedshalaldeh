@@ -150,6 +150,43 @@
             transition: transform 0.25s ease;
         }
 
+        /* القائمة المنسدلة الخاصة بكرات نيوتن */
+        .newton-select-label {
+            display: block;
+            width: 100%;
+            margin: 8px 0 8px;
+            color: var(--accent-orange);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .newton-select {
+            width: 100%;
+            max-width: 300px;
+            padding: 11px 14px;
+            border-radius: 9px;
+            border: 1px solid var(--accent-cyan);
+            background-color: #111b35;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            text-align: right;
+            transition: all 0.2s ease;
+        }
+
+        .newton-select:hover,
+        .newton-select:focus {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 2px rgba(247, 127, 0, 0.15);
+        }
+
+        .newton-select option {
+            background-color: #1c2541;
+            color: #ffffff;
+        }
+
 
         .collision-card h2 {
             margin: 0 0 12px 0;
@@ -209,7 +246,7 @@
                 <p>محاكاة تفاعلية لانزلاق كرتين على سطحين مائلين ثم تصادمهما معا، مع دراسة السرعات والزخم والطاقة وأنواع التصادم.</p>
                 <span class="tag">محاكاة تفاعلية</span>
             </a>
-            <a href="newton_cradle.html" class="collision-card">
+            <div class="collision-card">
                 <div class="icon newton-balls" aria-label="كرات نيوتن">
                     <span class="ball ball1"></span>
                     <span class="ball ball2"></span>
@@ -218,9 +255,18 @@
                     <span class="ball ball5"></span>
                 </div>
                 <h2>كرات نيوتن (Newton's Cradle)</h2>
-                <p>محاكاة تفاعلية لكرات نيوتن لدراسة حفظ الزخم والطاقة في التصادمات المرنة وانتقال الحركة بين الكرات.</p>
+                <p>اختر نموذج المحاكاة المناسب لدراسة حفظ الزخم والطاقة وانتقال الحركة بين الكرات.</p>
+
+                <label for="newtonCradleSelect" class="newton-select-label">اختر النموذج:</label>
+                <select id="newtonCradleSelect" class="newton-select"
+                        onchange="if(this.value) window.location.href=this.value;">
+                    <option value="">-- اختر المحاكاة --</option>
+                    <option value="newton_cradle.html">كرات نيوتن 2D</option>
+                    <option value="newton_cradle_3d.html">كرات نيوتن 3D</option>
+                </select>
+
                 <span class="tag">حفظ الزخم والطاقة</span>
-            </a>
+            </div>
 
             <a href="pend.html" class="collision-card">
                 <div class="icon">🏹🔴</div>
