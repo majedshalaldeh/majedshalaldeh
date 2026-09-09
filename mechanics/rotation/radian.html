@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مفهوم الراديان — طول القوس على نصف القطر</title>
+<style>
+  :root{
+    --bg-deep:#04070d;
+    --bg-panel:#0a1220;
+    --line:#1c2b3f;
+    --wire:#8fa7bf;
+    --field-cool:#3aa0ff;
+    --field-hot:#ff5a3c;
+    --amber:#ffb238;
+    --green:#8fe3a0;
+    --text:#dce8f5;
+    --text-dim:#7f95ab;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    background:radial-gradient(ellipse at 50% 20%, #0d1930 0%, var(--bg-deep) 65%);
+    font-family:'Courier New', 'Consolas', monospace;
+    color:var(--text);
+  }
+  #stage{position:fixed; top:150px; bottom:250px; left:0; right:0; display:flex; align-items:center; justify-content:center;}
+  svg{max-width:96%; max-height:100%;}
+
+  #title{
+    position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    text-align:center; pointer-events:none; z-index:5;
+  }
+  #title h1{
+    margin:0; font-size:22px; letter-spacing:4px; font-weight:700;
+    color:var(--text); text-transform:uppercase;
+    text-shadow:0 0 18px rgba(58,160,255,0.35);
+  }
+  #title p{
+    margin:8px 0 0; font-size:14px; letter-spacing:1px; color:var(--text-dim);
+  }
+  #title .credit{
+    margin:10px 0 0; font-size:14px; letter-spacing:1px; color:var(--amber);
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    direction:rtl;
+  }
+  #title .credit .dot{opacity:0.4; color:var(--text-dim);}
+  #title .credit .phone{direction:ltr; unicode-bidi:embed; color:var(--field-cool);}
+
+  #nav{
+    position:fixed; top:18px; right:20px; z-index:6;
+    display:flex; flex-direction:column; gap:8px; align-items:flex-end;
+  }
+  #nav a{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(10,18,32,0.85); border:1px solid var(--line);
+    color:var(--text); text-decoration:none;
+    font-family:inherit; font-size:14px; letter-spacing:0.5px;
+    padding:9px 16px; border-radius:2px;
+    transition:border-color 0.2s, color 0.2s, transform 0.15s;
+    white-space:nowrap;
+  }
+  #nav a:hover{border-color:var(--field-cool); color:var(--field-cool); transform:translateX(-2px);}
+  #nav a .arrow{font-size:16px; line-height:1;}
+  #nav a.home:hover{border-color:var(--amber); color:var(--amber);}
+
+  #explainBox{
+    position:fixed; top:150px; right:20px; z-index:5;
+    background:rgba(6,11,20,0.82); border:1px solid var(--line); border-radius:2px;
+    padding:16px 20px 18px; width:270px;
+  }
+  #explainBox h3{
+    margin:0 0 10px; font-size:12.5px; letter-spacing:2px; color:var(--text);
+    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;
+  }
+  #explainBox p{margin:0 0 10px; font-size:12.5px; line-height:1.8; color:var(--text-dim);}
+  #explainBox .formula{
+    text-align:center; font-size:16px; color:var(--amber); font-weight:700;
+    margin:12px 0; direction:ltr; letter-spacing:1px;
+  }
+  #explainBox .note{font-size:11px; color:var(--text-dim); line-height:1.6; opacity:0.8;}
+
+  #resultPanel{
+    position:fixed; top:150px; left:20px; z-index:5;
+    background:rgba(6,11,20,0.85); border:1px solid var(--line); border-radius:2px;
+    padding:16px 20px 18px; width:250px;
+  }
+  #resultPanel h3{
+    margin:0 0 10px; font-size:12.5px; letter-spacing:2px; color:var(--text);
+    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;
+  }
+  .rRow{display:flex; justify-content:space-between; align-items:baseline; font-size:13px; margin:8px 0; color:var(--text-dim);}
+  .rRow b{color:var(--field-cool); font-weight:700; direction:ltr;}
+  .rRow.highlight b{color:var(--amber); font-size:15px;}
+  .rRow.highlight{margin-top:12px; padding-top:10px; border-top:1px solid var(--line);}
+
+  #rulerBox{
+    position:fixed; bottom:190px; left:50%; transform:translateX(-50%);
+    width:min(640px, 92vw); z-index:5;
+    background:rgba(6,11,20,0.85); border:1px solid var(--line); border-radius:2px;
+    padding:12px 18px 14px;
+  }
+  #rulerBox .rlabel{font-size:11.5px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase; margin-bottom:8px;}
+  #rulerTrack{position:relative; height:34px; background:var(--line); border-radius:2px; overflow:visible;}
+  #rulerFill{position:absolute; top:0; left:0; height:100%; background:linear-gradient(90deg, var(--field-cool), var(--amber)); border-radius:2px; width:0%;}
+  .rTick{position:absolute; top:-4px; width:1px; height:42px; background:var(--text-dim); opacity:0.6;}
+  .rTickLabel{position:absolute; top:38px; font-size:10.5px; color:var(--text-dim); transform:translateX(50%); direction:ltr;}
+
+  #panel{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    width:min(640px, 94vw);
+    background:linear-gradient(180deg, rgba(10,18,32,0.92), rgba(6,11,20,0.96));
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:14px 22px 16px;
+    z-index:5;
+    box-shadow:0 0 0 1px rgba(58,160,255,0.05), 0 20px 50px rgba(0,0,0,0.6);
+  }
+  .ctrlHead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .ctrlHead .label{font-size:12.5px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase;}
+  .ctrlHead .val{font-size:18px; font-weight:700; color:var(--amber); direction:ltr; text-shadow:0 0 10px rgba(255,178,56,0.4);}
+  input[type="range"]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
+    background:linear-gradient(90deg, var(--field-cool), var(--line) 60%, var(--field-hot));
+    outline:none; margin:8px 0 4px; cursor:pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:var(--amber); border:2px solid #0a1220;
+    box-shadow:0 0 10px rgba(255,178,56,0.7); cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:14px; height:14px; border-radius:50%;
+    background:var(--amber); border:2px solid #0a1220;
+    box-shadow:0 0 10px rgba(255,178,56,0.7); cursor:pointer;
+  }
+  .row2{display:flex; gap:14px; margin-top:10px;}
+  .row2 > div{flex:1;}
+  .btnRow{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;}
+  .btnRow button{
+    flex:1; min-width:52px; font-family:inherit; font-size:12px; letter-spacing:0.3px;
+    padding:8px 4px; border-radius:2px; cursor:pointer;
+    border:1px solid var(--line); background:rgba(58,160,255,0.1); color:var(--field-cool);
+    transition:border-color 0.2s, color 0.2s;
+  }
+  .btnRow button:hover{border-color:var(--field-cool);}
+  .btnRow button.active{background:rgba(255,178,56,0.15); color:var(--amber); border-color:var(--amber);}
+  #playBtn{background:rgba(143,227,160,0.12); color:var(--green); border-color:var(--line);}
+  #playBtn:hover{border-color:var(--green);}
+  #playBtn.playing{background:rgba(255,90,60,0.12); color:var(--field-hot);}
+
+  @media (max-width:900px){
+    #explainBox, #resultPanel{display:none;}
+    #rulerBox{width:92vw; bottom:180px;}
+    #stage{bottom:220px;}
+  }
+  @media (max-width:640px){
+    #title h1{font-size:16px; letter-spacing:2px;}
+    #title p{font-size:11px;}
+    #nav a{font-size:11px; padding:7px 12px;}
+    #panel{padding:10px 14px 12px;}
+    .ctrlHead .val{font-size:15px;}
+    #stage{top:120px; bottom:195px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"><svg id="scene" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg"></svg></div>
+
+<div id="title">
+  <h1>مفهوم الراديان</h1>
+  <p>عندما يساوي طول القوس نصف القطر، تكون الزاوية المقابلة له راديانًا واحدًا</p>
+  <div class="credit">إعداد الأستاذ <span>ماجد شلالده</span><span class="dot">•</span><span class="phone">0599870176</span></div>
+</div>
+
+<!-- عدّل رابط href أدناه ليشير إلى ملف صفحتك الرئيسية -->
+<div id="nav">
+  <a class="home" href="../../index.html"><span class="arrow">⌂</span> العودة للصفحة الرئيسية</a>
+  <a class="field" href="rotation.html"><span class="arrow">↩</span> العودة للحركة الدورانية</a>
+</div>
+
+<div id="explainBox">
+  <h3>التعريف</h3>
+  <p>الراديان هو وحدة قياس الزاوية الناتجة عن "لف" طول نصف القطر r على محيط الدائرة، بدءًا من نقطة البداية.</p>
+  <div class="formula">θ (rad) = s / r</div>
+  <p>حيث s هو طول القوس (المسافة المقطوعة على المحيط) و r هو نصف القطر.</p>
+  <p class="note">حرّك المؤشر البرتقالي حول الدائرة، ولاحظ كيف تُطابق كل علامة قوس طوله r زاوية إضافية مقدارها راديان واحد بالضبط — بغض النظر عن حجم الدائرة.</p>
+  <p class="note">العصا الوردية توضّح الفكرة حرفيًا: جزء منها ملتصق بالفعل بالقوس (منحنٍ)، والجزء الباقي لا يزال مستقيمًا ممتدًا كمماس. راقبه يتقلص تدريجيًا حتى يختفي عند اكتمال راديان كامل، ثم تبدأ نسخة جديدة.</p>
+</div>
+
+<div id="resultPanel">
+  <h3>القراءات اللحظية</h3>
+  <div class="rRow"><span>الزاوية θ</span><b id="dRad">0.000 rad</b></div>
+  <div class="rRow"><span>بالتحويل إلى درجات</span><b id="dDeg">0.0°</b></div>
+  <div class="rRow"><span>طول القوس s = rθ</span><b id="dArc">0 px</b></div>
+  <div class="rRow"><span>عدد أنصاف الأقطار المطوية</span><b id="dCount">0.00</b></div>
+  <div class="rRow highlight"><span>نسبة الدورة الكاملة</span><b id="dTurn">0.0%</b></div>
+</div>
+
+<div id="rulerBox">
+  <div class="rlabel">القوس ممدودًا بالنسبة لطول نصف القطر r</div>
+  <div id="rulerTrack">
+    <div id="rulerFill"></div>
+  </div>
+</div>
+
+<div id="panel">
+  <div class="ctrlHead"><span class="label">الزاوية θ (بالراديان)</span><span class="val" id="thetaVal">0.000</span></div>
+  <input id="thetaSlider" type="range" min="0" max="6.2832" step="0.001" value="0">
+
+  <div class="row2">
+    <div>
+      <div class="ctrlHead"><span class="label">نصف القطر r (px)</span><span class="val" id="rVal">150</span></div>
+      <input id="rSlider" type="range" min="70" max="220" step="1" value="150">
+    </div>
+  </div>
+
+  <div class="btnRow">
+    <button data-t="0">0</button>
+    <button data-t="1.5708">π/2</button>
+    <button data-t="3.1416">π</button>
+    <button data-t="4.7124">3π/2</button>
+    <button data-t="6.2832">2π</button>
+    <button id="playBtn">تشغيل ▶</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById('scene');
+  const cx = 340, cy = 300;
+
+  function el(tag, attrs){
+    const e = document.createElementNS(NS, tag);
+    for(const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // static-ish elements we will keep references to
+  // logo watermark, clipped to the current circle — references the external logo.png
+  // (place logo.png in the same folder as this HTML file)
+  const defs = el('defs', {});
+  svg.appendChild(defs);
+  const logoClip = el('clipPath', {id:'logoClip'});
+  const logoClipCircle = el('circle', {cx, cy, r:150});
+  logoClip.appendChild(logoClipCircle);
+  defs.appendChild(logoClip);
+
+  const logoImage = el('image', {
+    x: cx-150, y: cy-150, width:300, height:300,
+    href:'logo.png', preserveAspectRatio:'xMidYMid slice',
+    'clip-path':'url(#logoClip)', opacity:0.5
+  });
+  logoImage.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', 'logo.png');
+  svg.appendChild(logoImage);
+
+  const circle = el('circle', {cx, cy, r:150, fill:'none', stroke:'#1c2b3f', 'stroke-width':2});
+  svg.appendChild(circle);
+
+  const centerDot = el('circle', {cx, cy, r:4, fill:'#7f95ab'});
+  svg.appendChild(centerDot);
+
+  // fixed reference radius (angle = 0), the "measuring stick"
+  const refLine = el('line', {x1:cx, y1:cy, x2:cx+150, y2:cy, stroke:'#ffb238', 'stroke-width':3, 'stroke-linecap':'round'});
+  svg.appendChild(refLine);
+  const refLabel = el('text', {x:0, y:0, fill:'#ffb238', 'font-size':15, 'font-family':'Courier New, monospace', 'text-anchor':'middle'});
+  refLabel.textContent = 'r';
+  svg.appendChild(refLabel);
+
+  // swept arc (polyline), representing s = r*theta
+  const arcPath = el('polyline', {points:'', fill:'none', stroke:'#3aa0ff', 'stroke-width':3, 'stroke-linecap':'round', opacity:0.3});
+  svg.appendChild(arcPath);
+
+  // rotating radius (current angle)
+  const rotLine = el('line', {x1:cx, y1:cy, x2:cx+150, y2:cy, stroke:'#3aa0ff', 'stroke-width':3, 'stroke-linecap':'round'});
+  svg.appendChild(rotLine);
+  const rotDot = el('circle', {cx:cx+150, cy, r:7, fill:'#3aa0ff'});
+  svg.appendChild(rotDot);
+
+  // group for integer-radian tick marks + labels (rebuilt each frame)
+  const tickGroup = el('g', {});
+  svg.appendChild(tickGroup);
+
+  // arc-length caption near the middle of the swept arc
+  const arcCaption = el('text', {x:0, y:0, fill:'#8fd4ff', 'font-size':13, 'font-family':'Courier New, monospace', 'text-anchor':'middle'});
+  svg.appendChild(arcCaption);
+
+  // group for the colored "measuring copies" — each completed piece is one full length of r,
+  // taken from the reference stick and pressed down onto the arc
+  const segGroup = el('g', {});
+  svg.appendChild(segGroup);
+  const segColors = ['#3aa0ff', '#8fe3a0'];
+
+  // the currently-peeling copy: the part still straight (not yet wrapped),
+  // sticking out tangent to the circle from the current tip
+  const peelColor = '#ff6fd8';
+  const remainderLine = el('line', {x1:0, y1:0, x2:0, y2:0, stroke:peelColor, 'stroke-width':4, 'stroke-linecap':'round', 'stroke-dasharray':'2,7', opacity:0});
+  svg.appendChild(remainderLine);
+  const remainderDot = el('circle', {cx:0, cy:0, r:5, fill:peelColor, opacity:0});
+  svg.appendChild(remainderDot);
+
+  function polar(r, angle){
+    return { x: cx + r*Math.cos(angle), y: cy - r*Math.sin(angle) };
+  }
+
+  function render(){
+    const r = parseFloat(rSlider.value);
+    const theta = parseFloat(thetaSlider.value);
+
+    circle.setAttribute('r', r);
+    logoClipCircle.setAttribute('r', r);
+    logoImage.setAttribute('x', cx-r);
+    logoImage.setAttribute('y', cy-r);
+    logoImage.setAttribute('width', 2*r);
+    logoImage.setAttribute('height', 2*r);
+
+    refLine.setAttribute('x2', cx + r);
+    refLine.setAttribute('y2', cy);
+    const refMid = polar(r*0.55, 0.14);
+    refLabel.setAttribute('x', refMid.x);
+    refLabel.setAttribute('y', refMid.y - 6);
+
+    const tip = polar(r, theta);
+    rotLine.setAttribute('x2', tip.x);
+    rotLine.setAttribute('y2', tip.y);
+    rotDot.setAttribute('cx', tip.x);
+    rotDot.setAttribute('cy', tip.y);
+
+    // sample the swept arc finely
+    const steps = Math.max(2, Math.round(theta*40));
+    let pts = [];
+    for(let i=0; i<=steps; i++){
+      const a = (theta*i)/steps;
+      const p = polar(r, a);
+      pts.push(p.x.toFixed(2)+','+p.y.toFixed(2));
+    }
+    arcPath.setAttribute('points', pts.join(' '));
+
+    // integer-radian tick marks along the swept arc
+    while(tickGroup.firstChild) tickGroup.removeChild(tickGroup.firstChild);
+    const maxTick = Math.floor(theta + 1e-6);
+    for(let n=1; n<=maxTick; n++){
+      const p = polar(r, n);
+      const pOut = polar(r+16, n);
+      const tick = el('line', {x1:p.x, y1:p.y, x2:pOut.x, y2:pOut.y, stroke:'#ffb238', 'stroke-width':2});
+      tickGroup.appendChild(tick);
+      const pLbl = polar(r+30, n);
+      const lbl = el('text', {x:pLbl.x, y:pLbl.y+4, fill:'#ffb238', 'font-size':12, 'font-family':'Courier New, monospace', 'text-anchor':'middle'});
+      lbl.textContent = n;
+      tickGroup.appendChild(lbl);
+    }
+
+    // colored "measuring copies": each completed 1-radian arc is one full length of r,
+    // taken from the reference stick and pressed down onto the curve
+    while(segGroup.firstChild) segGroup.removeChild(segGroup.firstChild);
+    const numCompleted = Math.floor(theta + 1e-9);
+    for(let i=1; i<=numCompleted; i++){
+      let segPts = [];
+      const segSteps = 16;
+      for(let j=0; j<=segSteps; j++){
+        const a = (i-1) + j/segSteps;
+        const p = polar(r, a);
+        segPts.push(p.x.toFixed(2)+','+p.y.toFixed(2));
+      }
+      const seg = el('polyline', {points:segPts.join(' '), fill:'none', stroke:segColors[(i-1)%2], 'stroke-width':7, 'stroke-linecap':'round'});
+      segGroup.appendChild(seg);
+      const mid = polar(r+30, i-0.5);
+      const segLbl = el('text', {x:mid.x, y:mid.y+4, fill:segColors[(i-1)%2], 'font-size':13, 'font-family':'Courier New, monospace', 'text-anchor':'middle'});
+      segLbl.textContent = 'r';
+      segGroup.appendChild(segLbl);
+    }
+
+    // the currently-peeling copy: the portion already pressed onto the arc (colored, curved)
+    // plus the remaining straight tangent tail — watch it shrink to zero as it finishes wrapping
+    const frac = theta - numCompleted;
+    if(frac > 1e-6 && numCompleted < 6){
+      let pts2 = [];
+      const s2 = 16;
+      for(let j=0; j<=s2; j++){
+        const a = numCompleted + (frac*j)/s2;
+        const p = polar(r, a);
+        pts2.push(p.x.toFixed(2)+','+p.y.toFixed(2));
+      }
+      const activeSeg = el('polyline', {points:pts2.join(' '), fill:'none', stroke:peelColor, 'stroke-width':7, 'stroke-linecap':'round'});
+      segGroup.appendChild(activeSeg);
+
+      const remainderLen = r*(1-frac);
+      const tx = -Math.sin(theta), ty = -Math.cos(theta);
+      remainderLine.setAttribute('x1', tip.x);
+      remainderLine.setAttribute('y1', tip.y);
+      remainderLine.setAttribute('x2', tip.x + remainderLen*tx);
+      remainderLine.setAttribute('y2', tip.y + remainderLen*ty);
+      remainderLine.setAttribute('opacity', 0.9);
+      remainderDot.setAttribute('cx', tip.x + remainderLen*tx);
+      remainderDot.setAttribute('cy', tip.y + remainderLen*ty);
+      remainderDot.setAttribute('opacity', 0.9);
+    } else {
+      remainderLine.setAttribute('opacity', 0);
+      remainderDot.setAttribute('opacity', 0);
+    }
+
+    // arc length caption
+    if(theta > 0.15){
+      const mid = polar(r*1.14, theta/2);
+      arcCaption.setAttribute('x', mid.x);
+      arcCaption.setAttribute('y', mid.y);
+      arcCaption.textContent = 's = ' + (r*theta).toFixed(0) + ' px';
+      arcCaption.setAttribute('opacity', 1);
+    } else {
+      arcCaption.setAttribute('opacity', 0);
+    }
+
+    // readouts
+    const deg = theta * 180 / Math.PI;
+    document.getElementById('dRad').textContent = theta.toFixed(3) + ' rad';
+    document.getElementById('dDeg').textContent = deg.toFixed(1) + '°';
+    document.getElementById('dArc').textContent = (r*theta).toFixed(0) + ' px';
+    document.getElementById('dCount').textContent = theta.toFixed(2) + ' × r';
+    document.getElementById('dTurn').textContent = ((theta/(2*Math.PI))*100).toFixed(1) + '%';
+
+    thetaVal.textContent = theta.toFixed(3);
+    rVal.textContent = r.toFixed(0);
+
+    // ruler
+    const turnFrac = Math.min(1, theta/(2*Math.PI));
+    rulerFill.style.width = (turnFrac*100) + '%';
+  }
+
+  // build ruler ticks once (positions are percentage-based, independent of r)
+  const rulerTrack = document.getElementById('rulerTrack');
+  const rulerFill = document.getElementById('rulerFill');
+  const fullTurn = 2*Math.PI;
+  for(let n=1; n<=6; n++){
+    const pct = Math.min(100, (n/fullTurn)*100);
+    const tick = document.createElement('div');
+    tick.className = 'rTick';
+    tick.style.right = pct + '%';
+    rulerTrack.appendChild(tick);
+    const label = document.createElement('div');
+    label.className = 'rTickLabel';
+    label.style.right = pct + '%';
+    label.textContent = n + 'r';
+    rulerTrack.appendChild(label);
+  }
+  const tick2pi = document.createElement('div');
+  tick2pi.className = 'rTick';
+  tick2pi.style.right = '100%';
+  tick2pi.style.background = '#ffb238';
+  rulerTrack.appendChild(tick2pi);
+
+  const thetaSlider = document.getElementById('thetaSlider');
+  const rSlider = document.getElementById('rSlider');
+  const thetaVal = document.getElementById('thetaVal');
+  const rVal = document.getElementById('rVal');
+
+  thetaSlider.addEventListener('input', render);
+  rSlider.addEventListener('input', render);
+
+  document.querySelectorAll('.btnRow button[data-t]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      thetaSlider.value = btn.getAttribute('data-t');
+      render();
+    });
+  });
+
+  // auto-play
+  let playing = false;
+  let lastTime = null;
+  const speed = 0.7; // rad/sec
+  const playBtn = document.getElementById('playBtn');
+
+  function tick(now){
+    if(!playing) return;
+    if(lastTime === null) lastTime = now;
+    const dt = (now - lastTime)/1000;
+    lastTime = now;
+    let t = parseFloat(thetaSlider.value) + speed*dt;
+    if(t > 6.2832){ t = 0; }
+    thetaSlider.value = t;
+    render();
+    requestAnimationFrame(tick);
+  }
+
+  playBtn.addEventListener('click', ()=>{
+    playing = !playing;
+    playBtn.textContent = playing ? 'إيقاف ⏸' : 'تشغيل ▶';
+    playBtn.classList.toggle('playing', playing);
+    if(playing){ lastTime = null; requestAnimationFrame(tick); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
