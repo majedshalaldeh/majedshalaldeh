@@ -58,7 +58,7 @@
 
 <div class="main-container">
     <div class="canvas-area">
-        <canvas id="c" width="1195" height="870"></canvas>
+        <canvas id="c" width="1195" height="675"></canvas>
     </div>
 
     <div class="control-panel">
@@ -111,10 +111,9 @@ const resultsList = document.getElementById('resultsList');
 const powerBtn = document.getElementById('powerBtn');
 
 // ---------- إعداد الشبكة (موسّعة لتملأ الشاشة) ----------
-const COLS = 18, ROWS = 13, SPACING = 65, MARGIN = 45;
+const COLS = 18, ROWS = 10, SPACING = 65, MARGIN = 45;
 // width = MARGIN*2 + (COLS-1)*SPACING = 90 + 17*65 = 1195
-// height = MARGIN*2 + (ROWS-1)*SPACING = 90 + 12*65 = 870
-// (تباعد أقل من هذا يبدأ بمزاحمة رموز المصباح/العدادات ونص القيم)
+// height = MARGIN*2 + (ROWS-1)*SPACING = 90 + 9*65 = 675
 // ملاحظة: أبعاد الكانفاس أدناه (1180×820) محسوبة لتطابق هذه القيم بالضبط:
 // width = MARGIN*2 + (COLS-1)*SPACING = 100 + 12*90 = 1180
 // height = MARGIN*2 + (ROWS-1)*SPACING = 100 + 8*90 = 820
