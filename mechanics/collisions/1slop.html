@@ -259,15 +259,15 @@
     <div class="title"><span class="dot b1"></span> الكرة الأولى (المزلق)</div>
     <div class="ctrl">
       <label>الكتلة <em id="m1val">1.0 kg</em></label>
-      <input type="range" id="m1" min="0.5" max="20" step="0.5" value="1">
+      <input type="range" id="m1" min="0.5" max="30" step="0.5" value="1">
     </div>
     <div class="ctrl">
       <label>ارتفاع المزلق <em id="h1val">3.0 m</em></label>
-      <input type="range" id="h1" min="0.5" max="5" step="0.1" value="3">
+      <input type="range" id="h1" min="0.5" max="10" step="0.1" value="3">
     </div>
     <div class="ctrl">
       <label>السرعة الابتدائية <em id="v1initval">0.0 m/s</em></label>
-      <input type="range" id="v1init" min="-10" max="10" step="0.5" value="0">
+      <input type="range" id="v1init" min="-20" max="20" step="0.5" value="0">
     </div>
   </div>
 
@@ -290,9 +290,9 @@
     </div>
     <div class="ctrl" id="m3ctrl" style="display:none;">
       <label>كتلة الكرة الثالثة <em id="m3val">1.0 kg</em></label>
-      <input type="range" id="m3" min="0.5" max="20" step="0.5" value="1">
+      <input type="range" id="m3" min="0.5" max="30" step="0.5" value="1">
       <label style="margin-top:6px;">السرعة الابتدائية <em id="v3initval">0.0 m/s</em></label>
-      <input type="range" id="v3init" min="-10" max="10" step="0.5" value="0">
+      <input type="range" id="v3init" min="-20" max="20" step="0.5" value="0">
     </div>
     <div class="action-btns">
       <button id="startBtn">▶ ابدأ المحاكاة</button>
@@ -305,11 +305,11 @@
     <div class="title"><span class="dot b2"></span> الكرة الثانية (على السطح)</div>
     <div class="ctrl">
       <label>الكتلة <em id="m2val">1.0 kg</em></label>
-      <input type="range" id="m2" min="0.5" max="20" step="0.5" value="1.5">
+      <input type="range" id="m2" min="0.5" max="30" step="0.5" value="1.5">
     </div>
     <div class="ctrl">
       <label>الموضع على السطح الأفقي <em id="pos2val">6.0 m</em></label>
-      <input type="range" id="pos2" min="-4" max="10" step="0.5" value="6">
+      <input type="range" id="pos2" min="-4" max="20" step="0.5" value="6">
     </div>
     <div class="ctrl">
       <label>السرعة الابتدائية <em id="v2initval">0.0 m/s</em></label>
@@ -515,7 +515,7 @@
   const logoTexture = logoTextureLoader.load(LOGO_DATA_URI);
   const logoRadius = Math.min(FLAT_HALF*0.55, TRACK_WIDTH*0.42);
   const logoGeo = new THREE.CircleGeometry(logoRadius, 48);
-  const logoMat = new THREE.MeshBasicMaterial({ map: logoTexture, transparent:true, depthWrite:false, side:THREE.DoubleSide });
+  const logoMat = new THREE.MeshBasicMaterial({ map: logoTexture, transparent:false, depthWrite:false, side:THREE.DoubleSide });
   const logoMesh = new THREE.Mesh(logoGeo, logoMat);
   logoMesh.rotation.x = -Math.PI/2;
   logoMesh.position.set(0, 0.01, 0); // just above the flat platform's top surface (y=0)
