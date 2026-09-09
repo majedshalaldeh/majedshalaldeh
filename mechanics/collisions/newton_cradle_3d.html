@@ -63,7 +63,7 @@ body.dark .hint{background:rgba(255,255,255,.08);color:#b9c6cc}
 <div class="toolbar">
   <button id="resetBtn" type="button">إعادة ضبط</button>
   <button id="playBtn" type="button">إيقاف</button>
-  <button id="themeBtn" type="button">خلفية داكنة</button>
+  <button id="themeBtn" type="button">خلفية فاتحة</button>
 </div>
 <div class="navigation">
   <button id="homeBtn" type="button">الرئيسية</button>
@@ -116,7 +116,7 @@ const scene=new THREE.Scene();
 
 const camera=new THREE.PerspectiveCamera(46,1,0.1,200);
 const target=new THREE.Vector3(0,3.6,0);
-let camTheta=0.28, camPhi=1.15, camRadius=24;
+let camTheta=0.28, camPhi=1.15, camRadius=20;
 function updateCamera(){
   camPhi=Math.max(0.25,Math.min(1.45,camPhi));
   camRadius=Math.max(14,Math.min(38,camRadius));
@@ -177,7 +177,7 @@ const THEME={
   light:{bg:0xeef3f6,fog:[0xeef3f6,30,60],ground:0xc3ced4,hemiSky:0xffffff,hemiGround:0xb9c6cc},
   dark:{bg:0x030405,fog:[0x030405,22,55],ground:0x14181c,hemiSky:0x9fb4c2,hemiGround:0x05070a}
 };
-let isDark=false;
+let isDark=true;
 function applyTheme(){
   const t=isDark?THEME.dark:THEME.light;
   scene.background=new THREE.Color(t.bg);
