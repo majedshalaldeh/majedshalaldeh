@@ -68,41 +68,34 @@
   .navBtn:hover{ background:#233254; border-color:#3a4b6e; }
 
   #logoBadgeWrap{
-    top:66px; right:16px; width:290px;
+    top:62px; right:16px; width:365px;
     display:flex; justify-content:center;
-    padding:10px 0;
+    padding:9px 0;
     background:transparent; border:none; backdrop-filter:none;
   }
   #logoBadgeImg{
-    width:112px; height:112px; border-radius:50%;
+    width:140px; height:140px; border-radius:50%;
     object-fit:cover;
     box-shadow:0 0 0 1px var(--line), 0 4px 18px rgba(0,0,0,0.45);
     background:#0b1220;
   }
 
   #panel{
-    top:206px; right:16px;
-    width:290px;
-    padding:14px 18px 18px;
-    max-height:calc(100vh - 222px);
+    top:222px; right:16px;
+    width:365px;
+    padding:15px 24px 18px;
+    max-height:calc(100vh - 238px);
     overflow-y:auto;
   }
 
-  #controlBar{
-    top:66px; left:16px;
-    width:190px;
-    padding:12px;
-  }
-  #controlBar .btn-row{margin-bottom:8px;}
-  #controlBar .btn-row:last-child{margin-bottom:0;}
   #panel .panelHead{
-    font-size:12px; color:var(--text-dim); margin:0 0 12px; font-weight:700;
+    font-size:16px; color:var(--text-dim); margin:0 0 9px; font-weight:700;
     text-align:center;
   }
-  .field{margin-bottom:12px;}
+  .field{margin-bottom:10px;}
   .field label{
     display:flex; justify-content:space-between; align-items:baseline;
-    font-size:12.5px; color:var(--text-dim); margin-bottom:5px;
+    font-size:16px; color:var(--text-dim); margin-bottom:3px;
   }
   .field label span.val{
     color:var(--accent);
@@ -112,33 +105,35 @@
   input[type=range]{
     width:100%;
     accent-color: var(--accent);
-    height:4px;
+    height:6px;
     cursor:pointer;
+    display:block;
+    margin:3px 0;
   }
-  .hint{font-size:10.5px; color:#5c6a80; margin-top:3px;}
+  .hint{font-size:12.5px; color:#5c6a80; margin-top:2px; line-height:1.3;}
 
-  .toggleRow{display:flex; gap:6px;}
+  .toggleRow{display:flex; gap:8px;}
   .toggleBtn{
-    flex:1; padding:7px 4px; border-radius:6px;
+    flex:1; padding:8px 6px; border-radius:7px;
     border:1px solid var(--line); background:#1b273f;
-    color:var(--text-dim); font-size:12px; font-weight:600;
+    color:var(--text-dim); font-size:15px; font-weight:600;
     cursor:pointer; font-family:inherit;
   }
   .toggleBtn.active{
     background:var(--accent); color:#241705; border-color:var(--accent);
   }
 
-  .divider{height:1px; background:var(--line); margin:14px 0;}
+  .divider{height:1px; background:var(--line); margin:10px 0;}
 
-  .btn-row{display:flex; gap:8px; margin-top:4px;}
+  .btn-row{display:flex; gap:10px; margin-top:4px;}
   button{
     flex:1;
-    padding:9px 8px;
-    border-radius:7px;
+    padding:11px 12px;
+    border-radius:8px;
     border:1px solid var(--line);
     background:#1b273f;
     color:var(--text);
-    font-size:12.5px;
+    font-size:16px;
     font-weight:600;
     cursor:pointer;
     font-family:inherit;
@@ -154,8 +149,10 @@
   button:disabled{ opacity:0.4; cursor:not-allowed; }
 
   #results{
-    bottom:16px; right:16px;
+    top:66px; left:16px;
     width:290px;
+    max-height:calc(100vh - 82px);
+    overflow-y:auto;
     padding:14px 18px;
     font-size:12.5px;
   }
@@ -184,9 +181,8 @@
   ::-webkit-scrollbar-thumb{background:#2c3a58; border-radius:4px;}
 
   @media (max-width: 720px){
-    #panel, #navBar, #logoBadgeWrap{width:min(84vw,290px);}
-    #results{width:min(84vw,290px); bottom:auto; top:calc(222px + 60vh); right:16px;}
-    #controlBar{width:min(40vw,190px);}
+    #panel, #navBar, #logoBadgeWrap{width:min(90vw,365px);}
+    #results{width:min(84vw,290px); max-height:40vh;}
     #titleBar .title{font-size:15px;}
   }
 </style>
@@ -209,18 +205,6 @@
 
 <div class="hud" id="logoBadgeWrap">
   <img id="logoBadgeImg" src="logo.png" alt="شعار الأستاذ ماجد شلالده">
-</div>
-
-<div class="hud" id="controlBar">
-  <div class="btn-row">
-    <button id="startBtn">ابدأ المحاكاة</button>
-  </div>
-  <div class="btn-row">
-    <button id="pauseBtn" disabled>إيقاف مؤقت</button>
-  </div>
-  <div class="btn-row">
-    <button id="resetBtn">إعادة الضبط</button>
-  </div>
 </div>
 
 <div class="hud" id="panel">
@@ -246,7 +230,7 @@
 
   <div class="field">
     <label>طول الخيط L <span class="val" id="valLen">1.50 م</span></label>
-    <input type="range" id="len" min="0.4" max="3" step="0.05" value="1.5">
+    <input type="range" id="len" min="0.4" max="6" step="0.05" value="1.5">
   </div>
 
   <div class="field">
@@ -255,24 +239,24 @@
   </div>
 
   <div class="field">
-    <label>تسارع الجاذبية g <span class="val" id="valG">9.80 م/ث²</span></label>
+    <label>تسارع الجاذبية g <span class="val" id="valG">9.80 m/s²</span></label>
     <input type="range" id="gravity" min="1" max="25" step="0.1" value="9.8">
   </div>
 
   <div class="field">
-    <label>كتلة الكرة الأولى m₁ <span class="val" id="valM1">1.0 كغم</span></label>
-    <input type="range" id="m1" min="0.1" max="10" step="0.1" value="1.0">
+    <label>كتلة الكرة الأولى m₁ <span class="val" id="valM1">1.0 kg</span></label>
+    <input type="range" id="m1" min="0.1" max="25" step="0.1" value="1.0">
   </div>
 
   <div class="field">
-    <label>كتلة الكرة الثانية m₂ <span class="val" id="valM2">1.0 كغم</span></label>
-    <input type="range" id="m2" min="0.1" max="10" step="0.1" value="1.0">
+    <label>كتلة الكرة الثانية m₂ <span class="val" id="valM2">1.0 kg</span></label>
+    <input type="range" id="m2" min="0.1" max="25" step="0.1" value="1.0">
   </div>
 
   <div class="field">
-    <label>سرعة الكرة الثانية v₂ <span class="val" id="valV2">0.00 م/ث</span></label>
-    <input type="range" id="v2" min="-3" max="3" step="0.1" value="0">
-    <div class="hint">موجب: تتحرك نحو اليمين — سالب: تتحرك نحو اليسار</div>
+    <label>سرعة الكرة الثانية v₂ <span class="val" id="valV2">0.00 m/s</span></label>
+    <input type="range" id="v2" min="-10" max="10" step="0.1" value="0">
+    <div class="hint">موجب: تتحرك نحو اليمين — سالب: تتحرك نحو اليسار. إن كانت مبتعدة عن الكرة الأولى بسرعة كبيرة، أو كانت في نفس جهة رفع البندول وساكنة/مبتعدة، فقد لا تلحق بها الكرة الأولى إطلاقًا (نتيجة منطقية).</div>
   </div>
 
   <div class="field">
@@ -286,7 +270,15 @@
     <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1">
   </div>
 
+  <div class="divider"></div>
 
+  <div class="btn-row">
+    <button id="startBtn">ابدأ المحاكاة</button>
+    <button id="pauseBtn" disabled>إيقاف مؤقت</button>
+  </div>
+  <div class="btn-row" style="margin-top:4px;">
+    <button id="resetBtn">إعادة الضبط</button>
+  </div>
 </div>
 
 <div class="hud empty" id="results">
@@ -322,17 +314,57 @@ function rk4Step(theta, omega, dt, L, g){
 function radiusFromMass(m){ return 0.16 + 0.09*Math.cbrt(m); }
 const GAP = 0.05; // small initial clearance so balls never start already touching
 
+function initialOmega(theta0deg, pendSign){
+  return theta0deg >= 170 ? -0.05*pendSign : 0;
+}
+
+// quick offline pass: how long until ball1 first reaches the bottom of its swing (theta=0)
+function estimateArrivalTime(theta0, omega0, L, g){
+  if (Math.abs(theta0) < 1e-9) return 0;
+  let theta = theta0, omega = omega0, t = 0, prevTheta = theta;
+  const dt = 1/300;
+  for (let steps=0; steps<80000; steps++){
+    prevTheta = theta;
+    const [nt, nw] = rk4Step(theta, omega, dt, L, g);
+    theta = nt; omega = nw; t += dt;
+    if ((prevTheta > 0 && theta <= 0) || (prevTheta < 0 && theta >= 0)) return t;
+  }
+  return t;
+}
+
 function buildScenario(params){
   const {L, theta0deg, g, m1, m2, v2, e, pendSign, ballSign} = params;
   const theta0 = pendSign * theta0deg * Math.PI/180;
   const R1 = radiusFromMass(m1);
   const R2 = radiusFromMass(m2);
-  const omega0 = theta0deg >= 170 ? -0.05*pendSign : 0;
+  const omega0 = initialOmega(theta0deg, pendSign);
+
+  // place ball2 so a real collision lands near the origin instead of far away.
+  //
+  // Opposite-side setup (ball2 on the side ball1 swings toward): ball2's
+  // resting spot is naturally far from ball1's launch point, so we can
+  // safely pre-shift it (when approaching) to arrive right on time.
+  //
+  // Same-side setup (ball2 on the same side ball1 is raised from): ball2's
+  // near-origin resting spot can sit almost touching ball1's own launch
+  // position (the balls are large), which caused a bogus instant "collision"
+  // at the release angle instead of at the bottom. Fix: start it clearly
+  // beyond ball1's maximum possible reach (L, reached at 90°) on that side,
+  // so ball1's own swing can never reach it while it isn't moving, and it
+  // only meets ball1 once it has actually travelled in.
+  const T = Math.max(estimateArrivalTime(theta0, omega0, L, g), 0.5);
+  const sameSide = (pendSign === ballSign);
+  const xMeetNear = ballSign*(R1+R2+GAP);
+  const xRestFar = ballSign*(L+R1+R2+0.3);
+  const approaching = (v2 * ballSign) <= 0;
+  const x2Init = sameSide
+    ? xRestFar
+    : (approaching ? (xMeetNear - v2*T) : xMeetNear);
 
   return {
     L, g, m1, m2, e, R1, R2,
     theta: theta0, omega: omega0,
-    x2: ballSign*(R1+R2+GAP), vx2: v2,
+    x2: x2Init, vx2: v2,
     contactActive: false,
     collisionCount: 0,
     lastEvent: null
@@ -518,7 +550,7 @@ new THREE.TextureLoader().load('logo.png', tex=>{
   floorLogoMat.map = tex;
   floorLogoMat.needsUpdate = true;
 });
-const floorLogo = new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.6), floorLogoMat);
+const floorLogo = new THREE.Mesh(new THREE.CircleGeometry(0.8, 64), floorLogoMat);
 floorLogo.rotation.x = -Math.PI/2;
 floorLogo.position.set(0, 0.003, 1.7);
 scene.add(floorLogo);
@@ -647,12 +679,12 @@ function currentParams(){
 }
 
 function refreshLabels(){
-  valEls.len.textContent = parseFloat(els.len.value).toFixed(2)+' م';
+  valEls.len.textContent = parseFloat(els.len.value).toFixed(2)+' m';
   valEls.angle.textContent = els.angle.value+'°';
-  valEls.gravity.textContent = parseFloat(els.gravity.value).toFixed(2)+' م/ث²';
-  valEls.m1.textContent = parseFloat(els.m1.value).toFixed(1)+' كغم';
-  valEls.m2.textContent = parseFloat(els.m2.value).toFixed(1)+' كغم';
-  valEls.v2.textContent = parseFloat(els.v2.value).toFixed(2)+' م/ث';
+  valEls.gravity.textContent = parseFloat(els.gravity.value).toFixed(2)+' m/s²';
+  valEls.m1.textContent = parseFloat(els.m1.value).toFixed(1)+' kg';
+  valEls.m2.textContent = parseFloat(els.m2.value).toFixed(1)+' kg';
+  valEls.v2.textContent = parseFloat(els.v2.value).toFixed(2)+' m/s';
   const eVal = parseFloat(els.e.value);
   valEls.e.textContent = eVal.toFixed(2)+(eVal>=0.99?' (مرن)':(eVal<=0.01?' (غير مرن)':''));
   valEls.speed.textContent = parseFloat(els.speed.value).toFixed(2)+'×';
@@ -670,10 +702,19 @@ function setStaticPreview(){
   const H = p.L + R2;
   buildArmAndPivot(H);
   const theta0 = p.pendSign*p.theta0deg*Math.PI/180;
+  const omega0 = initialOmega(p.theta0deg, p.pendSign);
   const x1 = p.L*Math.sin(theta0);
   const y1 = R2 + p.L*(1-Math.cos(theta0));
   ball1.position.set(x1,y1,0);
-  const x2 = p.ballSign*(R1+R2+GAP);
+  // mirror buildScenario's placement exactly, so ball2 never jumps when Start is pressed
+  const T = Math.max(estimateArrivalTime(theta0, omega0, p.L, p.g), 0.5);
+  const sameSide = (p.pendSign === p.ballSign);
+  const xMeetNear = p.ballSign*(R1+R2+GAP);
+  const xRestFar = p.ballSign*(p.L+R1+R2+0.3);
+  const approaching = (p.v2 * p.ballSign) <= 0;
+  const x2 = sameSide
+    ? xRestFar
+    : (approaching ? (xMeetNear - p.v2*T) : xMeetNear);
   ball2.position.set(x2, R2, 0);
   stringLine.geometry.setFromPoints([new THREE.Vector3(0,H,0), new THREE.Vector3(x1,y1,0)]);
 }
@@ -690,17 +731,17 @@ function updateResults(s){
   resultsPanel.classList.remove('empty');
   const ev = s.lastEvent;
   collisionCountEl.textContent = '#'+s.collisionCount;
-  document.getElementById('rV1before').textContent = fmt(ev.v1b)+' م/ث';
-  document.getElementById('rV2before').textContent = fmt(ev.v2b)+' م/ث';
-  document.getElementById('rV1after').textContent = fmt(ev.v1a)+' م/ث';
-  document.getElementById('rV2after').textContent = fmt(ev.v2a)+' م/ث';
+  document.getElementById('rV1before').textContent = fmt(ev.v1b)+' m/s';
+  document.getElementById('rV2before').textContent = fmt(ev.v2b)+' m/s';
+  document.getElementById('rV1after').textContent = fmt(ev.v1a)+' m/s';
+  document.getElementById('rV2after').textContent = fmt(ev.v2a)+' m/s';
   document.getElementById('rMomentum').textContent = fmt(ev.momentumBefore)+' / '+fmt(ev.momentumAfter)+' kg·m/s';
   document.getElementById('rEnergy').textContent = fmt(ev.keBefore)+' / '+fmt(ev.keAfter)+' J';
   if (ev.peak.fullLoop){
     document.getElementById('rPeakHeight').textContent = '≥ '+fmt(ev.peak.height)+' م (دوران كامل)';
     document.getElementById('rPeakAngle').textContent = 'يكمل دورة كاملة';
   } else {
-    document.getElementById('rPeakHeight').textContent = fmt(ev.peak.height)+' م';
+    document.getElementById('rPeakHeight').textContent = fmt(ev.peak.height)+' m';
     document.getElementById('rPeakAngle').textContent = fmt(ev.peak.angleDeg)+'° ('+ev.peakSide+')';
   }
 }
@@ -719,6 +760,14 @@ startBtn.addEventListener('click', ()=>{
   sim = buildScenario(p);
   rebuildBalls(sim.R1, sim.R2);
   buildArmAndPivot(sim.L + sim.R2);
+  // place the balls at their real starting positions immediately — don't
+  // wait for the next animation frame, or the brand-new meshes would sit
+  // at their default (0,0,0) spot for a moment first (visible as a jump,
+  // especially noticeable on a second run when timing lines up differently)
+  const p1 = ball1Pos(sim);
+  ball1.position.set(p1.x, p1.y, 0);
+  ball2.position.set(sim.x2, sim.R2, 0);
+  stringLine.geometry.setFromPoints([new THREE.Vector3(0, sim.L+sim.R2, 0), new THREE.Vector3(p1.x, p1.y, 0)]);
   clearResults();
   running = true;
   paused = false;
