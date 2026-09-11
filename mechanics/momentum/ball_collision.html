@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محاكاة تصادم الكرة</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --bg: #0d1117;
+    --bg-water: #071c20;
+    --panel: #131a24;
+    --panel-border: #223046;
+    --ink: #dce6f2;
+    --muted: #7f93ab;
+    --accent: #ff9f4a;
+    --floor: #3a5a7a;
+    --wall: #3a5a7a;
+    --water: #1f8f9a;
+    --line: #26364a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; background: var(--bg); font-family:'Segoe UI',Tahoma,sans-serif; color:var(--ink); overflow:hidden; }
+  #scene { position:absolute; inset:0; }
+
+  #rightColumn{
+    position:absolute; top:12px; right:12px; bottom:12px; width:305px;
+    display:flex; flex-direction:column; gap:10px; z-index:10;
+  }
+
+  #navButtons{ display:flex; gap:8px; }
+  #navButtons a{
+    flex:1; text-align:center; text-decoration:none;
+    background: var(--panel); color:var(--ink);
+    border:1px solid var(--panel-border); border-radius:8px;
+    padding:9px 6px; font-size:12px; font-weight:600;
+  }
+  #navButtons a:hover{ border-color:var(--accent); color:var(--accent); }
+
+  #logoTop{
+    align-self:center;
+    width:128px; height:128px; object-fit:contain;
+    background: var(--panel); border:1px solid var(--panel-border);
+    border-radius:50%; padding:8px;
+  }
+
+  #panel {
+    position:relative;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+  }
+  #panel::-webkit-scrollbar{ width:6px; }
+  #panel::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+
+  #panel .sub { font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.6; }
+
+  #topTitle{
+    position:absolute; top:14px; left:50%; transform:translateX(-50%);
+    text-align:center; z-index:10; pointer-events:none;
+  }
+  #topTitle h1{ font-size:20px; margin:0 0 4px 0; font-weight:700; color:var(--ink); }
+  #topTitle .author{ font-size:13px; color:var(--accent); font-weight:600; }
+
+  #statsPanel{
+    position:absolute; top:12px; left:12px; width:260px; height:auto; max-height:calc(100vh - 24px);
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    overflow-y: auto;
+  }
+  #statsPanel::-webkit-scrollbar{ width:6px; }
+  #statsPanel::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+  #statsPanel h2{ font-size:14px; margin:0 0 10px 0; font-weight:600; color:var(--ink); }
+
+  .section-title{ font-size:12px; color:var(--accent); margin:16px 0 4px 0; font-weight:600; border-top:1px solid var(--line); padding-top:12px; }
+  .section-title.first{ border-top:none; padding-top:0; }
+
+  label{ display:block; font-size:12px; color:var(--muted); margin-bottom:5px; margin-top:12px; }
+  label span.val{ color:var(--ink); font-weight:600; }
+
+  select, button, input[type=range]{ width:100%; font-family:inherit; }
+  select{ background:#0f1620; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-size:13px; }
+  input[type=range]{ accent-color: var(--accent); }
+
+  .row{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .row button{ flex:1 1 calc(50% - 4px); }
+  button{ background:var(--accent); color:#1a1005; border:none; border-radius:6px; padding:9px 0; font-size:13px; font-weight:600; cursor:pointer; }
+  button.secondary{ background:transparent; color:var(--ink); border:1px solid var(--line); font-weight:500; }
+  button:active{ transform:translateY(1px); }
+
+  #stats{ margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); line-height:1.95; }
+  #stats b{ color:var(--ink); font-weight:600; }
+  #stats .hide{ display:none; }
+  #stats .forces-title{ color:var(--accent); font-weight:600; display:block; margin-top:6px; }
+
+  #hint{ position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:11px; color:var(--muted); z-index:10; }
+
+  .modeblock{ display:none; }
+  .modeblock.active{ display:block; }
+</style>
+</head>
+<body>
+
+<div id="scene"></div>
+
+<div id="topTitle">
+  <h1>محاكاة تصادم الكرة</h1>
+  <div class="author">إعداد الأستاذ : ماجد شلالدة</div>
+</div>
+
+<div id="rightColumn">
+  <div id="navButtons">
+    <!-- عدّل الروابط التالية لتطابق صفحات موقعك -->
+    <a href="../../index.html">الصفحة الرئيسية</a>
+    <a href="momentum.html">العودة لصفحة الزخم الخطي</a>
+  </div>
+  <img id="logoTop" src="logo.png" alt="شعار الأستاذ ماجد شلالدة">
+
+  <div id="panel">
+    <div class="sub">اختر السطح واضبط المتغيرات، ثم اضغط إطلاق.</div>
+
+    <label>نوع السطح</label>
+    <select id="surface">
+      <option value="floor">أرضية (سقوط عمودي)</option>
+      <option value="ceiling">سقف (صعود عمودي)</option>
+      <option value="wall">جدار رأسي (سطح ملساء)</option>
+      <option value="water">ماء (سقوط + غرق)</option>
+    </select>
+
+  <div class="section-title first">بيئة المحاكاة</div>
+  <label>تسارع الجاذبية (m/s²) — <span class="val" id="valGravity">9.8</span></label>
+  <input type="range" id="gravity" min="1" max="25" step="0.1" value="9.8">
+
+  <label>كتلة الكرة (kg) — <span class="val" id="valMass">1.0</span></label>
+  <input type="range" id="mass" min="0.1" max="10" step="0.1" value="1">
+
+  <label>زمن التصادم / مدة الارتطام البصرية للأسطح الصلبة (ms) — <span class="val" id="valColl">150</span></label>
+  <input type="range" id="collisionDuration" min="0" max="400" step="10" value="150">
+
+  <!-- ===== سقوط عمودي (أرضية / ماء) ===== -->
+  <div id="ctrl-fall" class="modeblock">
+    <div class="section-title">حركة السقوط العمودي</div>
+
+    <div id="floorHeightBlock" class="modeblock">
+      <label>الارتفاع عن سطح الأرض (m) — <span class="val" id="valHeight">8</span></label>
+      <input type="range" id="fallHeight" min="1" max="19" step="0.5" value="8">
+    </div>
+
+    <label>السرعة الابتدائية للأسفل (m/s) — <span class="val" id="valV0">0</span></label>
+    <input type="range" id="fallV0" min="0" max="15" step="0.5" value="0">
+
+    <label>السرعة بعد الاصطدام (٪ من سرعة الاصطدام) — <span class="val" id="valFallRest">78</span>%</label>
+    <input type="range" id="fallRest" min="0" max="100" step="1" value="78">
+
+    <div id="ctrl-water-extra" class="modeblock">
+      <label>الارتفاع عن سطح الماء (m) — <span class="val" id="valWaterHeight">6</span></label>
+      <input type="range" id="waterHeight" min="0.5" max="15" step="0.5" value="6">
+
+      <label>عمق سطح الماء عن الأرض (m) — <span class="val" id="valWaterDepth">4</span></label>
+      <input type="range" id="waterDepth" min="2" max="8" step="0.5" value="4">
+
+      <label>زمن التصادم/الدخول إلى الماء (ms) — <span class="val" id="valWaterColl">300</span></label>
+      <input type="range" id="waterCollDur" min="0" max="800" step="20" value="300">
+    </div>
+  </div>
+
+  <!-- ===== صعود عمودي (سقف) ===== -->
+  <div id="ctrl-rise" class="modeblock">
+    <div class="section-title">حركة الصعود العمودي</div>
+    <label>ارتفاع السقف عن الأرض (m) — <span class="val" id="valCeil">14</span></label>
+    <input type="range" id="ceilHeight" min="4" max="19" step="0.5" value="14">
+
+    <label>السرعة الابتدائية للأعلى (m/s) — <span class="val" id="valRiseV0">10</span></label>
+    <input type="range" id="riseV0" min="1" max="15" step="0.5" value="10">
+
+    <label>السرعة بعد الاصطدام (٪ من سرعة الاصطدام) — <span class="val" id="valCeilRest">70</span>%</label>
+    <input type="range" id="ceilRest" min="20" max="100" step="1" value="70">
+  </div>
+
+  <!-- ===== جدار رأسي ===== -->
+  <div id="ctrl-wall" class="modeblock">
+    <div class="section-title">حركة على أرضية ملساء (بلا احتكاك)</div>
+    <label>السرعة الابتدائية (m/s) — <span class="val" id="valWallSpeed">8</span></label>
+    <input type="range" id="wallSpeed" min="1" max="15" step="0.5" value="8">
+
+    <label>زاوية السقوط عن العمود القائم (الناظم) على مستوى الجدار (°) — <span class="val" id="valWallAngle">30</span></label>
+    <input type="range" id="wallAngle" min="-75" max="75" step="1" value="30">
+
+    <label>السرعة بعد الاصطدام (٪ من السرعة قبل الاصطدام) — <span class="val" id="valWallRest">100</span>%</label>
+    <input type="range" id="wallRest" min="30" max="100" step="1" value="100">
+  </div>
+
+  <div class="row">
+    <button id="launchBtn">إطلاق</button>
+    <button id="stopBtn" class="secondary">إيقاف</button>
+    <button id="resumeBtn" class="secondary">استئناف</button>
+    <button id="resetBtn" class="secondary">إعادة ضبط</button>
+  </div>
+  </div>
+</div>
+
+<div id="statsPanel">
+  <h2>القراءات الحية</h2>
+  <div id="stats">
+    الحالة: <b id="stState">جاهز</b><br>
+    السرعة الحالية: <b id="stSpeed">0.00</b> m/s<br>
+    سرعة الاصطدام: <b id="stImpact">—</b> m/s<br>
+    السرعة بعد آخر ارتداد: <b id="stPost">—</b> m/s<br>
+    الدفع عند الاصطدام: <b id="stImpulse">—</b> kg·m/s<br>
+    قوة السطح على الكرة أثناء الاصطدام: <b id="stSurfaceForce">—</b> N<br>
+    <span id="row-depth" class="hide">العمق تحت سطح الماء: <b id="stDepth">—</b> m<br></span>
+    <span id="row-angles" class="hide">زاوية السقوط: <b id="stAngleIn">—</b>° | زاوية الانعكاس: <b id="stAngleOut">—</b>°<br></span>
+    <span id="row-forces" class="hide">
+      <span class="forces-title">القوى المؤثرة على الكرة داخل الماء (بإهمال قوة اللزوجة)</span>
+      الوزن (mg): <b id="fWeight">—</b> N<br>
+      قوة الطفو: <b id="fBuoy">—</b> N<br>
+      القوة المحصلة: <b id="fNet">—</b> N<br>
+    </span>
+    عدد الارتدادات: <b id="stBounces">0</b>
+  </div>
+
+  <div style="margin-top:10px; font-size:11px; color:var(--muted); line-height:1.8;">
+    <span style="color:#ff5a5a;">■</span> الوزن &nbsp;
+    <span style="color:#4dd2ff;">■</span> الطفو &nbsp;
+    <span style="color:#ffd24d;">■</span> قوة السطح أثناء التصادم<br>
+    <span style="color:#b388ff;">■</span> مسار قبل الاصطدام &nbsp;
+    <span style="color:#ff8a3d;">■</span> مسار بعد الاصطدام
+  </div>
+</div>
+
+<div id="hint">اسحب الفأرة لتدوير المشهد — عجلة الفأرة للتقريب</div>
+
+<script>
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hexToInt = h => parseInt(h.replace('#',''),16);
+
+const COLOR = {
+  bg: hexToInt(cssVar('--bg')),
+  bgWater: hexToInt(cssVar('--bg-water')),
+  floor: hexToInt(cssVar('--floor')),
+  wall: hexToInt(cssVar('--wall')),
+  water: hexToInt(cssVar('--water')),
+  accent: hexToInt(cssVar('--accent')),
+  line: hexToInt(cssVar('--line')),
+};
+
+const ROOM = 10;
+const floorY = -ROOM;
+const R = 0.5;
+
+let scene, camera, renderer, ball, surfaces = {};
+let arrows = {};
+let lines = {};
+let angleX = 0.45, angleY = 0.7, dist = 26;
+let dragging = false, lastX=0, lastY=0;
+
+const state = {
+  mode: 'floor',
+  pos: new THREE.Vector3(0, floorY+8, 0),
+  vel: new THREE.Vector3(0,0,0),
+  running: false,
+  bounces: 0,
+  submerged: false,
+  lastImpact: null,
+  lastPost: null,
+  lastImpulse: null,
+  lastSurfaceForce: null,
+  angleIn: null,
+  angleOut: null,
+  squashTimer: 0,
+  squashDurTotal: 0,
+  waterEntryTimer: 0,
+  waterEntryTotal: 0,
+  forceWeight: null,
+  forceBuoy: null,
+  forceNet: null,
+  trailBefore: [],
+  trailAfter: []
+};
+
+const el = id => document.getElementById(id);
+
+function initScene(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(COLOR.bg);
+  scene.fog = new THREE.Fog(COLOR.bg, 28, 62);
+
+  camera = new THREE.PerspectiveCamera(48, window.innerWidth/window.innerHeight, 0.1, 220);
+  updateCamera();
+
+  renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  el('scene').appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  dir.position.set(10,20,10); scene.add(dir);
+  const dir2 = new THREE.DirectionalLight(0x88aaff, 0.3);
+  dir2.position.set(-10,5,-10); scene.add(dir2);
+
+  const grid = new THREE.GridHelper(ROOM*2, 18, COLOR.line, COLOR.line);
+  grid.position.y = floorY;
+  scene.add(grid);
+
+  const matFloor = new THREE.MeshStandardMaterial({ color:COLOR.floor, roughness:0.85, transparent:true, opacity:0.9 });
+  const matWaterSurface = new THREE.MeshStandardMaterial({ color:COLOR.water, roughness:0.1, metalness:0.15, transparent:true, opacity:0.55 });
+  const matWaterBody = new THREE.MeshStandardMaterial({ color:COLOR.water, roughness:0.2, metalness:0.05, transparent:true, opacity:0.32, depthWrite:false });
+  const planeGeo = new THREE.PlaneGeometry(ROOM*2, ROOM*2);
+
+  surfaces.floor = new THREE.Mesh(planeGeo, matFloor);
+  surfaces.floor.rotation.x = -Math.PI/2;
+  surfaces.floor.position.y = floorY;
+
+  surfaces.ceiling = new THREE.Mesh(planeGeo, matFloor);
+  surfaces.ceiling.rotation.x = Math.PI/2;
+  surfaces.ceiling.position.y = floorY + parseFloat(el('ceilHeight').value);
+
+  surfaces.wall = new THREE.Mesh(planeGeo, matFloor);
+  surfaces.wall.position.z = -ROOM;
+
+  surfaces.water = new THREE.Mesh(planeGeo, matWaterSurface);
+  surfaces.water.rotation.x = -Math.PI/2;
+  surfaces.water.position.y = floorY + parseFloat(el('waterDepth').value);
+
+  const waterBodyGeo = new THREE.BoxGeometry(ROOM*2-0.6, 1, ROOM*2-0.6);
+  surfaces.waterBody = new THREE.Mesh(waterBodyGeo, matWaterBody);
+
+  surfaces.baseFloor = new THREE.Mesh(planeGeo, matFloor);
+  surfaces.baseFloor.rotation.x = -Math.PI/2;
+  surfaces.baseFloor.position.y = floorY;
+
+  const rimMat = new THREE.MeshStandardMaterial({ color:COLOR.floor, roughness:0.9 });
+  const rimGeo = new THREE.BoxGeometry(ROOM*2, 0.4, 0.3);
+  surfaces.poolRim = new THREE.Group();
+  const positions = [
+    { x:0, z:-(ROOM-0.15), ry:0 },
+    { x:0, z:(ROOM-0.15), ry:0 },
+    { x:-(ROOM-0.15), z:0, ry:Math.PI/2 },
+    { x:(ROOM-0.15), z:0, ry:Math.PI/2 },
+  ];
+  positions.forEach(p=>{
+    const seg = new THREE.Mesh(rimGeo, rimMat);
+    seg.position.set(p.x, floorY+0.2, p.z);
+    seg.rotation.y = p.ry;
+    surfaces.poolRim.add(seg);
+  });
+
+  repositionWaterBodyGeom();
+
+  Object.values(surfaces).forEach(s=> scene.add(s));
+
+  const edgesGeo = new THREE.BoxGeometry(ROOM*2, ROOM*2, ROOM*2);
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(edgesGeo), new THREE.LineBasicMaterial({ color:COLOR.line }));
+  scene.add(edges);
+
+  const ballGeo = new THREE.SphereGeometry(R, 32, 32);
+  const ballMat = new THREE.MeshStandardMaterial({ color:0xe63030, roughness:0.35, metalness:0.15 });
+  ball = new THREE.Mesh(ballGeo, ballMat);
+  scene.add(ball);
+
+  // ===== أسهم القوى المؤثرة =====
+  arrows.weight  = new THREE.ArrowHelper(new THREE.Vector3(0,-1,0), new THREE.Vector3(), 1, 0xff5a5a, 0.35, 0.22);
+  arrows.buoy    = new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(), 1, 0x4dd2ff, 0.35, 0.22);
+  arrows.contact = new THREE.ArrowHelper(new THREE.Vector3(0,1,0), new THREE.Vector3(), 1, 0xffd24d, 0.35, 0.22);
+  Object.values(arrows).forEach(a=>{ a.visible=false; scene.add(a); });
+
+  // ===== مسارات الحركة قبل/بعد اصطدام الجدار =====
+  lines.before = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color:0xb388ff }));
+  lines.after  = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color:0xff8a3d }));
+  lines.before.visible = false;
+  lines.after.visible = false;
+  scene.add(lines.before, lines.after);
+
+  // ===== شعار دائري مطبوع على الأرضية =====
+  const logoTexture = new THREE.TextureLoader().load('logo.png');
+  const logoMat = new THREE.MeshStandardMaterial({ map:logoTexture, transparent:true, roughness:0.6, depthWrite:false });
+  const logoGeo = new THREE.CircleGeometry(4.4, 48);
+  surfaces.logoFloor = new THREE.Mesh(logoGeo, logoMat);
+  surfaces.logoFloor.rotation.x = -Math.PI/2;
+  surfaces.logoFloor.position.set(0, floorY+0.02, 0);
+  scene.add(surfaces.logoFloor);
+
+  updateSurfaceVisibility();
+  positionBallForMode();
+  window.addEventListener('resize', onResize);
+  attachMouseControls();
+}
+
+function repositionWaterBodyGeom(){
+  const waterY = floorY + parseFloat(el('waterDepth').value);
+  const h = Math.max(0.1, waterY - floorY);
+  surfaces.waterBody.scale.y = h;
+  surfaces.waterBody.position.y = floorY + h/2;
+}
+
+function updateCamera(){
+  camera.position.x = dist*Math.sin(angleY)*Math.cos(angleX);
+  camera.position.y = dist*Math.sin(angleX) + 2;
+  camera.position.z = dist*Math.cos(angleY)*Math.cos(angleX);
+  camera.lookAt(0,0,0);
+}
+
+function attachMouseControls(){
+  const dom = renderer.domElement;
+  dom.addEventListener('mousedown', e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; });
+  window.addEventListener('mouseup', ()=>dragging=false);
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const dx=e.clientX-lastX, dy=e.clientY-lastY;
+    angleY -= dx*0.006;
+    angleX = Math.max(-1.3, Math.min(1.3, angleX+dy*0.006));
+    lastX=e.clientX; lastY=e.clientY;
+    updateCamera();
+  });
+  dom.addEventListener('wheel', e=>{
+    dist = Math.max(12, Math.min(55, dist+e.deltaY*0.02));
+    updateCamera();
+  }, {passive:true});
+  dom.addEventListener('touchstart', e=>{ dragging=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }, {passive:true});
+  dom.addEventListener('touchend', ()=>dragging=false);
+  dom.addEventListener('touchmove', e=>{
+    if(!dragging) return;
+    const dx=e.touches[0].clientX-lastX, dy=e.touches[0].clientY-lastY;
+    angleY -= dx*0.006;
+    angleX = Math.max(-1.3, Math.min(1.3, angleX+dy*0.006));
+    lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    updateCamera();
+  }, {passive:true});
+}
+
+function onResize(){
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function updateSurfaceVisibility(){
+  surfaces.floor.visible = state.mode==='floor';
+  surfaces.ceiling.visible = state.mode==='ceiling';
+  surfaces.wall.visible = state.mode==='wall';
+  surfaces.water.visible = state.mode==='water';
+  surfaces.waterBody.visible = state.mode==='water';
+  surfaces.poolRim.visible = state.mode==='water';
+  surfaces.baseFloor.visible = (state.mode==='wall' || state.mode==='water');
+}
+
+function repositionSurfaces(){
+  surfaces.ceiling.position.y = floorY + parseFloat(el('ceilHeight').value);
+  surfaces.water.position.y = floorY + parseFloat(el('waterDepth').value);
+  repositionWaterBodyGeom();
+}
+
+function updateModeBlocksUI(){
+  document.querySelectorAll('.modeblock').forEach(b=>b.classList.remove('active'));
+  if(state.mode==='floor' || state.mode==='water'){
+    el('ctrl-fall').classList.add('active');
+    if(state.mode==='water'){
+      el('ctrl-water-extra').classList.add('active');
+    } else {
+      el('floorHeightBlock').classList.add('active');
+    }
+  } else if(state.mode==='ceiling'){
+    el('ctrl-rise').classList.add('active');
+  } else if(state.mode==='wall'){
+    el('ctrl-wall').classList.add('active');
+  }
+  el('row-depth').classList.toggle('hide', state.mode!=='water');
+  el('row-angles').classList.toggle('hide', state.mode!=='wall');
+  el('row-forces').classList.toggle('hide', state.mode!=='water');
+}
+
+// يحسب موضع بداية الكرة أفقياً بحيث تصل إلى منتصف الجدار تماماً وفق زاوية السقوط
+function wallStartPosition(){
+  const angDeg = parseFloat(el('wallAngle').value);
+  const ang = angDeg*Math.PI/180;
+  const startZ = ROOM-2;
+  const travel = startZ - (-ROOM+R);
+  let startX = -travel*Math.tan(ang);
+  startX = Math.max(-(ROOM-R), Math.min(ROOM-R, startX));
+  return new THREE.Vector3(startX, floorY+R, startZ);
+}
+
+function positionBallForMode(){
+  state.vel.set(0,0,0);
+  state.bounces = 0;
+  state.running = false;
+  state.submerged = false;
+  state.lastImpact = null;
+  state.lastPost = null;
+  state.lastImpulse = null;
+  state.lastSurfaceForce = null;
+  state.angleIn = null;
+  state.angleOut = null;
+  state.waterEntryTimer = 0;
+  state.waterEntryTotal = 0;
+  state.waterEntryVStart = 0;
+  state.waterEntryVTarget = 0;
+  state.waterEntryImpulseDone = false;
+  state.forceWeight = null;
+  state.forceBuoy = null;
+  state.forceNet = null;
+  state.trailBefore = [];
+  state.trailAfter = [];
+  ball.scale.set(1,1,1);
+
+  if(state.mode==='floor'){
+    const h = parseFloat(el('fallHeight').value);
+    state.pos.set(0, floorY+h, 0);
+  } else if(state.mode==='water'){
+    const waterY = floorY + parseFloat(el('waterDepth').value);
+    const h = parseFloat(el('waterHeight').value);
+    state.pos.set(0, waterY+h, 0);
+  } else if(state.mode==='ceiling'){
+    state.pos.set(0, floorY+R, 0);
+  } else if(state.mode==='wall'){
+    state.pos.copy(wallStartPosition());
+  }
+  ball.position.copy(state.pos);
+  setUnderwaterVisual(false);
+  updateStatsUI();
+}
+
+function launch(){
+  state.running = true;
+  state.bounces = 0;
+  state.lastImpact = null;
+  state.lastPost = null;
+  state.lastImpulse = null;
+  state.lastSurfaceForce = null;
+  state.angleIn = null;
+  state.angleOut = null;
+  state.submerged = false;
+  state.waterEntryTimer = 0;
+  state.waterEntryImpulseDone = false;
+  state.trailBefore = [];
+  state.trailAfter = [];
+
+  if(state.mode==='floor'){
+    const h = parseFloat(el('fallHeight').value);
+    const v0 = parseFloat(el('fallV0').value);
+    state.pos.set(0, floorY+h, 0);
+    state.vel.set(0, -v0, 0);
+  } else if(state.mode==='water'){
+    const waterY = floorY + parseFloat(el('waterDepth').value);
+    const h = parseFloat(el('waterHeight').value);
+    const v0 = parseFloat(el('fallV0').value);
+    state.pos.set(0, waterY+h, 0);
+    state.vel.set(0, -v0, 0);
+  } else if(state.mode==='ceiling'){
+    const v0 = parseFloat(el('riseV0').value);
+    state.pos.set(0, floorY+R, 0);
+    state.vel.set(0, v0, 0);
+  } else if(state.mode==='wall'){
+    const speed = parseFloat(el('wallSpeed').value);
+    const angDeg = parseFloat(el('wallAngle').value);
+    const ang = angDeg*Math.PI/180;
+    state.pos.copy(wallStartPosition());
+    state.vel.set(speed*Math.sin(ang), 0, -speed*Math.cos(ang));
+  }
+  el('stState').textContent = 'تعمل...';
+}
+
+function triggerSquash(customMs){
+  const dur = customMs!==undefined ? customMs : parseFloat(el('collisionDuration').value);
+  state.squashDurTotal = dur;
+  state.squashTimer = dur;
+}
+
+function setUnderwaterVisual(on){
+  if(on){
+    scene.fog.color.setHex(COLOR.bgWater);
+    scene.background.setHex(COLOR.bgWater);
+  } else {
+    scene.fog.color.setHex(COLOR.bg);
+    scene.background.setHex(COLOR.bg);
+  }
+}
+
+function updateStatsUI(){
+  el('stSpeed').textContent = state.vel.length().toFixed(2);
+  el('stImpact').textContent = state.lastImpact!==null ? state.lastImpact.toFixed(2) : '—';
+  el('stPost').textContent = state.lastPost!==null ? state.lastPost.toFixed(2) : '—';
+  el('stImpulse').textContent = state.lastImpulse!==null ? state.lastImpulse.toFixed(2) : '—';
+  el('stSurfaceForce').textContent = state.lastSurfaceForce!==null ? state.lastSurfaceForce.toFixed(2) : '—';
+  el('stBounces').textContent = state.bounces;
+  if(state.mode==='water'){
+    const waterY = floorY + parseFloat(el('waterDepth').value);
+    const depth = state.submerged ? Math.max(0, waterY-state.pos.y) : 0;
+    el('stDepth').textContent = state.submerged ? depth.toFixed(2) : '—';
+    el('fWeight').textContent = state.forceWeight!==null ? state.forceWeight.toFixed(2) : '—';
+    el('fBuoy').textContent = state.forceBuoy!==null ? state.forceBuoy.toFixed(2) : '—';
+    el('fNet').textContent = state.forceNet!==null ? state.forceNet.toFixed(2) : '—';
+  }
+  if(state.mode==='wall'){
+    el('stAngleIn').textContent = state.angleIn!==null ? state.angleIn : '—';
+    el('stAngleOut').textContent = state.angleOut!==null ? state.angleOut : '—';
+  }
+  if(!state.running) el('stState').textContent = (state.bounces>0 || state.lastImpact!==null) ? 'توقفت' : 'جاهز';
+}
+
+const clock = new THREE.Clock();
+
+function physicsStep(dt){
+  if(state.squashTimer>0){
+    state.squashTimer -= dt*1000;
+    const t = 1 - Math.max(0,state.squashTimer)/Math.max(1,state.squashDurTotal);
+    const s = Math.sin(Math.min(1,t)*Math.PI);
+    ball.scale.set(1+0.22*s, 1-0.35*s, 1+0.22*s);
+    if(state.squashTimer<=0) ball.scale.set(1,1,1);
+  }
+
+  if(!state.running) return;
+  const g = parseFloat(el('gravity').value);
+  const mass = parseFloat(el('mass').value);
+
+  if(state.mode==='floor'){
+    state.vel.y += -g*dt;
+    state.pos.y += state.vel.y*dt;
+    if(state.pos.y <= floorY+R){
+      state.pos.y = floorY+R;
+      const vBefore = state.vel.clone();
+      state.lastImpact = Math.abs(state.vel.y);
+      const rest = parseFloat(el('fallRest').value)/100;
+      state.vel.y *= -rest;
+      state.lastPost = Math.abs(state.vel.y);
+      state.lastImpulse = mass*state.vel.clone().sub(vBefore).length();
+      state.lastSurfaceForce = state.lastImpulse / (Math.max(1,parseFloat(el('collisionDuration').value))/1000);
+      state.bounces++;
+      triggerSquash();
+      if(Math.abs(state.vel.y) < 0.4){ state.vel.y=0; state.running=false; }
+    }
+  }
+  else if(state.mode==='water'){
+    const waterY = floorY + parseFloat(el('waterDepth').value);
+    if(state.pos.y > waterY){
+      state.vel.y += -g*dt;
+      state.pos.y += state.vel.y*dt;
+      if(state.pos.y <= waterY){
+        state.lastImpact = Math.abs(state.vel.y);
+        const rest = parseFloat(el('fallRest').value)/100;
+        state.waterEntryVStart = state.vel.y;          // السرعة لحظة الدخول (بدون تغيير مفاجئ)
+        state.waterEntryVTarget = state.vel.y*rest;     // السرعة المستهدفة بعد انتهاء زمن التصادم
+        state.lastPost = Math.abs(state.waterEntryVTarget);
+        state.lastImpulse = null; // سيُحسب عند اكتمال فترة التصادم
+        state.waterEntryImpulseDone = false;
+        state.submerged = true;
+        state.waterEntryTotal = Math.max(1, parseFloat(el('waterCollDur').value));
+        state.waterEntryTimer = state.waterEntryTotal;
+        triggerSquash(state.waterEntryTotal);
+      }
+    } else {
+      state.submerged = true;
+
+      if(state.waterEntryTimer>0){
+        // ===== فترة التصادم/الدخول: تناقص تدريجي للسرعة نحو السرعة المستهدفة (بإهمال قوة اللزوجة) =====
+        state.waterEntryTimer -= dt*1000;
+        const t = Math.min(1, 1-Math.max(0,state.waterEntryTimer)/state.waterEntryTotal);
+        const eased = t*t*(3-2*t); // smoothstep لانتقال ناعم
+        const vBeforeFrame = state.vel.y;
+        const newVelY = state.waterEntryVStart + (state.waterEntryVTarget-state.waterEntryVStart)*eased;
+        state.vel.y = newVelY;
+        state.pos.y += state.vel.y*dt;
+
+        const netForce = mass*(newVelY-vBeforeFrame)/dt; // موجب = صاعدة (يُبطئ السقوط)
+        state.forceWeight = mass*g;
+        state.forceBuoy = netForce + mass*g; // الطفو وحدها مسؤولة عن كامل التباطؤ (بلا لزوجة)
+        state.forceNet = netForce - mass*g; // القوة المحصلة (سالبة = صافي هابط)
+
+        if(state.waterEntryTimer<=0 && !state.waterEntryImpulseDone){
+          state.lastImpulse = mass*Math.abs(state.vel.y-state.waterEntryVStart);
+          state.lastSurfaceForce = state.lastImpulse / (Math.max(1,state.waterEntryTotal)/1000);
+          state.waterEntryImpulseDone = true;
+        }
+      } else {
+        // ===== بعد انتهاء فترة التصادم: وزن وطفو فقط (بإهمال قوة اللزوجة) =====
+        const buoyancyAccel = g*0.55;
+        state.vel.y += (-g + buoyancyAccel)*dt;
+        state.pos.y += state.vel.y*dt;
+
+        state.forceWeight = mass*g;
+        state.forceBuoy = mass*buoyancyAccel;
+        state.forceNet = mass*(-g+buoyancyAccel);
+      }
+
+      if(state.pos.y <= floorY+R){
+        const vBefore = state.vel.clone();
+        state.pos.y = floorY+R;
+        state.vel.y *= -0.1;
+        state.lastImpulse = mass*state.vel.clone().sub(vBefore).length();
+        if(Math.abs(state.vel.y) < 0.05){ state.vel.y=0; state.running=false; }
+      }
+    }
+    setUnderwaterVisual(state.submerged);
+  }
+  else if(state.mode==='ceiling'){
+    const ceilY = floorY + parseFloat(el('ceilHeight').value);
+    state.vel.y += -g*dt;
+    state.pos.y += state.vel.y*dt;
+    if(state.pos.y >= ceilY-R && state.vel.y>0){
+      state.pos.y = ceilY-R;
+      const vBefore = state.vel.clone();
+      state.lastImpact = state.vel.y;
+      const rest = parseFloat(el('ceilRest').value)/100;
+      state.vel.y *= -rest;
+      state.lastPost = Math.abs(state.vel.y);
+      state.lastImpulse = mass*state.vel.clone().sub(vBefore).length();
+      state.lastSurfaceForce = state.lastImpulse / (Math.max(1,parseFloat(el('collisionDuration').value))/1000);
+      state.bounces++;
+      triggerSquash();
+    }
+    if(state.pos.y <= floorY+R){
+      state.pos.y = floorY+R;
+      if(Math.abs(state.vel.y) < 0.35){ state.vel.y=0; state.running=false; }
+      else { state.vel.y *= -0.4; }
+    }
+  }
+  else if(state.mode==='wall'){
+    state.pos.addScaledVector(state.vel, dt);
+    if(state.pos.x <= -ROOM+R){ state.pos.x=-ROOM+R; state.vel.x*=-1; }
+    if(state.pos.x >= ROOM-R){ state.pos.x=ROOM-R; state.vel.x*=-1; }
+    if(state.pos.z <= -ROOM+R && state.vel.z<0){
+      const vBefore = state.vel.clone();
+      const restitution = parseFloat(el('wallRest').value)/100;
+      state.angleIn = (Math.atan2(Math.abs(state.vel.x), Math.abs(state.vel.z))*180/Math.PI).toFixed(1);
+      state.lastImpact = state.vel.length();
+      state.pos.z = -ROOM+R;
+      state.vel.z *= -restitution;
+      state.angleOut = (Math.atan2(Math.abs(state.vel.x), Math.abs(state.vel.z))*180/Math.PI).toFixed(1);
+      state.lastPost = state.vel.length();
+      state.lastImpulse = mass*state.vel.clone().sub(vBefore).length();
+      state.lastSurfaceForce = state.lastImpulse / (Math.max(1,parseFloat(el('collisionDuration').value))/1000);
+      state.bounces++;
+      triggerSquash();
+    }
+    if(state.pos.z > ROOM-1 && state.vel.z>0){ state.running=false; }
+    (state.bounces===0 ? state.trailBefore : state.trailAfter).push(state.pos.clone());
+  }
+
+  ball.position.copy(state.pos);
+  updateStatsUI();
+}
+
+function forceToArrowLength(f){
+  return THREE.MathUtils.clamp(Math.abs(f)*0.12, 0.4, 5);
+}
+
+function updateForceArrows(){
+  const g = parseFloat(el('gravity').value);
+  const mass = parseFloat(el('mass').value);
+  const weightMag = mass*g;
+  const origin = ball.position;
+
+  arrows.weight.visible = true;
+  arrows.weight.position.copy(origin);
+  arrows.weight.setDirection(new THREE.Vector3(0,-1,0));
+  arrows.weight.setLength(forceToArrowLength(weightMag), 0.35, 0.22);
+
+  const showBuoy = (state.mode==='water' && state.submerged && state.forceBuoy!==null);
+  arrows.buoy.visible = showBuoy;
+  if(showBuoy){
+    arrows.buoy.position.copy(origin);
+    arrows.buoy.setDirection(new THREE.Vector3(0,1,0));
+    arrows.buoy.setLength(forceToArrowLength(state.forceBuoy), 0.35, 0.22);
+  }
+
+  let contactActive = false;
+  const contactDir = new THREE.Vector3(0,1,0);
+  if(state.mode==='floor' && state.squashTimer>0){ contactActive=true; contactDir.set(0,1,0); }
+  else if(state.mode==='ceiling' && state.squashTimer>0){ contactActive=true; contactDir.set(0,-1,0); }
+  else if(state.mode==='wall' && state.squashTimer>0){ contactActive=true; contactDir.set(0,0,1); }
+  else if(state.mode==='water' && state.waterEntryTimer>0){ contactActive=true; contactDir.set(0,1,0); }
+
+  arrows.contact.visible = contactActive;
+  if(contactActive){
+    const mag = state.lastSurfaceForce!==null ? Math.abs(state.lastSurfaceForce) : weightMag;
+    arrows.contact.position.copy(origin);
+    arrows.contact.setDirection(contactDir);
+    arrows.contact.setLength(forceToArrowLength(mag), 0.35, 0.22);
+  }
+}
+
+function updateTrails(){
+  const showWall = state.mode==='wall';
+  lines.before.visible = showWall;
+  lines.after.visible = showWall;
+  if(!showWall) return;
+  const beforePts = state.trailBefore.length>=2 ? state.trailBefore : [ball.position.clone(), ball.position.clone()];
+  const afterPts = state.trailAfter.length>=2 ? state.trailAfter : [ball.position.clone(), ball.position.clone()];
+  lines.before.geometry.dispose();
+  lines.before.geometry = new THREE.BufferGeometry().setFromPoints(beforePts);
+  lines.after.geometry.dispose();
+  lines.after.geometry = new THREE.BufferGeometry().setFromPoints(afterPts);
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.033);
+  physicsStep(dt);
+  updateStatsUI();
+  updateForceArrows();
+  updateTrails();
+  renderer.render(scene, camera);
+}
+
+// ===== ربط عناصر التحكم =====
+el('surface').addEventListener('change', e=>{
+  state.mode = e.target.value;
+  updateSurfaceVisibility();
+  updateModeBlocksUI();
+  positionBallForMode();
+});
+
+el('launchBtn').addEventListener('click', ()=>{ launch(); });
+el('stopBtn').addEventListener('click', ()=>{ state.running=false; el('stState').textContent='أوقفت يدوياً'; });
+el('resumeBtn').addEventListener('click', ()=>{ state.running=true; el('stState').textContent='تعمل...'; });
+el('resetBtn').addEventListener('click', ()=>{ positionBallForMode(); });
+
+el('gravity').addEventListener('input', ()=>{ el('valGravity').textContent = parseFloat(el('gravity').value).toFixed(1); });
+el('mass').addEventListener('input', ()=>{ el('valMass').textContent = parseFloat(el('mass').value).toFixed(1); });
+el('collisionDuration').addEventListener('input', ()=>{ el('valColl').textContent = el('collisionDuration').value; });
+el('fallHeight').addEventListener('input', ()=>{ el('valHeight').textContent = el('fallHeight').value; if(!state.running) positionBallForMode(); });
+el('fallV0').addEventListener('input', ()=>{ el('valV0').textContent = el('fallV0').value; });
+el('fallRest').addEventListener('input', ()=>{ el('valFallRest').textContent = el('fallRest').value; });
+el('waterHeight').addEventListener('input', ()=>{ el('valWaterHeight').textContent = el('waterHeight').value; if(!state.running && state.mode==='water') positionBallForMode(); });
+el('waterDepth').addEventListener('input', ()=>{ el('valWaterDepth').textContent = el('waterDepth').value; repositionSurfaces(); if(!state.running && state.mode==='water') positionBallForMode(); });
+el('waterCollDur').addEventListener('input', ()=>{ el('valWaterColl').textContent = el('waterCollDur').value; });
+el('ceilHeight').addEventListener('input', ()=>{ el('valCeil').textContent = el('ceilHeight').value; repositionSurfaces(); });
+el('riseV0').addEventListener('input', ()=>{ el('valRiseV0').textContent = el('riseV0').value; });
+el('ceilRest').addEventListener('input', ()=>{ el('valCeilRest').textContent = el('ceilRest').value; });
+el('wallSpeed').addEventListener('input', ()=>{ el('valWallSpeed').textContent = el('wallSpeed').value; });
+el('wallAngle').addEventListener('input', ()=>{ el('valWallAngle').textContent = el('wallAngle').value; if(!state.running && state.mode==='wall') positionBallForMode(); });
+el('wallRest').addEventListener('input', ()=>{ el('valWallRest').textContent = el('wallRest').value; });
+
+updateModeBlocksUI();
+initScene();
+animate();
+</script>
+</body>
+</html>
