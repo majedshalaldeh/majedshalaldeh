@@ -515,7 +515,7 @@
   const logoTexture = logoTextureLoader.load(LOGO_DATA_URI);
   const logoRadius = Math.min(FLAT_HALF*0.55, TRACK_WIDTH*0.42);
   const logoGeo = new THREE.CircleGeometry(logoRadius, 48);
-  const logoMat = new THREE.MeshBasicMaterial({ map: logoTexture, transparent:true, depthWrite:false, side:THREE.DoubleSide });
+  const logoMat = new THREE.MeshBasicMaterial({ map: logoTexture, transparent:true, opacity:0.9, depthWrite:false, side:THREE.DoubleSide });
   const logoMesh = new THREE.Mesh(logoGeo, logoMat);
   logoMesh.rotation.x = -Math.PI/2;
   logoMesh.position.set(0, 0.01, 0); // just above the flat platform's top surface (y=0)
