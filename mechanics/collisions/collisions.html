@@ -268,12 +268,21 @@
                 <span class="tag">حفظ الزخم والطاقة</span>
             </div>
 
-            <a href="pend.html" class="collision-card">
-                <div class="icon">🏹🔴</div>
-                <h2>تصادم كرة معلقة بخيط مع جسم</h2>
-                <p>تطبيق عملي على البندول القذفي، حيث يصطدم مقذوف بكتلة معلقة لدراسة تحول الطاقة وحفظ الزخم.</p>
-                <span class="tag">حفظ طاقة وزخم</span>
-            </a>
+            <div class="collision-card">
+                <div class="icon">🔴🧵🔴</div>
+                <h2>البندول والبندول المزدوج</h2>
+                <p>اختر نموذج التصادم لدراسة حركة البندول، وتحول الطاقة، وحفظ الزخم في نماذج ثلاثية الأبعاد.</p>
+
+                <label for="pendulumSelect" class="newton-select-label">اختر نموذج المحاكاة:</label>
+                <select id="pendulumSelect" class="newton-select"
+                        onchange="if(this.value) window.location.href=this.value;">
+                    <option value="">-- اختر المحاكاة --</option>
+                    <option value="pend.html">تصادم كرة معلقة كبندول مع جسم على سطح أفقي 3D</option>
+                    <option value="2pend.html">تصادم كرتين معلقتين كبندول مزدوج 3D</option>
+                </select>
+
+                <span class="tag">بندول 3D • بندول مزدوج 3D</span>
+            </div>
 
          
 

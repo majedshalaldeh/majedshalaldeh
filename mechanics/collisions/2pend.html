@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محاكاة تصادم كرة البندول مع كرة ثابتة</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --bg-deep:#0b1220;
+    --bg-panel:#121b2e;
+    --line:#25324a;
+    --text:#e7ecf5;
+    --text-dim:#8b97ad;
+    --accent:#f2a541;
+    --ball1:#e2543b;
+    --ball2:#3b8ee2;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    background:var(--bg-deep);
+    font-family: "Tahoma","Segoe UI",Arial,sans-serif;
+    color:var(--text);
+  }
+  #scene-container{position:absolute; inset:0;}
+  #scene-container canvas{display:block; cursor:grab;}
+  #scene-container canvas:active{cursor:grabbing;}
+
+  .hud{
+    position:absolute;
+    z-index:5;
+    background:rgba(18,27,46,0.88);
+    border:1px solid var(--line);
+    border-radius:10px;
+    backdrop-filter: blur(6px);
+  }
+
+  #titleBar{
+    top:14px; left:50%; transform:translateX(-50%);
+    text-align:center;
+    padding:10px 28px 12px;
+    pointer-events:none;
+  }
+  #titleBar .title{
+    font-size:19px; font-weight:800; letter-spacing:0.3px; color:var(--text);
+  }
+  #titleBar .credit{
+    margin-top:4px; font-size:11.5px; color:var(--accent); font-weight:700;
+  }
+
+  #navBar{
+    top:16px; right:16px;
+    display:flex; gap:8px;
+    padding:8px;
+  }
+  .navBtn{
+    padding:8px 12px;
+    border-radius:7px;
+    border:1px solid var(--line);
+    background:#1b273f;
+    color:var(--text);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+    white-space:nowrap;
+  }
+  .navBtn:hover{ background:#233254; border-color:#3a4b6e; }
+
+  #logoBadgeWrap{
+    top:62px; right:16px; width:365px;
+    display:flex; justify-content:center;
+    padding:9px 0;
+    background:transparent; border:none; backdrop-filter:none;
+  }
+  #logoBadgeImg{
+    width:140px; height:140px; border-radius:50%;
+    object-fit:cover;
+    box-shadow:0 0 0 1px var(--line), 0 4px 18px rgba(0,0,0,0.45);
+    background:#0b1220;
+  }
+
+  #panel{
+    top:222px; right:16px;
+    width:365px;
+    padding:15px 24px 18px;
+    max-height:calc(100vh - 238px);
+    overflow-y:auto;
+  }
+
+  #panel .panelHead{
+    font-size:16px; color:var(--text-dim); margin:0 0 9px; font-weight:700;
+    text-align:center;
+  }
+  .field{margin-bottom:10px;}
+  .field label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:16px; color:var(--text-dim); margin-bottom:3px;
+  }
+  .field label span.val{
+    color:var(--accent);
+    font-weight:700;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type=range]{
+    width:100%;
+    accent-color: var(--accent);
+    height:6px;
+    cursor:pointer;
+    display:block;
+    margin:3px 0;
+  }
+  .hint{font-size:12.5px; color:#5c6a80; margin-top:2px; line-height:1.3;}
+
+  .toggleRow{display:flex; gap:8px;}
+  .toggleBtn{
+    flex:1; padding:8px 6px; border-radius:7px;
+    border:1px solid var(--line); background:#1b273f;
+    color:var(--text-dim); font-size:15px; font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .toggleBtn.active{
+    background:var(--accent); color:#241705; border-color:var(--accent);
+  }
+
+  .divider{height:1px; background:var(--line); margin:10px 0;}
+
+  .btn-row{display:flex; gap:10px; margin-top:4px;}
+  button{
+    flex:1;
+    padding:11px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#1b273f;
+    color:var(--text);
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+    transition: background .15s, border-color .15s;
+  }
+  button:hover{background:#233254; border-color:#3a4b6e;}
+  button#startBtn{
+    background:var(--accent);
+    color:#241705;
+    border-color:var(--accent);
+  }
+  button#startBtn:hover{ filter:brightness(1.08); }
+  button:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  #results{
+    top:66px; left:16px;
+    width:290px;
+    max-height:calc(100vh - 82px);
+    overflow-y:auto;
+    padding:14px 18px;
+    font-size:12.5px;
+  }
+  #results h2{
+    font-size:12.5px; margin:0 0 10px; color:var(--text-dim); font-weight:700;
+    display:flex; justify-content:space-between;
+  }
+  #results h2 span.count{color:var(--accent);}
+  .row{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--line); gap:8px;}
+  .row:last-child{border-bottom:none;}
+  .row .k{color:var(--text-dim);}
+  .row .v{font-weight:700; font-variant-numeric: tabular-nums; text-align:left;}
+  .v.b1{color:var(--ball1);}
+  .v.b2{color:var(--ball2);}
+  #results.empty .row .v{color:#3c4863;}
+
+  #status{
+    top:16px; left:16px;
+    padding:8px 14px;
+    font-size:12.5px;
+    color:var(--text-dim);
+  }
+  #status b{color:var(--accent);}
+
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-thumb{background:#2c3a58; border-radius:4px;}
+
+  @media (max-width: 720px){
+    #panel, #navBar, #logoBadgeWrap{width:min(90vw,365px);}
+    #results{width:min(84vw,290px); max-height:40vh;}
+    #titleBar .title{font-size:15px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="scene-container"></div>
+
+<div class="hud" id="titleBar">
+  <div class="title">محاكاة تصادم البندول</div>
+  <div class="credit">إعداد وتطوير الأستاذ: ماجد شلالده 0599870176</div>
+</div>
+
+<div class="hud" id="status">الحالة: <b id="statusText">جاهز للإعداد</b></div>
+
+<div class="hud" id="navBar">
+  <button class="navBtn" id="homeBtn">الصفحة الرئيسية</button>
+  <button class="navBtn" id="collisionsBtn">التصادمات</button>
+</div>
+
+<div class="hud" id="logoBadgeWrap">
+  <img id="logoBadgeImg" src="logo.png" alt="شعار الأستاذ ماجد شلالده">
+</div>
+
+<div class="hud" id="panel">
+  <p class="panelHead">إعدادات المحاكاة</p>
+
+  <div class="field">
+    <label>طول الخيط L (مشترك للكرتين) <span class="val" id="valLen">1.50 m</span></label>
+    <input type="range" id="len" min="0.4" max="3" step="0.05" value="1.5">
+  </div>
+
+  <div class="field">
+    <label>زاوية رفع الكرة الأولى θ₁ <span class="val" id="valAngle1">40°</span></label>
+    <input type="range" id="angle1" min="0" max="180" step="1" value="40">
+    <div class="hint">تُرفع الكرة الأولى دائمًا بعيدًا عن الكرة الثانية (نحو اليسار)</div>
+  </div>
+
+  <div class="field">
+    <label>زاوية رفع الكرة الثانية θ₂ <span class="val" id="valAngle2">0°</span></label>
+    <input type="range" id="angle2" min="0" max="180" step="1" value="0">
+    <div class="hint">تُرفع الكرة الثانية دائمًا بعيدًا عن الكرة الأولى (نحو اليمين). اتركها صفرًا لتبقى ساكنة قبل الاصطدام.</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label>تسارع الجاذبية g <span class="val" id="valG">9.80 m/s²</span></label>
+    <input type="range" id="gravity" min="1" max="25" step="0.1" value="9.8">
+  </div>
+
+  <div class="field">
+    <label>كتلة الكرة الأولى m₁ <span class="val" id="valM1">1.0 kg</span></label>
+    <input type="range" id="m1" min="0.1" max="10" step="0.1" value="1.0">
+  </div>
+
+  <div class="field">
+    <label>كتلة الكرة الثانية m₂ <span class="val" id="valM2">1.0 kg</span></label>
+    <input type="range" id="m2" min="0.1" max="10" step="0.1" value="1.0">
+  </div>
+
+  <div class="field">
+    <label>معامل الارتداد e <span class="val" id="valE">1.00 (مرن)</span></label>
+    <input type="range" id="e" min="0" max="1" step="0.05" value="1">
+    <div class="hint">1 = تصادم مرن تمامًا، 0 = تصادم عديم المرونة</div>
+  </div>
+
+  <div class="field">
+    <label>سرعة العرض <span class="val" id="valSpeed">1.0×</span></label>
+    <input type="range" id="speed" min="0.25" max="2" step="0.25" value="1">
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="btn-row">
+    <button id="startBtn">ابدأ المحاكاة</button>
+    <button id="pauseBtn" disabled>إيقاف مؤقت</button>
+  </div>
+  <div class="btn-row" style="margin-top:4px;">
+    <button id="resetBtn">إعادة الضبط</button>
+  </div>
+</div>
+
+<div class="hud empty" id="results">
+  <h2>آخر تصادم <span class="count" id="collisionCount"></span></h2>
+  <div class="row"><span class="k">سرعة الكرة الأولى قبل التصادم</span><span class="v b1" id="rV1before">—</span></div>
+  <div class="row"><span class="k">سرعة الكرة الثانية قبل التصادم</span><span class="v b2" id="rV2before">—</span></div>
+  <div class="row"><span class="k">سرعة الكرة الأولى بعد التصادم</span><span class="v b1" id="rV1after">—</span></div>
+  <div class="row"><span class="k">سرعة الكرة الثانية بعد التصادم</span><span class="v b2" id="rV2after">—</span></div>
+  <div class="row"><span class="k">الزخم الكلي (قبل / بعد)</span><span class="v" id="rMomentum">—</span></div>
+  <div class="row"><span class="k">الطاقة الحركية (قبل / بعد)</span><span class="v" id="rEnergy">—</span></div>
+  <div class="row"><span class="k">أقصى ارتفاع/زاوية للكرة الأولى بعد التصادم</span><span class="v b1" id="rPeak1">—</span></div>
+  <div class="row"><span class="k">أقصى ارتفاع/زاوية للكرة الثانية بعد التصادم</span><span class="v b2" id="rPeak2">—</span></div>
+</div>
+
+<script>
+/* ================= PHYSICS ================= */
+const FIXED_DT = 1/300;
+
+function pendulumDerivs(theta, omega, L, g){
+  return [omega, -(g/L)*Math.sin(theta)];
+}
+function rk4Step(theta, omega, dt, L, g){
+  const [k1t,k1w] = pendulumDerivs(theta, omega, L, g);
+  const [k2t,k2w] = pendulumDerivs(theta+0.5*dt*k1t, omega+0.5*dt*k1w, L, g);
+  const [k3t,k3w] = pendulumDerivs(theta+0.5*dt*k2t, omega+0.5*dt*k2w, L, g);
+  const [k4t,k4w] = pendulumDerivs(theta+dt*k3t, omega+dt*k3w, L, g);
+  return [
+    theta + dt/6*(k1t+2*k2t+2*k3t+k4t),
+    omega + dt/6*(k1w+2*k2w+2*k3w+k4w)
+  ];
+}
+
+function radiusFromMass(m){ return 0.16 + 0.09*Math.cbrt(m); }
+
+function initialOmega(theta0deg, sign){
+  return theta0deg >= 170 ? -0.05*sign : 0;
+}
+
+function buildScenario(params){
+  const {L, angle1deg, angle2deg, g, m1, m2, e} = params;
+  const R1 = radiusFromMass(m1);
+  const R2 = radiusFromMass(m2);
+  const d = R1 + R2; // pivots spaced so the balls touch exactly at rest (θ=0)
+  const pivot1x = -d/2, pivot2x = d/2;
+
+  // ball1 is always raised away from ball2 (to the left), ball2 always away
+  // from ball1 (to the right) — the only configuration that doesn't start
+  // the two balls already overlapping, since their pivots sit right next
+  // to each other.
+  const theta1 = -angle1deg*Math.PI/180;
+  const theta2 = angle2deg*Math.PI/180;
+  const omega1 = initialOmega(angle1deg, -1);
+  const omega2 = initialOmega(angle2deg, 1);
+
+  return {
+    L, g, m1, m2, e, R1, R2, pivot1x, pivot2x,
+    theta1, omega1, theta2, omega2,
+    contactActive: false,
+    collisionCount: 0,
+    lastEvent: null
+  };
+}
+
+// analytic max rise (height & angle) of a ball leaving the bottom with speed v
+function computePeak(v, L, g){
+  if (v*v >= 4*g*L){
+    return { fullLoop:true, height: 2*L };
+  }
+  const h_raw = (v*v)/(2*g);
+  const arg = Math.max(-1, Math.min(1, 1 - (v*v)/(2*g*L)));
+  const angleDeg = Math.acos(arg)*180/Math.PI;
+  return { fullLoop:false, height:h_raw, angleDeg };
+}
+
+function ballPos(sim, which){
+  const theta = which===1 ? sim.theta1 : sim.theta2;
+  const pivotX = which===1 ? sim.pivot1x : sim.pivot2x;
+  return { x: pivotX + sim.L*Math.sin(theta), y: sim.L*(1-Math.cos(theta)) + REST_HEIGHT(sim) };
+}
+function REST_HEIGHT(sim){ return (sim.R1+sim.R2)/2; }
+
+function stepScenario(sim, dt, onCollision){
+  const [nt1, nw1] = rk4Step(sim.theta1, sim.omega1, dt, sim.L, sim.g);
+  const [nt2, nw2] = rk4Step(sim.theta2, sim.omega2, dt, sim.L, sim.g);
+  let theta1=nt1, omega1=nw1, theta2=nt2, omega2=nw2;
+
+  const Rh = REST_HEIGHT(sim);
+  const x1 = sim.pivot1x + sim.L*Math.sin(theta1), y1 = Rh + sim.L*(1-Math.cos(theta1));
+  const x2 = sim.pivot2x + sim.L*Math.sin(theta2), y2 = Rh + sim.L*(1-Math.cos(theta2));
+  const dx = x1-x2, dy = y1-y2;
+  const dist = Math.sqrt(dx*dx+dy*dy);
+  const sumR = sim.R1 + sim.R2;
+
+  if (dist <= sumR){
+    if (!sim.contactActive){
+      const vx1 = sim.L*Math.cos(theta1)*omega1;
+      const vx2 = sim.L*Math.cos(theta2)*omega2;
+      const rel = vx1 - vx2;
+      if (rel > 1e-3){ // genuinely closing — a resting touch at θ=0 has rel≈0 and is skipped
+      const v1a = vx1 - (sim.m2*(1+sim.e)*rel)/(sim.m1+sim.m2);
+      const v2a = vx2 + (sim.m1*(1+sim.e)*rel)/(sim.m1+sim.m2);
+      const c1 = Math.cos(theta1), c2 = Math.cos(theta2);
+      if (Math.abs(c1) > 0.05) omega1 = v1a/(sim.L*c1);
+      if (Math.abs(c2) > 0.05) omega2 = v2a/(sim.L*c2);
+      sim.contactActive = true;
+      sim.collisionCount++;
+      const peak1 = computePeak(Math.abs(v1a), sim.L, sim.g);
+      const peak2 = computePeak(Math.abs(v2a), sim.L, sim.g);
+      sim.lastEvent = {
+        v1b:vx1, v2b:vx2, v1a, v2a,
+        momentumBefore: sim.m1*vx1 + sim.m2*vx2,
+        momentumAfter: sim.m1*v1a + sim.m2*v2a,
+        keBefore: 0.5*sim.m1*vx1*vx1 + 0.5*sim.m2*vx2*vx2,
+        keAfter: 0.5*sim.m1*v1a*v1a + 0.5*sim.m2*v2a*v2a,
+        peak1, peak2
+      };
+      if (onCollision) onCollision(sim);
+      }
+    }
+  } else {
+    sim.contactActive = false;
+  }
+
+  sim.theta1 = theta1; sim.omega1 = omega1;
+  sim.theta2 = theta2; sim.omega2 = omega2;
+}
+
+
+/* ================= AUDIO ================= */
+let audioCtx = null;
+function ensureAudio(){
+  if (!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+window.addEventListener('pointerdown', ()=>{ try{ ensureAudio(); }catch(e){} }, {once:true});
+
+function playCollisionSound(strength){
+  if (!audioCtx) return;
+  const t0 = audioCtx.currentTime;
+  const s = Math.min(1, strength/6);
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  const freq = 150 + s*260;
+  osc.frequency.setValueAtTime(freq, t0);
+  osc.frequency.exponentialRampToValueAtTime(Math.max(50, freq*0.35), t0+0.13);
+  gain.gain.setValueAtTime(0.0001, t0);
+  gain.gain.exponentialRampToValueAtTime(0.18 + s*0.55, t0+0.006);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.2);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+0.22);
+
+  const bufSize = Math.floor(audioCtx.sampleRate*0.05);
+  const buffer = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i=0;i<bufSize;i++){ data[i] = (Math.random()*2-1) * Math.pow(1-i/bufSize, 2); }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.12 + s*0.4, t0);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0+0.05);
+  noise.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+  noise.start(t0);
+}
+
+/* ================= THREE.JS SCENE ================= */
+const container = document.getElementById('scene-container');
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1220);
+scene.fog = new THREE.Fog(0x0b1220, 10, 26);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+
+const camTarget = new THREE.Vector3(0, 1.6, 0);
+let camRadius = 8.5, camAzimuth = 0.75, camPolar = 1.15;
+function updateCamera(){
+  camPolar = Math.max(0.35, Math.min(1.5, camPolar));
+  camRadius = Math.max(3, Math.min(20, camRadius));
+  const x = camTarget.x + camRadius*Math.sin(camPolar)*Math.sin(camAzimuth);
+  const y = camTarget.y + camRadius*Math.cos(camPolar);
+  const z = camTarget.z + camRadius*Math.sin(camPolar)*Math.cos(camAzimuth);
+  camera.position.set(x,y,z);
+  camera.lookAt(camTarget);
+}
+updateCamera();
+
+let dragging = false, lastX=0, lastY=0;
+renderer.domElement.addEventListener('pointerdown', e=>{dragging=true; lastX=e.clientX; lastY=e.clientY;});
+window.addEventListener('pointerup', ()=>dragging=false);
+window.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  const dx = e.clientX-lastX, dy = e.clientY-lastY;
+  lastX=e.clientX; lastY=e.clientY;
+  camAzimuth -= dx*0.006;
+  camPolar -= dy*0.006;
+  updateCamera();
+});
+renderer.domElement.addEventListener('wheel', e=>{
+  e.preventDefault();
+  camRadius += e.deltaY*0.003;
+  updateCamera();
+}, {passive:false});
+
+scene.add(new THREE.AmbientLight(0x8fa2c9, 0.55));
+const key = new THREE.DirectionalLight(0xfff2da, 1.15);
+key.position.set(5, 8, 4);
+key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.left=-8; key.shadow.camera.right=8;
+key.shadow.camera.top=8; key.shadow.camera.bottom=-8;
+key.shadow.camera.far = 25;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x4d6fb0, 0.35);
+rim.position.set(-6,4,-5);
+scene.add(rim);
+
+const tableGeo = new THREE.BoxGeometry(9, 0.2, 5);
+const tableMat = new THREE.MeshStandardMaterial({color:0x1a2439, roughness:0.15, metalness:0.35});
+const table = new THREE.Mesh(tableGeo, tableMat);
+table.position.y = -0.1;
+table.receiveShadow = true;
+scene.add(table);
+
+const grid = new THREE.GridHelper(9, 36, 0x2c3a58, 0x1c2740);
+grid.position.y = 0.001;
+scene.add(grid);
+
+// floor logo decal (uploaded logo.png), placed away from the collision line (z=0) so it's never covered
+const floorLogoMat = new THREE.MeshBasicMaterial({transparent:true, depthWrite:false});
+new THREE.TextureLoader().load('logo.png', tex=>{
+  floorLogoMat.map = tex;
+  floorLogoMat.needsUpdate = true;
+});
+const floorLogo = new THREE.Mesh(new THREE.CircleGeometry(0.8, 64), floorLogoMat);
+floorLogo.rotation.x = -Math.PI/2;
+floorLogo.position.set(0, 0.003, 1.7);
+scene.add(floorLogo);
+
+const poleMat = new THREE.MeshStandardMaterial({color:0x394a6e, roughness:0.4, metalness:0.5});
+let pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.06,4.2,16), poleMat);
+pole.position.set(0, 2.1, -1.1);
+pole.castShadow = true;
+scene.add(pole);
+const baseFoot = new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,0.08,24), poleMat);
+baseFoot.position.set(0,0.04,-1.1);
+baseFoot.castShadow = true;
+scene.add(baseFoot);
+
+let armMesh = null;
+let crossbarMesh = null;
+let pivotMarker1 = null;
+let pivotMarker2 = null;
+
+function buildArmAndPivot(H, pivot1x, pivot2x){
+  if(armMesh) scene.remove(armMesh);
+  if(crossbarMesh) scene.remove(crossbarMesh);
+  if(pivotMarker1) scene.remove(pivotMarker1);
+  if(pivotMarker2) scene.remove(pivotMarker2);
+  pole.geometry.dispose();
+  pole.geometry = new THREE.CylinderGeometry(0.05,0.06,H+0.3,16);
+  pole.position.y = H/2 + 0.08;
+
+  const armLen = 1.1;
+  armMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,armLen,16), poleMat);
+  armMesh.rotation.x = Math.PI/2;
+  armMesh.position.set(0, H, -1.1+armLen/2);
+  armMesh.castShadow = true;
+  scene.add(armMesh);
+
+  const crossLen = (pivot2x-pivot1x) + 0.3;
+  crossbarMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,crossLen,16), poleMat);
+  crossbarMesh.rotation.z = Math.PI/2;
+  crossbarMesh.position.set((pivot1x+pivot2x)/2, H, 0);
+  crossbarMesh.castShadow = true;
+  scene.add(crossbarMesh);
+
+  const pivotMat = new THREE.MeshStandardMaterial({color:0xf2a541});
+  pivotMarker1 = new THREE.Mesh(new THREE.SphereGeometry(0.05,16,16), pivotMat);
+  pivotMarker1.position.set(pivot1x,H,0);
+  scene.add(pivotMarker1);
+  pivotMarker2 = new THREE.Mesh(new THREE.SphereGeometry(0.05,16,16), pivotMat);
+  pivotMarker2.position.set(pivot2x,H,0);
+  scene.add(pivotMarker2);
+}
+
+const stringMat = new THREE.LineBasicMaterial({color:0xaab6cc});
+const string1Geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+const string1Line = new THREE.Line(string1Geo, stringMat);
+scene.add(string1Line);
+const string2Geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+const string2Line = new THREE.Line(string2Geo, stringMat);
+scene.add(string2Line);
+
+const ball1Mat = new THREE.MeshStandardMaterial({color:0xe2543b, roughness:0.35, metalness:0.15});
+const ball2Mat = new THREE.MeshStandardMaterial({color:0x3b8ee2, roughness:0.35, metalness:0.15});
+let ball1 = new THREE.Mesh(new THREE.SphereGeometry(0.2,32,32), ball1Mat);
+let ball2 = new THREE.Mesh(new THREE.SphereGeometry(0.2,32,32), ball2Mat);
+ball1.castShadow = true; ball2.castShadow = true;
+scene.add(ball1); scene.add(ball2);
+
+function rebuildBalls(R1,R2){
+  scene.remove(ball1); scene.remove(ball2);
+  ball1.geometry.dispose(); ball2.geometry.dispose();
+  ball1 = new THREE.Mesh(new THREE.SphereGeometry(R1,32,32), ball1Mat);
+  ball2 = new THREE.Mesh(new THREE.SphereGeometry(R2,32,32), ball2Mat);
+  ball1.castShadow = true; ball2.castShadow = true;
+  scene.add(ball1); scene.add(ball2);
+}
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ================= UI WIRING ================= */
+const els = {
+  len: document.getElementById('len'),
+  angle1: document.getElementById('angle1'),
+  angle2: document.getElementById('angle2'),
+  gravity: document.getElementById('gravity'),
+  m1: document.getElementById('m1'),
+  m2: document.getElementById('m2'),
+  e: document.getElementById('e'),
+  speed: document.getElementById('speed'),
+};
+const valEls = {
+  len: document.getElementById('valLen'),
+  angle1: document.getElementById('valAngle1'),
+  angle2: document.getElementById('valAngle2'),
+  gravity: document.getElementById('valG'),
+  m1: document.getElementById('valM1'),
+  m2: document.getElementById('valM2'),
+  e: document.getElementById('valE'),
+  speed: document.getElementById('valSpeed'),
+};
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resetBtn = document.getElementById('resetBtn');
+const statusText = document.getElementById('statusText');
+const resultsPanel = document.getElementById('results');
+const collisionCountEl = document.getElementById('collisionCount');
+
+// nav buttons — placeholder links; update hrefs to match the site's real pages
+document.getElementById('homeBtn').addEventListener('click', ()=>{
+  window.location.href = '../../index.html';
+});
+document.getElementById('collisionsBtn').addEventListener('click', ()=>{
+  window.location.href = 'collisions.html';
+});
+
+function currentParams(){
+  return {
+    L: parseFloat(els.len.value),
+    angle1deg: parseFloat(els.angle1.value),
+    angle2deg: parseFloat(els.angle2.value),
+    g: parseFloat(els.gravity.value),
+    m1: parseFloat(els.m1.value),
+    m2: parseFloat(els.m2.value),
+    e: parseFloat(els.e.value),
+  };
+}
+
+function refreshLabels(){
+  valEls.len.textContent = parseFloat(els.len.value).toFixed(2)+' m';
+  valEls.angle1.textContent = els.angle1.value+'°';
+  valEls.angle2.textContent = els.angle2.value+'°';
+  valEls.gravity.textContent = parseFloat(els.gravity.value).toFixed(2)+' m/s²';
+  valEls.m1.textContent = parseFloat(els.m1.value).toFixed(1)+' kg';
+  valEls.m2.textContent = parseFloat(els.m2.value).toFixed(1)+' kg';
+  const eVal = parseFloat(els.e.value);
+  valEls.e.textContent = eVal.toFixed(2)+(eVal>=0.99?' (مرن)':(eVal<=0.01?' (غير مرن)':''));
+  valEls.speed.textContent = parseFloat(els.speed.value).toFixed(2)+'×';
+}
+
+let sim = null;
+let running = false;
+let paused = false;
+let previewOnly = true;
+
+function setStaticPreview(){
+  const p = currentParams();
+  const R1 = radiusFromMass(p.m1), R2 = radiusFromMass(p.m2);
+  rebuildBalls(R1,R2);
+  const d = R1+R2;
+  const pivot1x = -d/2, pivot2x = d/2;
+  const H = p.L + (R1+R2)/2;
+  buildArmAndPivot(H, pivot1x, pivot2x);
+  const theta1 = -p.angle1deg*Math.PI/180;
+  const theta2 = p.angle2deg*Math.PI/180;
+  const x1 = pivot1x + p.L*Math.sin(theta1), y1 = H - p.L*Math.cos(theta1);
+  const x2 = pivot2x + p.L*Math.sin(theta2), y2 = H - p.L*Math.cos(theta2);
+  ball1.position.set(x1,y1,0);
+  ball2.position.set(x2,y2,0);
+  string1Line.geometry.setFromPoints([new THREE.Vector3(pivot1x,H,0), new THREE.Vector3(x1,y1,0)]);
+  string2Line.geometry.setFromPoints([new THREE.Vector3(pivot2x,H,0), new THREE.Vector3(x2,y2,0)]);
+}
+
+function fmt(n){ return (Math.abs(n)<0.005?0:n).toFixed(2); }
+
+function onCollisionEvent(s){
+  playCollisionSound(Math.abs(s.lastEvent.v1b - s.lastEvent.v2b));
+  updateResults(s);
+  statusText.textContent = 'اصطدام رقم '+s.collisionCount;
+}
+
+function fmtPeak(peak){
+  if (peak.fullLoop) return '≥ '+fmt(peak.height)+' m (دوران كامل)';
+  return fmt(peak.height)+' m / '+fmt(peak.angleDeg)+'°';
+}
+
+function updateResults(s){
+  resultsPanel.classList.remove('empty');
+  const ev = s.lastEvent;
+  collisionCountEl.textContent = '#'+s.collisionCount;
+  document.getElementById('rV1before').textContent = fmt(ev.v1b)+' m/s';
+  document.getElementById('rV2before').textContent = fmt(ev.v2b)+' m/s';
+  document.getElementById('rV1after').textContent = fmt(ev.v1a)+' m/s';
+  document.getElementById('rV2after').textContent = fmt(ev.v2a)+' m/s';
+  document.getElementById('rMomentum').textContent = fmt(ev.momentumBefore)+' / '+fmt(ev.momentumAfter)+' kg·m/s';
+  document.getElementById('rEnergy').textContent = fmt(ev.keBefore)+' / '+fmt(ev.keAfter)+' J';
+  document.getElementById('rPeak1').textContent = fmtPeak(ev.peak1);
+  document.getElementById('rPeak2').textContent = fmtPeak(ev.peak2);
+}
+
+function clearResults(){
+  resultsPanel.classList.add('empty');
+  collisionCountEl.textContent = '';
+  ['rV1before','rV2before','rV1after','rV2after','rMomentum','rEnergy','rPeak1','rPeak2'].forEach(id=>{
+    document.getElementById(id).textContent = '—';
+  });
+}
+
+startBtn.addEventListener('click', ()=>{
+  ensureAudio();
+  const p = currentParams();
+  sim = buildScenario(p);
+  rebuildBalls(sim.R1, sim.R2);
+  buildArmAndPivot(sim.L + (sim.R1+sim.R2)/2, sim.pivot1x, sim.pivot2x);
+  // place the balls at their real starting positions immediately — don't
+  // wait for the next animation frame, or the brand-new meshes would sit
+  // at their default (0,0,0) spot for a moment first (visible as a jump,
+  // especially noticeable on a second run when timing lines up differently)
+  const H = sim.L + (sim.R1+sim.R2)/2;
+  const pos1 = ballPos(sim,1), pos2 = ballPos(sim,2);
+  ball1.position.set(pos1.x, pos1.y, 0);
+  ball2.position.set(pos2.x, pos2.y, 0);
+  string1Line.geometry.setFromPoints([new THREE.Vector3(sim.pivot1x, H, 0), new THREE.Vector3(pos1.x, pos1.y, 0)]);
+  string2Line.geometry.setFromPoints([new THREE.Vector3(sim.pivot2x, H, 0), new THREE.Vector3(pos2.x, pos2.y, 0)]);
+  clearResults();
+  running = true;
+  paused = false;
+  previewOnly = false;
+  startBtn.disabled = true;
+  pauseBtn.disabled = false;
+  pauseBtn.textContent = 'إيقاف مؤقت';
+  statusText.textContent = 'الكرتان تتأرجحان…';
+});
+
+pauseBtn.addEventListener('click', ()=>{
+  if(!running) return;
+  paused = !paused;
+  pauseBtn.textContent = paused ? 'استئناف' : 'إيقاف مؤقت';
+  if(paused) statusText.textContent = 'متوقف مؤقتًا';
+  else statusText.textContent = 'الكرتان تتأرجحان…';
+});
+
+resetBtn.addEventListener('click', ()=>{
+  running = false; paused = false; previewOnly = true; sim = null;
+  startBtn.disabled = false;
+  pauseBtn.disabled = true;
+  pauseBtn.textContent = 'إيقاف مؤقت';
+  statusText.textContent = 'جاهز للإعداد';
+  clearResults();
+  setStaticPreview();
+});
+
+Object.values(els).forEach(el=>{
+  el.addEventListener('input', ()=>{
+    refreshLabels();
+    if(previewOnly) setStaticPreview();
+  });
+});
+
+refreshLabels();
+setStaticPreview();
+
+/* ================= ANIMATION LOOP ================= */
+let lastTime = performance.now();
+function animate(now){
+  requestAnimationFrame(animate);
+  let wallDt = Math.min((now-lastTime)/1000, 0.05);
+  lastTime = now;
+
+  if (running && !paused && sim){
+    const speedMult = parseFloat(els.speed.value);
+    let remaining = wallDt * speedMult;
+    while (remaining > 0){
+      const dt = Math.min(FIXED_DT, remaining);
+      remaining -= dt;
+      stepScenario(sim, dt, onCollisionEvent);
+    }
+
+    const H = sim.L + (sim.R1+sim.R2)/2;
+    const pos1 = ballPos(sim,1), pos2 = ballPos(sim,2);
+    ball1.position.set(pos1.x, pos1.y, 0);
+    ball2.position.set(pos2.x, pos2.y, 0);
+    string1Line.geometry.setFromPoints([new THREE.Vector3(sim.pivot1x,H,0), new THREE.Vector3(pos1.x,pos1.y,0)]);
+    string2Line.geometry.setFromPoints([new THREE.Vector3(sim.pivot2x,H,0), new THREE.Vector3(pos2.x,pos2.y,0)]);
+  }
+
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
