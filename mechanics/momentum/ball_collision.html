@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -121,7 +128,7 @@
   <div id="navButtons">
     <!-- عدّل الروابط التالية لتطابق صفحات موقعك -->
     <a href="../../index.html">الصفحة الرئيسية</a>
-    <a href="momentum.html">العودة لصفحة الزخم الخطي</a>
+    <a href="momentum.html">العودة للزخم الخطي</a>
   </div>
   <img id="logoTop" src="logo.png" alt="شعار الأستاذ ماجد شلالدة">
 
@@ -141,10 +148,15 @@
   <input type="range" id="gravity" min="1" max="25" step="0.1" value="9.8">
 
   <label>كتلة الكرة (kg) — <span class="val" id="valMass">1.0</span></label>
-  <input type="range" id="mass" min="0.1" max="10" step="0.1" value="1">
+  <input type="range" id="mass" min="0.1" max="30" step="0.1" value="1">
 
   <label>زمن التصادم / مدة الارتطام البصرية للأسطح الصلبة (ms) — <span class="val" id="valColl">150</span></label>
   <input type="range" id="collisionDuration" min="0" max="400" step="10" value="150">
+
+  <label style="display:flex; align-items:center; gap:6px; margin-top:14px;">
+    <input type="checkbox" id="soundToggle" checked style="width:auto;">
+    تفعيل صوت التصادمات
+  </label>
 
   <!-- ===== سقوط عمودي (أرضية / ماء) ===== -->
   <div id="ctrl-fall" class="modeblock">
@@ -152,21 +164,21 @@
 
     <div id="floorHeightBlock" class="modeblock">
       <label>الارتفاع عن سطح الأرض (m) — <span class="val" id="valHeight">8</span></label>
-      <input type="range" id="fallHeight" min="1" max="19" step="0.5" value="8">
+      <input type="range" id="fallHeight" min="1" max="30" step="0.1" value="8">
     </div>
 
     <label>السرعة الابتدائية للأسفل (m/s) — <span class="val" id="valV0">0</span></label>
-    <input type="range" id="fallV0" min="0" max="15" step="0.5" value="0">
+    <input type="range" id="fallV0" min="0" max="15" step="0.1" value="0">
 
     <label>السرعة بعد الاصطدام (٪ من سرعة الاصطدام) — <span class="val" id="valFallRest">78</span>%</label>
-    <input type="range" id="fallRest" min="0" max="100" step="1" value="78">
+    <input type="range" id="fallRest" min="0" max="100" step="0.1" value="78">
 
     <div id="ctrl-water-extra" class="modeblock">
       <label>الارتفاع عن سطح الماء (m) — <span class="val" id="valWaterHeight">6</span></label>
-      <input type="range" id="waterHeight" min="0.5" max="15" step="0.5" value="6">
+      <input type="range" id="waterHeight" min="0.5" max="15" step="0.1" value="6">
 
       <label>عمق سطح الماء عن الأرض (m) — <span class="val" id="valWaterDepth">4</span></label>
-      <input type="range" id="waterDepth" min="2" max="8" step="0.5" value="4">
+      <input type="range" id="waterDepth" min="2" max="8" step="0.1" value="4">
 
       <label>زمن التصادم/الدخول إلى الماء (ms) — <span class="val" id="valWaterColl">300</span></label>
       <input type="range" id="waterCollDur" min="0" max="800" step="20" value="300">
@@ -177,20 +189,20 @@
   <div id="ctrl-rise" class="modeblock">
     <div class="section-title">حركة الصعود العمودي</div>
     <label>ارتفاع السقف عن الأرض (m) — <span class="val" id="valCeil">14</span></label>
-    <input type="range" id="ceilHeight" min="4" max="19" step="0.5" value="14">
+    <input type="range" id="ceilHeight" min="4" max="19" step="0.1" value="14">
 
     <label>السرعة الابتدائية للأعلى (m/s) — <span class="val" id="valRiseV0">10</span></label>
-    <input type="range" id="riseV0" min="1" max="15" step="0.5" value="10">
+    <input type="range" id="riseV0" min="1" max="20" step="0.1" value="10">
 
     <label>السرعة بعد الاصطدام (٪ من سرعة الاصطدام) — <span class="val" id="valCeilRest">70</span>%</label>
-    <input type="range" id="ceilRest" min="20" max="100" step="1" value="70">
+    <input type="range" id="ceilRest" min="20" max="100" step="0.1" value="70">
   </div>
 
   <!-- ===== جدار رأسي ===== -->
   <div id="ctrl-wall" class="modeblock">
     <div class="section-title">حركة على أرضية ملساء (بلا احتكاك)</div>
     <label>السرعة الابتدائية (m/s) — <span class="val" id="valWallSpeed">8</span></label>
-    <input type="range" id="wallSpeed" min="1" max="15" step="0.5" value="8">
+    <input type="range" id="wallSpeed" min="1" max="20" step="0.1" value="8">
 
     <label>زاوية السقوط عن العمود القائم (الناظم) على مستوى الجدار (°) — <span class="val" id="valWallAngle">30</span></label>
     <input type="range" id="wallAngle" min="-75" max="75" step="1" value="30">
@@ -233,7 +245,8 @@
     <span style="color:#4dd2ff;">■</span> الطفو &nbsp;
     <span style="color:#ffd24d;">■</span> قوة السطح أثناء التصادم<br>
     <span style="color:#b388ff;">■</span> مسار قبل الاصطدام &nbsp;
-    <span style="color:#ff8a3d;">■</span> مسار بعد الاصطدام
+    <span style="color:#ff8a3d;">■</span> مسار بعد الاصطدام<br>
+    <span style="color:#ffffff;">┊</span> الخط العمودي (الناظم) على الجدار عند نقطة الاصطدام
   </div>
 </div>
 
@@ -284,7 +297,8 @@ const state = {
   forceBuoy: null,
   forceNet: null,
   trailBefore: [],
-  trailAfter: []
+  trailAfter: [],
+  wallCollisionX: null
 };
 
 const el = id => document.getElementById(id);
@@ -380,6 +394,11 @@ function initScene(){
   lines.before.visible = false;
   lines.after.visible = false;
   scene.add(lines.before, lines.after);
+
+  // ===== الخط العمودي (الناظم) على الجدار عند نقطة الاصطدام =====
+  lines.normal = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color:0xffffff, dashSize:0.35, gapSize:0.2 }));
+  lines.normal.visible = false;
+  scene.add(lines.normal);
 
   // ===== شعار دائري مطبوع على الأرضية =====
   const logoTexture = new THREE.TextureLoader().load('logo.png');
@@ -511,6 +530,7 @@ function positionBallForMode(){
   state.forceNet = null;
   state.trailBefore = [];
   state.trailAfter = [];
+  state.wallCollisionX = null;
   ball.scale.set(1,1,1);
 
   if(state.mode==='floor'){
@@ -544,6 +564,7 @@ function launch(){
   state.waterEntryImpulseDone = false;
   state.trailBefore = [];
   state.trailAfter = [];
+  state.wallCollisionX = null;
 
   if(state.mode==='floor'){
     const h = parseFloat(el('fallHeight').value);
@@ -568,6 +589,80 @@ function launch(){
     state.vel.set(speed*Math.sin(ang), 0, -speed*Math.cos(ang));
   }
   el('stState').textContent = 'تعمل...';
+}
+
+// ===== أصوات التصادم =====
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    audioCtx = new AC();
+  }
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function soundOn(){ return el('soundToggle') && el('soundToggle').checked; }
+
+function playThud(intensity){
+  if(!soundOn()) return;
+  const ctx = ensureAudio();
+  if(!ctx) return;
+  const t = ctx.currentTime;
+  const i = Math.max(0, Math.min(10, intensity||1));
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(85 + i*5, t);
+  osc.frequency.exponentialRampToValueAtTime(35, t+0.13);
+  gain.gain.setValueAtTime(Math.min(0.55, 0.12+i*0.035), t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t+0.16);
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.start(t); osc.stop(t+0.18);
+}
+
+function playSplash(intensity){
+  if(!soundOn()) return;
+  const ctx = ensureAudio();
+  if(!ctx) return;
+  const t = ctx.currentTime;
+  const i = Math.max(0, Math.min(10, intensity||1));
+  const dur = 0.28;
+  const bufferSize = Math.floor(ctx.sampleRate*dur);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let n=0;n<bufferSize;n++){ data[n] = (Math.random()*2-1)*Math.pow(1-n/bufferSize,2); }
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+  const filter = ctx.createBiquadFilter();
+  filter.type='bandpass';
+  filter.frequency.value = 700+i*40;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(Math.min(0.6, 0.18+i*0.035), t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t+dur);
+  noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+  noise.start(t);
+}
+
+function playUnderwaterThud(intensity){
+  if(!soundOn()) return;
+  const ctx = ensureAudio();
+  if(!ctx) return;
+  const t = ctx.currentTime;
+  const i = Math.max(0, Math.min(10, intensity||1));
+  const osc = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 280;
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(65+i*3, t);
+  osc.frequency.exponentialRampToValueAtTime(28, t+0.2);
+  gain.gain.setValueAtTime(Math.min(0.4, 0.1+i*0.02), t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t+0.25);
+  osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+  osc.start(t); osc.stop(t+0.3);
 }
 
 function triggerSquash(customMs){
@@ -637,6 +732,7 @@ function physicsStep(dt){
       state.lastSurfaceForce = state.lastImpulse / (Math.max(1,parseFloat(el('collisionDuration').value))/1000);
       state.bounces++;
       triggerSquash();
+      playThud(state.lastImpact);
       if(Math.abs(state.vel.y) < 0.4){ state.vel.y=0; state.running=false; }
     }
   }
@@ -657,6 +753,7 @@ function physicsStep(dt){
         state.waterEntryTotal = Math.max(1, parseFloat(el('waterCollDur').value));
         state.waterEntryTimer = state.waterEntryTotal;
         triggerSquash(state.waterEntryTotal);
+        playSplash(state.lastImpact);
       }
     } else {
       state.submerged = true;
@@ -697,6 +794,7 @@ function physicsStep(dt){
         state.pos.y = floorY+R;
         state.vel.y *= -0.1;
         state.lastImpulse = mass*state.vel.clone().sub(vBefore).length();
+        playUnderwaterThud(Math.abs(vBefore.y));
         if(Math.abs(state.vel.y) < 0.05){ state.vel.y=0; state.running=false; }
       }
     }
@@ -717,23 +815,26 @@ function physicsStep(dt){
       state.lastSurfaceForce = state.lastImpulse / (Math.max(1,parseFloat(el('collisionDuration').value))/1000);
       state.bounces++;
       triggerSquash();
+      playThud(state.lastImpact);
     }
     if(state.pos.y <= floorY+R){
+      const impactY = Math.abs(state.vel.y);
       state.pos.y = floorY+R;
       if(Math.abs(state.vel.y) < 0.35){ state.vel.y=0; state.running=false; }
-      else { state.vel.y *= -0.4; }
+      else { state.vel.y *= -0.4; triggerSquash(); playThud(impactY); }
     }
   }
   else if(state.mode==='wall'){
     state.pos.addScaledVector(state.vel, dt);
-    if(state.pos.x <= -ROOM+R){ state.pos.x=-ROOM+R; state.vel.x*=-1; }
-    if(state.pos.x >= ROOM-R){ state.pos.x=ROOM-R; state.vel.x*=-1; }
+    if(state.pos.x <= -ROOM+R){ state.pos.x=-ROOM+R; state.vel.x*=-1; playThud(state.vel.length()); }
+    if(state.pos.x >= ROOM-R){ state.pos.x=ROOM-R; state.vel.x*=-1; playThud(state.vel.length()); }
     if(state.pos.z <= -ROOM+R && state.vel.z<0){
       const vBefore = state.vel.clone();
       const restitution = parseFloat(el('wallRest').value)/100;
       state.angleIn = (Math.atan2(Math.abs(state.vel.x), Math.abs(state.vel.z))*180/Math.PI).toFixed(1);
       state.lastImpact = state.vel.length();
       state.pos.z = -ROOM+R;
+      state.wallCollisionX = state.pos.x;
       state.vel.z *= -restitution;
       state.angleOut = (Math.atan2(Math.abs(state.vel.x), Math.abs(state.vel.z))*180/Math.PI).toFixed(1);
       state.lastPost = state.vel.length();
@@ -741,6 +842,7 @@ function physicsStep(dt){
       state.lastSurfaceForce = state.lastImpulse / (Math.max(1,parseFloat(el('collisionDuration').value))/1000);
       state.bounces++;
       triggerSquash();
+      playThud(state.lastImpact);
     }
     if(state.pos.z > ROOM-1 && state.vel.z>0){ state.running=false; }
     (state.bounces===0 ? state.trailBefore : state.trailAfter).push(state.pos.clone());
@@ -802,6 +904,17 @@ function updateTrails(){
   lines.after.geometry = new THREE.BufferGeometry().setFromPoints(afterPts);
 }
 
+function updateWallNormal(){
+  const show = (state.mode==='wall' && state.wallCollisionX!==null);
+  lines.normal.visible = show;
+  if(!show) return;
+  const p1 = new THREE.Vector3(state.wallCollisionX, floorY+R, -ROOM+R);
+  const p2 = new THREE.Vector3(state.wallCollisionX, floorY+R, -ROOM+R+7);
+  lines.normal.geometry.dispose();
+  lines.normal.geometry = new THREE.BufferGeometry().setFromPoints([p1,p2]);
+  lines.normal.computeLineDistances();
+}
+
 function animate(){
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.033);
@@ -809,6 +922,7 @@ function animate(){
   updateStatsUI();
   updateForceArrows();
   updateTrails();
+  updateWallNormal();
   renderer.render(scene, camera);
 }
 
@@ -820,7 +934,7 @@ el('surface').addEventListener('change', e=>{
   positionBallForMode();
 });
 
-el('launchBtn').addEventListener('click', ()=>{ launch(); });
+el('launchBtn').addEventListener('click', ()=>{ ensureAudio(); launch(); });
 el('stopBtn').addEventListener('click', ()=>{ state.running=false; el('stState').textContent='أوقفت يدوياً'; });
 el('resumeBtn').addEventListener('click', ()=>{ state.running=true; el('stState').textContent='تعمل...'; });
 el('resetBtn').addEventListener('click', ()=>{ positionBallForMode(); });

@@ -159,11 +159,11 @@
   <div class="sectionTitle">الجسم قبل الانفجار</div>
   <div class="field">
     <label>كتلة الجسم M <span class="val" id="valM">2.0 kg</span></label>
-    <input type="range" id="mass" min="0.2" max="20" step="0.1" value="2">
+    <input type="range" id="mass" min="0.2" max="40" step="0.1" value="2">
   </div>
   <div class="field">
     <label>سرعة الجسم V <span class="val" id="valV">4.0 m/s</span></label>
-    <input type="range" id="speed0" min="0" max="15" step="0.1" value="4">
+    <input type="range" id="speed0" min="0" max="30" step="0.1" value="4">
   </div>
   <div class="field">
     <label>اتجاه الحركة θ <span class="val" id="valTheta">0°</span></label>
@@ -393,10 +393,14 @@ key.shadow.camera.far=60;
 scene.add(key);
 scene.add(new THREE.DirectionalLight(0x4d6fb0, 0.3));
 
-const floorGeo = new THREE.BoxGeometry(40,0.2,40);
-const floorMat = new THREE.MeshStandardMaterial({color:0x1a2439, roughness:0.15, metalness:0.35});
+const floorGeo = new THREE.PlaneGeometry(40,40);
+const floorMat = new THREE.MeshStandardMaterial({
+  color:0x1a2439, roughness:0.15, metalness:0.35,
+  transparent:true, opacity:0.35, side:THREE.DoubleSide, depthWrite:false
+});
 const floor = new THREE.Mesh(floorGeo, floorMat);
-floor.position.y=-0.1;
+floor.rotation.x = -Math.PI/2;
+floor.position.y = 0;
 floor.receiveShadow = true;
 scene.add(floor);
 scene.add(new THREE.GridHelper(40,40,0x2c3a58,0x1c2740).translateY(0.001));
@@ -438,15 +442,28 @@ function makeTextSprite(text, color){
 const label0 = makeTextSprite('0°', '#e2543b'); label0.position.set(3.5,0.3,0); scene.add(label0);
 const label90 = makeTextSprite('90°', '#3b8ee2'); label90.position.set(0,0.3,-3.5); scene.add(label90);
 
-// pre-explosion body: a distinct spiky shape
+// size scales with mass assuming constant density: volume ∝ mass, so radius ∝ ∛mass.
+// The same formula is used for the body and every fragment, so equal masses
+// always render as equal-sized spheres.
+function radiusFromMass(m){ return 0.28*Math.cbrt(m); }
+
+// pre-explosion body: its radius reflects its own mass M
 const bodyMat = new THREE.MeshStandardMaterial({color:0xff7043, roughness:0.35, metalness:0.25, emissive:0x552200, emissiveIntensity:0.35});
-let body = new THREE.Mesh(new THREE.SphereGeometry(0.35,32,32), bodyMat);
+let body = new THREE.Mesh(new THREE.SphereGeometry(radiusFromMass(2),32,32), bodyMat);
+let bodyRadius = radiusFromMass(2);
 body.castShadow = true;
 scene.add(body);
+function rebuildBody(mass){
+  bodyRadius = radiusFromMass(mass);
+  scene.remove(body);
+  body.geometry.dispose();
+  body = new THREE.Mesh(new THREE.SphereGeometry(bodyRadius,32,32), bodyMat);
+  body.castShadow = true;
+  scene.add(body);
+}
 
 // fragments (rebuilt whenever the count/masses change)
 const FRAG_COLORS = [0xe2543b,0x3b8ee2,0x4caf6b,0xf2a541,0xa463c9,0x3bc4c0];
-function radiusFromMass(m){ return 0.12 + 0.07*Math.cbrt(m); }
 let fragMeshes = [];
 let fragTrails = [];
 function rebuildFragmentMeshes(fragments){
@@ -541,11 +558,11 @@ function buildFragmentControls(n, keepValues){
       <div class="fragHeader"><span class="fragDot" style="background:${color}"></span>الجزء رقم ${i+1}</div>
       <div class="field">
         <label>الكتلة m${i+1} <span class="val" data-role="mass">${def.mass.toFixed(1)} kg</span></label>
-        <input type="range" data-role="mass" data-i="${i}" min="0.1" max="10" step="0.1" value="${def.mass}">
+        <input type="range" data-role="mass" data-i="${i}" min="0.1" max="20" step="0.1" value="${def.mass}">
       </div>
       <div class="field">
         <label>السرعة v${i+1} <span class="val" data-role="speed">${def.speed.toFixed(1)} m/s</span></label>
-        <input type="range" data-role="speed" data-i="${i}" min="0" max="15" step="0.1" value="${def.speed}">
+        <input type="range" data-role="speed" data-i="${i}" min="0" max="100" step="0.1" value="${def.speed}">
       </div>
       <div class="field">
         <label>الزاوية θ${i+1} <span class="val" data-role="angle">${def.angle}°</span></label>
@@ -598,12 +615,13 @@ let running = false, paused = false, previewOnly = true;
 function setStaticPreview(){
   const p = currentParams();
   rebuildFragmentMeshes(p.fragments);
+  rebuildBody(p.M);
   fragMeshes.forEach(m=>m.visible=false);
   fragTrails.forEach(t=>t.visible=false);
   body.visible = true;
   const dir = dirVec(p.theta0deg);
   const pos = p.V>0.02 ? {x:-dir.x*D_BEHIND, z:-dir.z*D_BEHIND} : {x:0,z:0};
-  body.position.set(pos.x, 0.35, pos.z);
+  body.position.set(pos.x, bodyRadius, pos.z);
   if (flashMesh){ scene.remove(flashMesh); flashMesh=null; }
 }
 
@@ -630,11 +648,12 @@ startBtn.addEventListener('click', ()=>{
   const p = currentParams();
   sim = buildScenario(p);
   rebuildFragmentMeshes(p.fragments);
+  rebuildBody(p.M);
   fragMeshes.forEach(m=>m.visible=false);
   fragTrails.forEach(t=>t.visible=false);
   body.visible = true;
   const pos = bodyPos(sim);
-  body.position.set(pos.x, 0.35, pos.z);
+  body.position.set(pos.x, bodyRadius, pos.z);
   clearResults();
   running = true; paused = false; previewOnly = false;
   startBtn.disabled = true;
@@ -697,7 +716,7 @@ function animate(now){
     }
     if (!sim.exploded){
       const pos = bodyPos(sim);
-      body.position.set(pos.x, 0.35, pos.z);
+      body.position.set(pos.x, bodyRadius, pos.z);
     } else {
       sim.frags.forEach((f,i)=>{
         fragMeshes[i].position.set(f.x, radiusFromMass(f.mass), f.z);
