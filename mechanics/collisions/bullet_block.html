@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محاكاة إطلاق رصاصة نحو قطعة خشبية</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#131a24; --panel-border:#223046;
+    --ink:#dce6f2; --muted:#7f93ab; --accent:#ff9f4a; --line:#26364a;
+    --ok:#5fd97a; --warn:#ffcf4d; --bad:#ff5a5a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Segoe UI',Tahoma,sans-serif;overflow:hidden;}
+  #scene{position:absolute;inset:0;}
+
+  #topTitle{position:absolute; top:14px; left:50%; transform:translateX(-50%); text-align:center; z-index:10; pointer-events:none;}
+  #topTitle h1{font-size:19px; margin:0 0 4px 0; font-weight:700;}
+  #topTitle .author{font-size:13px; color:var(--accent); font-weight:600;}
+
+  #rightColumn{
+    position:absolute; top:12px; right:12px; bottom:12px; width:300px;
+    display:flex; flex-direction:column; gap:10px; z-index:10;
+  }
+
+  #navButtons{display:flex; gap:8px;}
+  #navButtons a{
+    flex:1; text-align:center; text-decoration:none;
+    background:var(--panel); color:var(--ink);
+    border:1px solid var(--panel-border); border-radius:8px;
+    padding:9px 6px; font-size:12px; font-weight:600;
+  }
+  #navButtons a:hover{border-color:var(--accent); color:var(--accent);}
+
+  #logoTop{
+    align-self:center;
+    width:96px; height:96px; object-fit:contain;
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:50%; padding:6px;
+  }
+
+  #rightPanel{
+    position:relative;
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:10px;
+    padding:16px 18px; z-index:10; box-shadow:0 8px 24px rgba(0,0,0,.4);
+    overflow-y:auto; flex:1; min-height:0;
+  }
+  #rightPanel::-webkit-scrollbar{width:6px;}
+  #rightPanel::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+
+  #leftPanel{
+    position:absolute; top:12px; left:12px; width:260px; max-height:calc(100vh - 24px);
+    background:var(--panel); border:1px solid var(--panel-border); border-radius:10px;
+    padding:16px 18px; z-index:10; box-shadow:0 8px 24px rgba(0,0,0,.4);
+    overflow-y:auto; font-size:12px; line-height:1.9;
+  }
+  #leftPanel::-webkit-scrollbar{width:6px;}
+  #leftPanel::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+  #leftPanel h2{font-size:14px; margin:0 0 10px 0;}
+  #leftPanel b{color:var(--ink); font-weight:600;}
+  .ok{color:var(--ok); font-weight:600;}
+  .warn{color:var(--warn); font-weight:600;}
+
+  .section-title{font-size:12px; color:var(--accent); font-weight:600; margin:16px 0 6px 0; border-top:1px solid var(--line); padding-top:12px;}
+  .section-title.first{border-top:none; padding-top:0;}
+
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:5px; margin-top:10px;}
+  label span.val{color:var(--ink); font-weight:600;}
+  input[type=range]{width:100%; accent-color:var(--accent);}
+
+  .row{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;}
+  .row button{flex:1 1 calc(50% - 4px); background:var(--accent); color:#1a1005; border:none; border-radius:6px; padding:9px 0; font-size:13px; font-weight:600; cursor:pointer;}
+  .row button.secondary{background:transparent; color:var(--ink); border:1px solid var(--line); font-weight:500;}
+  button:active{transform:translateY(1px);}
+  button:disabled{opacity:0.4; cursor:not-allowed;}
+
+  .checkline{display:flex; align-items:center; gap:6px; margin-top:12px; font-size:12px; color:var(--muted);}
+  .checkline input{width:auto;}
+
+  #hint{position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:11px; color:var(--muted); z-index:10;}
+</style>
+</head>
+<body>
+
+<div id="scene"></div>
+<div id="topTitle">
+  <h1>محاكاة إطلاق رصاصة نحو قطعة خشبية واستقرارها فيها</h1>
+  <div class="author">إعداد وتطوير الأستاذ: ماجد شلالدة — 0599870176</div>
+</div>
+
+<div id="rightColumn">
+  <div id="navButtons">
+    <!-- عدّل الروابط التالية لتطابق صفحات موقعك -->
+    <a href="../../index.html">الصفحة الرئيسية</a>
+    <a href="collisions.html">العودة للتصادمات</a>
+  </div>
+  <img id="logoTop" src="logo.png" alt="شعار الأستاذ ماجد شلالدة">
+
+  <div id="rightPanel">
+  <div class="section-title first">الرصاصة</div>
+  <label>كتلة الرصاصة (g) — <span class="val" id="valBulletMass">10</span></label>
+  <input type="range" id="bulletMass" min="2" max="60" step="1" value="10">
+
+  <label>سرعة الرصاصة الابتدائية (m/s) — <span class="val" id="valBulletSpeed">350</span></label>
+  <input type="range" id="bulletSpeed" min="50" max="900" step="5" value="350">
+
+  <div class="section-title">نتيجة الاصطدام</div>
+  <label>نوع النتيجة</label>
+  <select id="collisionType">
+    <option value="embed">استقرار الرصاصة داخل القطعة (تصادم غير مرن تام)</option>
+    <option value="penetrate">اختراق القطعة والخروج من الجانب الآخر</option>
+  </select>
+
+  <div id="exitSpeedBlock" style="display:none;">
+    <label>سرعة الرصاصة عند الخروج (m/s) — <span class="val" id="valExitSpeed">150</span></label>
+    <input type="range" id="exitSpeed" min="0" max="345" step="5" value="150">
+    <div style="font-size:11px; color:var(--muted); margin-top:4px;">لا يمكن أن تتجاوز سرعة الخروج سرعة الرصاصة قبل الاختراق (الحد الأعلى يُضبط تلقائياً).</div>
+  </div>
+
+  <div class="section-title">القطعة الخشبية</div>
+  <label>كتلة القطعة الخشبية (kg) — <span class="val" id="valBlockMass">3</span></label>
+  <input type="range" id="blockMass" min="0.2" max="20" step="0.1" value="3">
+
+  <div class="section-title">إعداد المشهد</div>
+  <label>المسافة بين البندقية والقطعة (m) — <span class="val" id="valDist">16</span></label>
+  <input type="range" id="gunDistance" min="8" max="30" step="1" value="16">
+
+  <div class="checkline">
+    <input type="checkbox" id="soundToggle" checked>
+    <span>تفعيل الأصوات (إطلاق واستقرار)</span>
+  </div>
+
+  <div class="row">
+    <button id="fireBtn">إطلاق النار</button>
+    <button id="resetBtn" class="secondary">إعادة ضبط</button>
+  </div>
+  </div>
+</div>
+
+<div id="leftPanel">
+  <h2>القراءات الحية</h2>
+  الحالة: <b id="stPhase">جاهزة</b><br>
+  السرعة الحالية: <b id="stCurSpeed">0.00</b> m/s<br>
+
+  <div class="section-title first">قبل الاصطدام</div>
+  سرعة الرصاصة: <b id="stVBullet">—</b> m/s<br>
+  زخم الرصاصة: <b id="stPBullet">—</b> kg·m/s<br>
+  الطاقة الحركية للرصاصة: <b id="stKEBullet">—</b> J<br>
+
+  <div id="resultEmbedTitle" class="section-title">بعد الاستقرار (تصادم غير مرن تام)</div>
+  <div id="resultEmbedBody">
+    السرعة المشتركة v': <b id="stVAfter">—</b> m/s<br>
+    الزخم الكلي بعد: <b id="stPAfter">—</b> kg·m/s<br>
+    الطاقة الحركية بعد: <b id="stKEAfter">—</b> J<br>
+    الطاقة المفقودة (تشوّه/حرارة): <b id="stKELost">—</b> J<br>
+    نسبة الطاقة المفقودة: <b id="stKELostPct">—</b><br>
+  </div>
+
+  <div id="resultPenTitle" class="section-title" style="display:none;">بعد الاختراق</div>
+  <div id="resultPenBody" style="display:none;">
+    سرعة الرصاصة عند الخروج: <b id="stVExit">—</b> m/s<br>
+    سرعة القطعة الخشبية بعدها: <b id="stVBlock">—</b> m/s<br>
+    الزخم الكلي بعد: <b id="stPAfter2">—</b> kg·m/s<br>
+    الطاقة الحركية الكلية بعد: <b id="stKEAfter2">—</b> J<br>
+    الطاقة المفقودة (تشوّه/حرارة): <b id="stKELost2">—</b> J<br>
+    نسبة الطاقة المفقودة: <b id="stKELostPct2">—</b><br>
+  </div>
+
+  <div class="section-title">فحص حفظ الزخم</div>
+  <span id="stPCheck">—</span>
+</div>
+
+<div id="hint">اسحب الفأرة لتدوير الكاميرا في كل الاتجاهات — عجلة الفأرة للتقريب</div>
+
+<script>
+const el = id => document.getElementById(id);
+
+/* ============ المشهد والكاميرا ============ */
+let scene, camera, renderer;
+const clock = new THREE.Clock();
+let angleX=0.35, angleY=0.15, dist=26;
+let dragging=false, lastX=0, lastY=0;
+
+function initScene(){
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0d1117);
+  scene.fog = new THREE.Fog(0x0d1117, 30, 90);
+
+  camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 400);
+  updateCamera();
+
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  el('scene').appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff,0.6));
+  const d1 = new THREE.DirectionalLight(0xffffff,0.9); d1.position.set(15,25,10); scene.add(d1);
+  const d2 = new THREE.DirectionalLight(0x88aaff,0.25); d2.position.set(-15,10,-10); scene.add(d2);
+
+  const floorMat = new THREE.MeshStandardMaterial({color:0x24344a, roughness:0.95});
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(20,80), floorMat);
+  floor.rotation.x = -Math.PI/2;
+  scene.add(floor);
+
+  const grid = new THREE.GridHelper(80,40,0x3a4d68,0x2a3a52);
+  grid.position.y=0.01;
+  scene.add(grid);
+
+  // ===== شعار دائري مطبوع على الأرضية =====
+  const logoTexture = new THREE.TextureLoader().load('logo.png');
+  const logoMat = new THREE.MeshStandardMaterial({ map:logoTexture, transparent:true, roughness:0.6, depthWrite:false });
+  const logoGeo = new THREE.CircleGeometry(3, 48);
+  const logoFloor = new THREE.Mesh(logoGeo, logoMat);
+  logoFloor.rotation.x = -Math.PI/2;
+  logoFloor.position.set(0, 0.02, -15);
+  scene.add(logoFloor);
+
+  window.addEventListener('resize', onResize);
+  attachMouse();
+}
+
+function updateCamera(){
+  camera.position.x = dist*Math.sin(angleY)*Math.cos(angleX);
+  camera.position.y = dist*Math.sin(angleX) + 2;
+  camera.position.z = dist*Math.cos(angleY)*Math.cos(angleX);
+  camera.lookAt(0,1,0);
+}
+
+function attachMouse(){
+  const dom = renderer.domElement;
+  dom.addEventListener('mousedown', e=>{dragging=true; lastX=e.clientX; lastY=e.clientY;});
+  window.addEventListener('mouseup', ()=>dragging=false);
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const dx=e.clientX-lastX, dy=e.clientY-lastY;
+    angleY -= dx*0.006;
+    angleX = Math.max(-1.5, Math.min(1.5, angleX+dy*0.006));
+    lastX=e.clientX; lastY=e.clientY;
+    updateCamera();
+  });
+  dom.addEventListener('wheel', e=>{
+    dist = Math.max(6, Math.min(100, dist+e.deltaY*0.03));
+    updateCamera();
+  }, {passive:true});
+  dom.addEventListener('touchstart', e=>{dragging=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;}, {passive:true});
+  dom.addEventListener('touchend', ()=>dragging=false);
+  dom.addEventListener('touchmove', e=>{
+    if(!dragging) return;
+    const dx=e.touches[0].clientX-lastX, dy=e.touches[0].clientY-lastY;
+    angleY -= dx*0.006;
+    angleX = Math.max(-1.5, Math.min(1.5, angleX+dy*0.006));
+    lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    updateCamera();
+  }, {passive:true});
+}
+
+function onResize(){
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+}
+
+/* ============ الأصوات ============ */
+let audioCtx=null;
+function ensureAudio(){
+  if(!audioCtx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; audioCtx=new AC(); }
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+function soundOn(){ return el('soundToggle').checked; }
+
+function playGunshot(){
+  if(!soundOn()) return;
+  const ctx=ensureAudio(); if(!ctx) return;
+  const t=ctx.currentTime;
+  const dur=0.18;
+  const bufferSize=Math.floor(ctx.sampleRate*dur);
+  const buffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate);
+  const data=buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){ data[i]=(Math.random()*2-1)*Math.pow(1-i/bufferSize,0.7); }
+  const noise=ctx.createBufferSource(); noise.buffer=buffer;
+  const filter=ctx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=800;
+  const gain=ctx.createGain(); gain.gain.setValueAtTime(0.8,t); gain.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+  noise.start(t);
+
+  const osc=ctx.createOscillator(); osc.type='square';
+  osc.frequency.setValueAtTime(180,t); osc.frequency.exponentialRampToValueAtTime(60,t+0.06);
+  const g2=ctx.createGain(); g2.gain.setValueAtTime(0.5,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.08);
+  osc.connect(g2); g2.connect(ctx.destination);
+  osc.start(t); osc.stop(t+0.09);
+}
+
+function playEmbedThud(intensity){
+  if(!soundOn()) return;
+  const ctx=ensureAudio(); if(!ctx) return;
+  const t=ctx.currentTime;
+  const i=Math.max(0,Math.min(10,intensity||1));
+  const dur=0.35;
+  const bufferSize=Math.floor(ctx.sampleRate*dur);
+  const buffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate);
+  const data=buffer.getChannelData(0);
+  for(let n=0;n<bufferSize;n++){ data[n]=(Math.random()*2-1)*Math.pow(1-n/bufferSize,2); }
+  const noise=ctx.createBufferSource(); noise.buffer=buffer;
+  const filter=ctx.createBiquadFilter(); filter.type='lowpass'; filter.frequency.value=350;
+  const gain=ctx.createGain(); gain.gain.setValueAtTime(Math.min(0.6,0.25+i*0.02),t); gain.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+  noise.start(t);
+
+  const osc=ctx.createOscillator(); osc.type='sine';
+  osc.frequency.setValueAtTime(80,t); osc.frequency.exponentialRampToValueAtTime(30,t+0.2);
+  const g2=ctx.createGain(); g2.gain.setValueAtTime(0.4,t); g2.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+  osc.connect(g2); g2.connect(ctx.destination);
+  osc.start(t); osc.stop(t+0.3);
+}
+
+/* ============ حالة المحاكاة ============ */
+const sim = {
+  phase:'idle', // idle | flying | combined | penetrating | penetrated
+  collisionType:'embed',
+  bulletMassKg:0.01, bulletSpeed:0, blockMassKg:3,
+  z:0, vz:0,
+  vzBlock:0, blockZ:0,
+  penTimer:0, penTotal:0, penEntryZ:0, penExitZ:0, exitSpeedFinal:0, blockVelocityFinal:0,
+  bulletMesh:null, blockMesh:null, gunMesh:null, embedMarker:null,
+  trail:[], trailLine:null, blockTrail:[], blockTrailLine:null, flash:null, flashTimer:0,
+  blockHalf:0.6, gunZ:16
+};
+
+function blockSideForMass(m){ return THREE.MathUtils.clamp(0.5*Math.cbrt(Math.max(0.05,m)), 0.4, 2.2); }
+
+function buildStaticScene(){
+  if(sim.gunMesh) scene.remove(sim.gunMesh);
+  if(sim.blockMesh) scene.remove(sim.blockMesh);
+
+  const D = parseFloat(el('gunDistance').value);
+  sim.gunZ = D;
+
+  // البندقية (تمثيل مبسط)
+  const gunGroup = new THREE.Group();
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.09,1.4,16), new THREE.MeshStandardMaterial({color:0x333333, metalness:0.7, roughness:0.35}));
+  barrel.rotation.x = Math.PI/2;
+  barrel.position.set(0,0.5,D-0.6);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.35,0.9), new THREE.MeshStandardMaterial({color:0x4a3626, roughness:0.7}));
+  body.position.set(0,0.35,D+0.2);
+  gunGroup.add(barrel, body);
+  scene.add(gunGroup);
+  sim.gunMesh = gunGroup;
+
+  // القطعة الخشبية
+  const M = parseFloat(el('blockMass').value);
+  sim.blockMassKg = M;
+  const side = blockSideForMass(M);
+  sim.blockHalf = side/2;
+  const blockMat = new THREE.MeshStandardMaterial({color:0x8b5a2b, roughness:0.85});
+  sim.blockMesh = new THREE.Mesh(new THREE.BoxGeometry(side,side,side), blockMat);
+  sim.blockMesh.position.set(0, side/2, 0);
+  scene.add(sim.blockMesh);
+}
+
+function clearDynamic(){
+  if(sim.bulletMesh){ scene.remove(sim.bulletMesh); sim.bulletMesh=null; }
+  if(sim.trailLine){ scene.remove(sim.trailLine); sim.trailLine=null; }
+  if(sim.blockTrailLine){ scene.remove(sim.blockTrailLine); sim.blockTrailLine=null; }
+  if(sim.flash){ scene.remove(sim.flash); sim.flash=null; }
+  sim.trail=[];
+  sim.blockTrail=[];
+}
+
+/* ============ الفيزياء ============ */
+function updateResultSectionsVisibility(){
+  const isPen = el('collisionType').value==='penetrate';
+  el('resultEmbedTitle').style.display = isPen ? 'none':'block';
+  el('resultEmbedBody').style.display = isPen ? 'none':'block';
+  el('resultPenTitle').style.display = isPen ? 'block':'none';
+  el('resultPenBody').style.display = isPen ? 'block':'none';
+  el('exitSpeedBlock').style.display = isPen ? 'block':'none';
+}
+
+function syncExitSpeedMax(){
+  const v = parseFloat(el('bulletSpeed').value);
+  const exitInp = el('exitSpeed');
+  exitInp.max = v;
+  if(parseFloat(exitInp.value) > v){ exitInp.value = v; }
+  el('valExitSpeed').textContent = exitInp.value;
+}
+
+function updateStatsPreCalc(){
+  const mG = parseFloat(el('bulletMass').value);
+  const v = parseFloat(el('bulletSpeed').value);
+  const M = parseFloat(el('blockMass').value);
+  const mKg = mG/1000;
+  const pBefore = mKg*v;
+  const keBefore = 0.5*mKg*v*v;
+
+  el('stVBullet').textContent = v.toFixed(1);
+  el('stPBullet').textContent = pBefore.toFixed(3);
+  el('stKEBullet').textContent = keBefore.toFixed(2);
+
+  const type = el('collisionType').value;
+  let vAfter=0, vExit=0, vBlock=0;
+
+  if(type==='embed'){
+    vAfter = pBefore/(mKg+M);
+    const pAfter = (mKg+M)*vAfter;
+    const keAfter = 0.5*(mKg+M)*vAfter*vAfter;
+    const keLost = keBefore-keAfter;
+    const pct = keBefore>0 ? (keLost/keBefore*100) : 0;
+    el('stVAfter').textContent = vAfter.toFixed(3);
+    el('stPAfter').textContent = pAfter.toFixed(3);
+    el('stKEAfter').textContent = keAfter.toFixed(2);
+    el('stKELost').textContent = keLost.toFixed(2);
+    el('stKELostPct').textContent = pct.toFixed(1)+'%';
+    el('stPCheck').innerHTML = Math.abs(pAfter-pBefore)<0.0005 ? '<span class="ok">الزخم محفوظ تماماً (كما هو متوقع في أي تصادم)</span>' : '<span class="warn">—</span>';
+  } else {
+    syncExitSpeedMax();
+    vExit = Math.min(parseFloat(el('exitSpeed').value), v);
+    vBlock = M>0 ? (mKg*(v-vExit))/M : 0;
+    const pAfter = mKg*vExit + M*vBlock;
+    const keAfter = 0.5*mKg*vExit*vExit + 0.5*M*vBlock*vBlock;
+    const keLost = keBefore-keAfter;
+    const pct = keBefore>0 ? (keLost/keBefore*100) : 0;
+    el('stVExit').textContent = vExit.toFixed(1);
+    el('stVBlock').textContent = vBlock.toFixed(3);
+    el('stPAfter2').textContent = pAfter.toFixed(3);
+    el('stKEAfter2').textContent = keAfter.toFixed(2);
+    el('stKELost2').innerHTML = keLost>=0 ? keLost.toFixed(2) : `<span class="warn">${keLost.toFixed(2)} (غير فيزيائي)</span>`;
+    el('stKELostPct2').textContent = pct.toFixed(1)+'%';
+    el('stPCheck').innerHTML = Math.abs(pAfter-pBefore)<0.0005 ? '<span class="ok">الزخم محفوظ تماماً (كما هو متوقع في أي تصادم)</span>' : '<span class="warn">—</span>';
+  }
+
+  return {mKg, v, M, vAfter, vExit, vBlock};
+}
+
+function fire(){
+  if(sim.phase!=='idle') return;
+  ensureAudio();
+  buildStaticScene();
+  sim.collisionType = el('collisionType').value;
+  const {mKg, v, M, vAfter, vExit, vBlock} = updateStatsPreCalc();
+  sim.bulletMassKg = mKg;
+  sim.bulletSpeed = v;
+  sim.blockMassKg = M;
+  sim.vAfterCollision = vAfter;
+  sim.exitSpeedFinal = vExit;
+  sim.blockVelocityFinal = vBlock;
+
+  sim.z = sim.gunZ - 0.6;
+  sim.vz = -v;
+  sim.phase = 'flying';
+
+  const bulletMat = new THREE.MeshStandardMaterial({color:0xd4af37, metalness:0.8, roughness:0.3});
+  const bulletGroup = new THREE.Group();
+  const bBody = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.14,12), bulletMat);
+  const bTip = new THREE.Mesh(new THREE.ConeGeometry(0.045,0.09,12), bulletMat);
+  bTip.position.y = 0.14/2 + 0.09/2;
+  bulletGroup.add(bBody, bTip);
+  sim.bulletMesh = bulletGroup;
+  sim.bulletMesh.rotation.x = Math.PI/2;
+  sim.bulletMesh.position.set(0,0.5,sim.z);
+  scene.add(sim.bulletMesh);
+
+  sim.trail=[];
+  sim.trailLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0xd4af37}));
+  scene.add(sim.trailLine);
+
+  sim.blockTrail=[];
+  sim.blockTrailLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0xff8a3d}));
+  scene.add(sim.blockTrailLine);
+
+  // ومضة الفوهة
+  const flashMat = new THREE.MeshBasicMaterial({color:0xffcc66, transparent:true, opacity:0.9});
+  sim.flash = new THREE.Mesh(new THREE.SphereGeometry(0.25,12,12), flashMat);
+  sim.flash.position.set(0,0.5,sim.gunZ-1.3);
+  scene.add(sim.flash);
+  sim.flashTimer = 0.0001;
+
+  playGunshot();
+  el('stPhase').textContent = 'الرصاصة تتحرك نحو الهدف...';
+  el('fireBtn').disabled = true;
+  setInputsDisabled(true);
+}
+
+function handleImpact(){
+  sim.phase = 'combined';
+  scene.remove(sim.bulletMesh); sim.bulletMesh=null;
+
+  // علامة استقرار الرصاصة داخل القطعة الخشبية (تتحرك معها تلقائياً كطفل)
+  const markerMat = new THREE.MeshStandardMaterial({color:0x2b2b2b, metalness:0.6, roughness:0.4});
+  sim.embedMarker = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.12,8), markerMat);
+  sim.embedMarker.rotation.x = Math.PI/2;
+  sim.embedMarker.position.set(0,0, sim.blockHalf-0.05);
+  sim.blockMesh.add(sim.embedMarker);
+
+  sim.vz = -sim.vAfterCollision;
+
+  playEmbedThud(sim.bulletSpeed/40);
+  el('stPhase').textContent = 'استقرت الرصاصة — تتحركان معاً بسرعة مشتركة';
+  el('fireBtn').disabled = true;
+}
+
+function handlePenetrationStart(){
+  sim.phase = 'penetrating';
+  sim.penEntryZ = sim.blockHalf+0.05;
+  sim.penExitZ = -(sim.blockHalf+0.05);
+  const avgSpeed = Math.max(0.5,(sim.bulletSpeed+sim.exitSpeedFinal)/2);
+  sim.penTotal = THREE.MathUtils.clamp((sim.blockHalf*2)/avgSpeed*1000, 30, 220);
+  sim.penTimer = sim.penTotal;
+
+  playEmbedThud(sim.bulletSpeed/40);
+  el('stPhase').textContent = 'الرصاصة تخترق القطعة الخشبية...';
+}
+
+function finishPenetration(){
+  sim.phase = 'penetrated';
+  sim.z = sim.penExitZ;
+  sim.vz = -sim.exitSpeedFinal;
+  sim.blockZ = 0;
+  sim.vzBlock = -sim.blockVelocityFinal;
+  el('stPhase').textContent = 'اخترقت الرصاصة القطعة — كل منهما يتحرك بسرعته المستقلة';
+  el('fireBtn').disabled = true;
+}
+
+function resetAll(){
+  clearDynamic();
+  buildStaticScene();
+  sim.phase='idle';
+  sim.z=0; sim.vz=0; sim.blockZ=0; sim.vzBlock=0;
+  el('stPhase').textContent='جاهزة';
+  el('stCurSpeed').textContent='0.00';
+  el('fireBtn').disabled=false;
+  setInputsDisabled(false);
+  updateStatsPreCalc();
+}
+
+function setInputsDisabled(disabled){
+  ['bulletMass','bulletSpeed','blockMass','gunDistance','collisionType','exitSpeed'].forEach(id=> el(id).disabled=disabled);
+}
+
+/* ============ حلقة التحديث ============ */
+function step(dt){
+  if(sim.phase==='flying'){
+    sim.z += sim.vz*dt;
+    sim.bulletMesh.position.z = sim.z;
+    sim.trail.push(new THREE.Vector3(0,0.5,sim.z));
+    if(sim.trail.length>400) sim.trail.shift();
+    if(sim.trail.length>=2){
+      sim.trailLine.geometry.dispose();
+      sim.trailLine.geometry = new THREE.BufferGeometry().setFromPoints(sim.trail);
+    }
+    el('stCurSpeed').textContent = Math.abs(sim.vz).toFixed(2);
+
+    if(sim.z <= sim.blockHalf+0.05){
+      sim.z = sim.blockHalf+0.05;
+      if(sim.collisionType==='embed'){ handleImpact(); }
+      else { handlePenetrationStart(); }
+    }
+  } else if(sim.phase==='combined'){
+    sim.z += sim.vz*dt;
+    sim.blockMesh.position.z = sim.z;
+    sim.blockTrail.push(new THREE.Vector3(0,0.5,sim.z));
+    if(sim.blockTrail.length>400) sim.blockTrail.shift();
+    if(sim.blockTrail.length>=2){
+      sim.blockTrailLine.geometry.dispose();
+      sim.blockTrailLine.geometry = new THREE.BufferGeometry().setFromPoints(sim.blockTrail);
+    }
+    el('stCurSpeed').textContent = Math.abs(sim.vz).toFixed(3);
+  } else if(sim.phase==='penetrating'){
+    sim.penTimer -= dt*1000;
+    const t = THREE.MathUtils.clamp(1-Math.max(0,sim.penTimer)/sim.penTotal, 0, 1);
+    sim.bulletMesh.position.z = THREE.MathUtils.lerp(sim.penEntryZ, sim.penExitZ, t);
+    el('stCurSpeed').textContent = Math.abs(sim.bulletSpeed).toFixed(2);
+    if(sim.penTimer<=0){ finishPenetration(); }
+  } else if(sim.phase==='penetrated'){
+    sim.z += sim.vz*dt;
+    sim.bulletMesh.position.z = sim.z;
+    sim.trail.push(new THREE.Vector3(0,0.5,sim.z));
+    if(sim.trail.length>400) sim.trail.shift();
+    if(sim.trail.length>=2){
+      sim.trailLine.geometry.dispose();
+      sim.trailLine.geometry = new THREE.BufferGeometry().setFromPoints(sim.trail);
+    }
+
+    sim.blockZ += sim.vzBlock*dt;
+    sim.blockMesh.position.z = sim.blockZ;
+    sim.blockTrail.push(new THREE.Vector3(0,0.5,sim.blockZ));
+    if(sim.blockTrail.length>400) sim.blockTrail.shift();
+    if(sim.blockTrail.length>=2){
+      sim.blockTrailLine.geometry.dispose();
+      sim.blockTrailLine.geometry = new THREE.BufferGeometry().setFromPoints(sim.blockTrail);
+    }
+    el('stCurSpeed').textContent = ('رصاصة: '+Math.abs(sim.vz).toFixed(2)+' | قطعة: '+Math.abs(sim.vzBlock).toFixed(3));
+  }
+
+  if(sim.flash){
+    sim.flashTimer += dt;
+    const t = sim.flashTimer/0.15;
+    if(t>=1){ scene.remove(sim.flash); sim.flash=null; }
+    else{
+      sim.flash.scale.setScalar(1+t*4);
+      sim.flash.material.opacity = 0.9*(1-t);
+    }
+  }
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.033);
+  step(dt);
+  renderer.render(scene, camera);
+}
+
+/* ============ ربط الواجهة ============ */
+el('bulletMass').addEventListener('input', ()=>{ el('valBulletMass').textContent = el('bulletMass').value; updateStatsPreCalc(); });
+el('bulletSpeed').addEventListener('input', ()=>{ el('valBulletSpeed').textContent = el('bulletSpeed').value; syncExitSpeedMax(); updateStatsPreCalc(); });
+el('blockMass').addEventListener('input', ()=>{ el('valBlockMass').textContent = el('blockMass').value; updateStatsPreCalc(); if(sim.phase==='idle') buildStaticScene(); });
+el('gunDistance').addEventListener('input', ()=>{ el('valDist').textContent = el('gunDistance').value; if(sim.phase==='idle') buildStaticScene(); });
+el('collisionType').addEventListener('change', ()=>{ updateResultSectionsVisibility(); syncExitSpeedMax(); updateStatsPreCalc(); });
+el('exitSpeed').addEventListener('input', ()=>{ el('valExitSpeed').textContent = el('exitSpeed').value; updateStatsPreCalc(); });
+
+el('fireBtn').addEventListener('click', fire);
+el('resetBtn').addEventListener('click', resetAll);
+
+updateResultSectionsVisibility();
+syncExitSpeedMax();
+initScene();
+buildStaticScene();
+updateStatsPreCalc();
+animate();
+</script>
+</body>
+</html>
