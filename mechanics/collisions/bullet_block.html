@@ -209,7 +209,7 @@ function initScene(){
 
   // ===== شعار دائري مطبوع على الأرضية =====
   const logoTexture = new THREE.TextureLoader().load('logo.png');
-  const logoMat = new THREE.MeshStandardMaterial({ map:logoTexture, transparent:true, roughness:0.6, depthWrite:false });
+  const logoMat = new THREE.MeshStandardMaterial({ map:logoTexture, transparent:true, opacity:0.28, roughness:0.6, depthWrite:false });
   const logoGeo = new THREE.CircleGeometry(1.5, 48);
   const logoFloor = new THREE.Mesh(logoGeo, logoMat);
   logoFloor.rotation.x = -Math.PI/2;
