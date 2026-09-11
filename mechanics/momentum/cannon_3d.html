@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>انطلاق قذيفة من مدفع - حفظ الزخم الخطي</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{background:#000;font-family:Arial,"Tahoma",sans-serif;color:#eef3f6}
+canvas{display:block;width:100vw;height:100vh;touch-action:none;cursor:grab}
+canvas.dragging{cursor:grabbing}
+
+.header{position:fixed;top:10px;left:50%;transform:translateX(-50%);text-align:center;
+ pointer-events:none;z-index:10;white-space:nowrap}
+.title{font-size:19px;font-weight:800;color:#e8c46a}
+.subtitle{margin-top:1px;font-size:12px;font-weight:700;color:#8fb3d9}
+.author{margin-top:3px;font-size:12px;font-weight:800;color:#f0c869}
+@media(max-width:640px){.title{font-size:15px}.subtitle{font-size:10px}.author{font-size:10px}}
+
+.panel-wrap{position:fixed;top:70px;right:14px;z-index:20;display:flex;flex-direction:column;align-items:center}
+.panel-logo{width:140px;height:140px;border-radius:50%;margin-bottom:8px;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.panel{position:static;background:rgba(20,22,25,.92);color:#eef3f6;
+ border-radius:12px;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,.4);width:250px;direction:rtl}
+.panel h3{margin:0 0 8px;font-size:14px;color:#bcd7e8}
+.row{margin-bottom:10px}
+.row label{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:3px}
+.row input[type=range]{width:100%}
+.panel small{color:#9fb3bd}
+
+.panel-buttons{display:flex;gap:8px;margin-top:12px}
+.panel-buttons button{border:0;border-radius:8px;padding:9px 10px;background:#355d70;color:#fff;
+ font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);flex:1}
+.panel-buttons button:hover{background:#274a5a}
+.panel-buttons button:disabled{background:#454f54;cursor:not-allowed}
+
+.hud{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.15);
+ direction:rtl;font-size:12px}
+.hud div{display:flex;justify-content:space-between;gap:10px;margin:3px 0}
+.hud b{color:#bcd7e8}
+.hud .zero{color:#66bb6a;font-weight:800}
+
+.hint{position:fixed;top:70px;left:14px;z-index:20;font-size:11px;color:#9fb3bd;
+ background:rgba(255,255,255,.08);padding:6px 10px;border-radius:10px;direction:rtl;max-width:40vw;pointer-events:none}
+
+.navigation{position:fixed;top:10px;right:14px;z-index:20;display:flex;gap:8px;direction:rtl}
+.navigation button{border:0;border-radius:8px;padding:8px 13px;background:#1d3f6e;color:#f0c869;
+ font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.navigation button:hover{background:#2a5688}
+@media(max-width:640px){.navigation{top:8px;right:8px;gap:5px}.navigation button{padding:7px 10px;font-size:11px}}
+
+@media(max-width:640px){.panel{width:180px;padding:10px 12px}.panel-wrap{top:64px}.panel-logo{width:104px;height:104px}.hud{font-size:11px;min-width:170px}.hint{display:none}}
+</style>
+</head>
+<body>
+<div class="navigation">
+  <button id="homeBtn" type="button">الرئيسية</button>
+  <button id="momentumBtn" type="button">العودة للزخم الخطي</button>
+</div>
+<div class="header">
+  <div class="title">انطلاق قذيفة من مدفع</div>
+  <div class="subtitle">تطبيق على حفظ الزخم الخطي في نظام معزول</div>
+  <div class="author">إعداد وتطوير الأستاذ: ماجد شلالده 0599870176</div>
+</div>
+
+<div class="panel-wrap">
+  <img class="panel-logo" src="logo.png" alt="شعار">
+  <div class="panel">
+  <h3>إعدادات الإطلاق</h3>
+  <div class="row">
+    <label><span>كتلة المدفع M</span><span id="Mval">60 kg</span></label>
+    <input type="range" id="M" min="30" max="150" value="60" step="1">
+  </div>
+  <div class="row">
+    <label><span>كتلة القذيفة m</span><span id="mval">6 kg</span></label>
+    <input type="range" id="m" min="2" max="10" value="6" step="0.5">
+  </div>
+  <div class="row">
+    <label><span>سرعة القذيفة v (بالنسبة للأرض)</span><span id="vval">15 m/s</span></label>
+    <input type="range" id="v0" min="8" max="22" value="15" step="0.5">
+  </div>
+  <div class="row">
+    <label><span>زاوية الإطلاق θ</span><span id="thval">30°</span></label>
+    <input type="range" id="theta" min="0" max="70" value="30" step="1">
+  </div>
+  <small>قبل الإطلاق، الزخم الكلي للنظام (مدفع + قذيفة) = صفر.</small>
+
+  <div class="panel-buttons">
+    <button id="fireBtn" type="button">إطلاق</button>
+    <button id="resetBtn" type="button">إعادة ضبط</button>
+  </div>
+
+  <div class="hud" id="hud">
+    <div><span>سرعة ارتداد المدفع (Vc)</span><b id="vc">0.00 m/s</b></div>
+    <div><span>زخم المدفع (M·Vc)</span><b id="pc">0.00 kg.m/s</b></div>
+    <div><span>زخم القذيفة الأفقي (m·v·cosθ)</span><b id="pp">0.00 kg.m/s</b></div>
+    <div><span>مجموع الزخم الأفقي</span><b class="zero" id="psum">0.00 kg.m/s</b></div>
+  </div>
+  </div>
+</div>
+
+<div class="hint">اسحب الخلفية لتدوير الكاميرا، وعجلة الفأرة للتكبير/التصغير</div>
+
+<canvas id="canvas"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+window.addEventListener('load', () => { if (typeof THREE !== 'undefined') init(); });
+
+function init(){
+const canvas = document.getElementById('canvas');
+const G = 9.8;
+
+// ------------------------------------------------------------
+// Scene / camera / renderer
+// ------------------------------------------------------------
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+scene.fog = new THREE.Fog(0x000000, 50, 150);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 400);
+const target = new THREE.Vector3(10, 3, 0);
+let camTheta = 0.55, camPhi = 1.2, camRadius = 42;
+function updateCamera(){
+  camPhi = Math.max(0.02, Math.min(3.12, camPhi));
+  camRadius = Math.max(15, Math.min(90, camRadius));
+  const x = target.x + camRadius*Math.sin(camPhi)*Math.sin(camTheta);
+  const z = target.z + camRadius*Math.sin(camPhi)*Math.cos(camTheta);
+  const y = target.y + camRadius*Math.cos(camPhi);
+  camera.position.set(x,y,z);
+  camera.lookAt(target);
+}
+updateCamera();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xb9c6cc, 0.8));
+const key = new THREE.DirectionalLight(0xffffff, 1.1);
+key.position.set(20, 30, 15);
+key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.left=-40; key.shadow.camera.right=60;
+key.shadow.camera.top=40; key.shadow.camera.bottom=-10;
+key.shadow.camera.far=100;
+scene.add(key);
+scene.add(new THREE.DirectionalLight(0xbcd7e8, 0.3).translateX(-20));
+
+// Ground: long rail track
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(220, 60),
+  new THREE.MeshStandardMaterial({color:0x14181c, roughness:0.95, transparent:true, opacity:0.35})
+);
+ground.rotation.x = -Math.PI/2;
+ground.position.set(60,0,0);
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Reference grid on the ground (helps read positions now that the ground is transparent)
+const grid = new THREE.GridHelper(220, 44, 0x4a5a63, 0x2a343a);
+grid.position.set(60, 0.02, 0);
+scene.add(grid);
+
+// Circular logo stamped on the ground near the cannon's starting position
+const logoTexture = new THREE.TextureLoader().load('logo.png');
+const logoDisc = new THREE.Mesh(
+  new THREE.CircleGeometry(6, 64),
+  new THREE.MeshBasicMaterial({map:logoTexture, transparent:true, depthWrite:false})
+);
+logoDisc.rotation.x = -Math.PI/2;
+logoDisc.position.set(0, 0.02, 0);
+scene.add(logoDisc);
+
+// rail line
+const railMat = new THREE.MeshStandardMaterial({color:0x8a97a0, roughness:0.6});
+const rail = new THREE.Mesh(new THREE.BoxGeometry(220, 0.15, 1.2), railMat);
+rail.position.set(60, 0.08, 0);
+rail.receiveShadow = true;
+scene.add(rail);
+
+// distance markers every 10m
+for(let x=-20; x<=180; x+=10){
+  const mark = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.05,1.4), new THREE.MeshStandardMaterial({color:0xaab6bd}));
+  mark.position.set(x,0.03,0);
+  scene.add(mark);
+}
+
+// ------------------------------------------------------------
+// Cannon (carriage + barrel)
+// ------------------------------------------------------------
+const CANNON_START_X = 0;
+const cannonGroup = new THREE.Group();
+scene.add(cannonGroup);
+
+const bodyMat = new THREE.MeshStandardMaterial({color:0x3f5661, roughness:0.4, metalness:0.5});
+const wheelMat = new THREE.MeshStandardMaterial({color:0x2a2f33, roughness:0.7});
+
+const carriage = new THREE.Mesh(new THREE.BoxGeometry(3.2,1.2,2), bodyMat);
+carriage.position.y = 1.1;
+carriage.castShadow = true;
+cannonGroup.add(carriage);
+
+function addWheel(z){
+  const w = new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,0.4,20), wheelMat);
+  w.rotation.x = Math.PI/2;
+  w.position.set(0, 0.7, z);
+  w.castShadow = true;
+  cannonGroup.add(w);
+}
+addWheel(-1.2); addWheel(1.2);
+
+const barrelPivot = new THREE.Group();
+barrelPivot.position.set(-0.3, 1.85, 0);
+cannonGroup.add(barrelPivot);
+
+const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.42,4.2,20), bodyMat);
+barrel.rotation.z = -Math.PI/2;
+barrel.position.x = 2.0;
+barrel.castShadow = true;
+barrelPivot.add(barrel);
+
+cannonGroup.position.x = CANNON_START_X;
+
+function setBarrelAngle(deg){
+  barrelPivot.rotation.z = deg * Math.PI/180;
+}
+
+// Projectile
+const projectile = new THREE.Mesh(new THREE.SphereGeometry(0.45,24,20),
+  new THREE.MeshStandardMaterial({color:0xc0392b, roughness:0.3, metalness:0.4}));
+projectile.castShadow = true;
+scene.add(projectile);
+
+// Anchor point at the narrow (muzzle) end of the barrel, as a proper
+// child of the barrel mesh, so its world position always follows the
+// barrel's current rotation/position automatically.
+const muzzleTip = new THREE.Object3D();
+// Position is in the cylinder's own pre-rotation local space (axis along Y):
+// +Y is the narrow (radiusTop) end, which is the muzzle opening.
+muzzleTip.position.set(0, 2.1, 0);
+barrel.add(muzzleTip);
+
+function muzzlePosition(){
+  muzzleTip.updateWorldMatrix(true, false);
+  const p = new THREE.Vector3();
+  muzzleTip.getWorldPosition(p);
+  return p;
+}
+function resetProjectilePose(){
+  const p = muzzlePosition();
+  projectile.position.copy(p);
+}
+
+// ------------------------------------------------------------
+// Physics state
+// ------------------------------------------------------------
+let M = 60, m = 6, v0 = 15, theta = 30;
+let firing = false, elapsed = 0, Vc = 0, landed = false;
+let projStart = new THREE.Vector3();
+
+function readInputs(){
+  M = parseFloat(document.getElementById('M').value);
+  m = parseFloat(document.getElementById('m').value);
+  v0 = parseFloat(document.getElementById('v0').value);
+  theta = parseFloat(document.getElementById('theta').value);
+  document.getElementById('Mval').textContent = M + ' kg';
+  document.getElementById('mval').textContent = m + ' kg';
+  document.getElementById('vval').textContent = v0 + ' m/s';
+  document.getElementById('thval').textContent = theta + '\u00b0';
+  setBarrelAngle(theta);
+  updateHUD(0,0);
+}
+function updateHUD(vc, running){
+  const rad = theta*Math.PI/180;
+  const pp = m*v0*Math.cos(rad);
+  const pc = M*vc;
+  document.getElementById('vc').textContent = vc.toFixed(2)+' m/s';
+  document.getElementById('pc').textContent = pc.toFixed(2)+' kg.m/s';
+  document.getElementById('pp').textContent = (running? pp.toFixed(2): '0.00')+' kg.m/s';
+  document.getElementById('psum').textContent = (pc+ (running?pp:0)).toFixed(2)+' kg.m/s';
+}
+
+function reset(){
+  firing = false; elapsed = 0; Vc = 0; landed = false;
+  cannonGroup.position.x = CANNON_START_X;
+  readInputs();
+  resetProjectilePose();
+  document.getElementById('fireBtn').disabled = false;
+}
+function fire(){
+  if (firing) return;
+  readInputs();
+  const rad = theta*Math.PI/180;
+  Vc = -(m * v0 * Math.cos(rad)) / M; // recoil velocity (x-direction), momentum conservation
+  projStart = muzzlePosition();
+  elapsed = 0; firing = true; landed = false;
+  document.getElementById('fireBtn').disabled = true;
+}
+
+['M','m','v0','theta'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', ()=>{ if(!firing) readInputs(); if(!firing) resetProjectilePose(); });
+});
+document.getElementById('fireBtn').addEventListener('click', fire);
+document.getElementById('resetBtn').addEventListener('click', reset);
+document.getElementById('homeBtn').addEventListener('click', ()=>{ window.location.href='../../index.html'; });
+document.getElementById('momentumBtn').addEventListener('click', ()=>{ window.location.href='linear-momentum.html'; });
+
+reset();
+
+// ------------------------------------------------------------
+// Camera controls (drag = orbit, wheel = zoom)
+// ------------------------------------------------------------
+let rotating=false, lastPX=0, lastPY=0;
+canvas.addEventListener('pointerdown', e=>{ rotating=true; lastPX=e.clientX; lastPY=e.clientY; canvas.classList.add('dragging'); canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointermove', e=>{
+  if(!rotating) return;
+  const dx=e.clientX-lastPX, dy=e.clientY-lastPY;
+  lastPX=e.clientX; lastPY=e.clientY;
+  camTheta -= dx*0.006; camPhi -= dy*0.006;
+  updateCamera();
+});
+function endDrag(){ rotating=false; canvas.classList.remove('dragging'); }
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+canvas.addEventListener('wheel', e=>{ e.preventDefault(); camRadius += e.deltaY*0.03; updateCamera(); }, {passive:false});
+
+// ------------------------------------------------------------
+// Animation loop
+// ------------------------------------------------------------
+let lastT = performance.now();
+function animate(){
+  const now = performance.now();
+  let dt = (now-lastT)/1000; lastT = now;
+  dt = Math.min(dt, 0.033);
+
+  if (firing){
+    elapsed += dt;
+    const rad = theta*Math.PI/180;
+    const vx = v0*Math.cos(rad), vy = v0*Math.sin(rad);
+    const px = projStart.x + vx*elapsed;
+    const py = projStart.y + vy*elapsed; // no gravity: straight-line motion
+    projectile.position.set(px, py, projStart.z);
+
+    cannonGroup.position.x = CANNON_START_X + Vc*elapsed;
+
+    updateHUD(Vc, 1);
+
+    if (elapsed > 8){
+      firing = false;
+      document.getElementById('fireBtn').disabled = false;
+    }
+  }
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+function resize(){
+  const w = innerWidth, h = innerHeight;
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
+  renderer.setSize(w,h);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+animate();
+}
+</script>
+</body>
+</html>
