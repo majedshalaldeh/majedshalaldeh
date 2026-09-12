@@ -73,7 +73,7 @@ canvas.dragging{cursor:grabbing}
   </div>
   <div class="row">
     <label><span>كتلة القذيفة m</span><span id="mval">6 kg</span></label>
-    <input type="range" id="m" min="1" max="50" value="6" step="0.1">
+    <input type="range" id="m" min="2" max="50" value="6" step="0.5">
   </div>
   <div class="row">
     <label><span>سرعة القذيفة v (بالنسبة للأرض)</span><span id="vval">15 m/s</span></label>
@@ -281,6 +281,70 @@ function updateHUD(vc, running){
   document.getElementById('psum').textContent = (pc+ (running?pp:0)).toFixed(2)+' kg.m/s';
 }
 
+// ------------------------------------------------------------
+// Cannon fire sound (synthesized, no external audio file needed)
+// ------------------------------------------------------------
+let audioCtx = null, masterGain = null;
+function ensureAudio(){
+  try{
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.9;
+      masterGain.connect(audioCtx.destination);
+    }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }catch(e){}
+}
+function playFireSound(){
+  ensureAudio();
+  if(!audioCtx || !masterGain) return;
+  const now = audioCtx.currentTime;
+
+  // deep sub-bass thump
+  const thump = audioCtx.createOscillator();
+  const thumpGain = audioCtx.createGain();
+  thump.type = 'sine';
+  thump.frequency.setValueAtTime(120, now);
+  thump.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+  thumpGain.gain.setValueAtTime(0.9, now);
+  thumpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+  thump.connect(thumpGain); thumpGain.connect(masterGain);
+  thump.start(now); thump.stop(now + 0.6);
+
+  // sharp noise crack (the "bang")
+  const dur = 0.5;
+  const buffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate*dur), audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++){
+    const env = Math.pow(1 - i/data.length, 2.2);
+    data[i] = (Math.random()*2-1) * env;
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(3000, now);
+  filter.frequency.exponentialRampToValueAtTime(300, now + dur);
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.8, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  noise.connect(filter); filter.connect(noiseGain); noiseGain.connect(masterGain);
+  noise.start(now); noise.stop(now + dur);
+
+  // faint echo/tail
+  const tail = audioCtx.createOscillator();
+  const tailGain = audioCtx.createGain();
+  tail.type = 'triangle';
+  tail.frequency.setValueAtTime(70, now + 0.15);
+  tail.frequency.exponentialRampToValueAtTime(25, now + 0.9);
+  tailGain.gain.setValueAtTime(0, now);
+  tailGain.gain.linearRampToValueAtTime(0.25, now + 0.18);
+  tailGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+  tail.connect(tailGain); tailGain.connect(masterGain);
+  tail.start(now); tail.stop(now + 0.9);
+}
+
 function reset(){
   firing = false; elapsed = 0; Vc = 0; landed = false;
   cannonGroup.position.x = CANNON_START_X;
@@ -290,12 +354,14 @@ function reset(){
 }
 function fire(){
   if (firing) return;
+  ensureAudio();
   readInputs();
   const rad = theta*Math.PI/180;
   Vc = -(m * v0 * Math.cos(rad)) / M; // recoil velocity (x-direction), momentum conservation
   projStart = muzzlePosition();
   elapsed = 0; firing = true; landed = false;
   document.getElementById('fireBtn').disabled = true;
+  playFireSound();
 }
 
 ['M','m','v0','theta'].forEach(id=>{
