@@ -249,7 +249,6 @@
   <div class="row-stat"><span>التغيّر ΔKE</span><span id="keDelta">—</span></div>
   <h3 style="margin-top:10px;">الارتفاع بعد الاصطدام الأول</h3>
   <div class="row-stat"><span><span class="dot b1"></span>الكرة الأولى</span><span id="peak1">—</span></div>
-  <div class="row-stat"><span><span class="dot b2"></span>الكرة الثانية</span><span id="peak2">—</span></div>
   <div class="row-stat" id="peak3row" style="display:none;"><span><span class="dot b3"></span>الكرة الثالثة</span><span id="peak3">—</span></div>
   <div id="log-box"></div>
 </div>
@@ -259,7 +258,7 @@
     <div class="title"><span class="dot b1"></span> الكرة الأولى (المزلق)</div>
     <div class="ctrl">
       <label>الكتلة <em id="m1val">1.0 kg</em></label>
-      <input type="range" id="m1" min="0.5" max="30" step="0.5" value="1">
+      <input type="range" id="m1" min="0.5" max="30" step="0.1" value="1">
     </div>
     <div class="ctrl">
       <label>ارتفاع المزلق <em id="h1val">3.0 m</em></label>
@@ -290,9 +289,9 @@
     </div>
     <div class="ctrl" id="m3ctrl" style="display:none;">
       <label>كتلة الكرة الثالثة <em id="m3val">1.0 kg</em></label>
-      <input type="range" id="m3" min="0.5" max="30" step="0.5" value="1">
+      <input type="range" id="m3" min="0.5" max="30" step="0.1" value="1">
       <label style="margin-top:6px;">السرعة الابتدائية <em id="v3initval">0.0 m/s</em></label>
-      <input type="range" id="v3init" min="-20" max="20" step="0.5" value="0">
+      <input type="range" id="v3init" min="-20" max="20" step="0.1" value="0">
     </div>
     <div class="action-btns">
       <button id="startBtn">▶ ابدأ المحاكاة</button>
@@ -305,15 +304,15 @@
     <div class="title"><span class="dot b2"></span> الكرة الثانية (على السطح)</div>
     <div class="ctrl">
       <label>الكتلة <em id="m2val">1.0 kg</em></label>
-      <input type="range" id="m2" min="0.5" max="30" step="0.5" value="1.5">
+      <input type="range" id="m2" min="0.5" max="30" step="0.1" value="1.5">
     </div>
     <div class="ctrl">
       <label>الموضع على السطح الأفقي <em id="pos2val">6.0 m</em></label>
-      <input type="range" id="pos2" min="-4" max="20" step="0.5" value="6">
+      <input type="range" id="pos2" min="-4" max="10" step="0.1" value="4">
     </div>
     <div class="ctrl">
       <label>السرعة الابتدائية <em id="v2initval">0.0 m/s</em></label>
-      <input type="range" id="v2init" min="-10" max="10" step="0.5" value="0">
+      <input type="range" id="v2init" min="-20" max="20" step="0.5" value="0">
     </div>
   </div>
 </div>
@@ -365,7 +364,7 @@
   let firstCollisionHappened = false;
   let audioCtx = null;
 
-  const ball1 = { x:0, vx:0, r:radiusFromMass(params.m1), mesh:null, stopped:true, airborne:false, vy:0, height:0, m:params.m1, peakHeightAfterCollision:0 };
+  const ball1 = { x:0, vx:0, r:radiusFromMass(params.m1), mesh:null, stopped:true, airborne:false, vy:0, height:0, m:params.m1, peakHeightAfterCollision:0, peakDetectPrevHeight:0, peakDetectRising:false, peakStopArmed:false };
   const ball2 = { x:0, vx:0, r:radiusFromMass(params.m2), mesh:null, stopped:true, airborne:false, vy:0, height:0, m:params.m2, peakHeightAfterCollision:0 };
   const ball3 = { x:0, vx:0, r:radiusFromMass(params.m3), mesh:null, stopped:true, airborne:false, vy:0, height:0, m:params.m3, peakHeightAfterCollision:0 };
 
@@ -386,6 +385,9 @@
     ball1.vy = 0; ball2.vy = 0; ball3.vy = 0;
     ball1.peakHeightAfterCollision = 0; ball2.peakHeightAfterCollision = 0; ball3.peakHeightAfterCollision = 0;
     firstCollisionHappened = false;
+    ball1.peakDetectRising = false;
+    ball1.peakDetectPrevHeight = 0;
+    ball1.peakStopArmed = false;
     ball1.stopped = false; ball2.stopped = false;
     ball3.stopped = !params.enable3;
     if (ball3.mesh) ball3.mesh.visible = params.enable3;
@@ -743,7 +745,6 @@
     el('keAfter').textContent = '—';
     el('keDelta').textContent = '—';
     el('peak1').textContent = '—';
-    el('peak2').textContent = '—';
     el('peak3').textContent = '—';
     setControlsEnabled(true);
     pauseBtn.disabled = true;
@@ -862,7 +863,11 @@
         B.x += overlap/2 + 0.001;
 
         collisionCount++;
-        if (collisionCount === 1) firstCollisionHappened = true;
+        if (collisionCount === 1){
+          firstCollisionHappened = true;
+          ball1.peakDetectPrevHeight = ball1.airborne ? ball1.height : terrainY(ball1.x, params.h1, params.h2);
+          ball1.peakDetectRising = false;
+        }
         el('collCount').textContent = String(collisionCount);
         el('keBefore').textContent = keBefore.toFixed(2)+' J';
         el('keAfter').textContent = keAfter.toFixed(2)+' J';
@@ -893,6 +898,20 @@
         const currentHeight = b.airborne ? b.height : terrainY(b.x, params.h1, params.h2);
         if (currentHeight > b.peakHeightAfterCollision) b.peakHeightAfterCollision = currentHeight;
       });
+
+      // stop the whole scene the instant ball1 (the first ball) reaches its peak height after the collision
+      if (!ball1.peakStopArmed && !ball1.stopped){
+        const h1Now = ball1.airborne ? ball1.height : terrainY(ball1.x, params.h1, params.h2);
+        const rising = h1Now > ball1.peakDetectPrevHeight + 1e-4;
+        if (ball1.peakDetectRising && !rising){
+          running = false;
+          ball1.peakStopArmed = true;
+          if (pauseBtn) pauseBtn.textContent = '▶ استئناف';
+          addLog('⏹ توقفت المحاكاة: بلغت الكرة الأولى أقصى ارتفاع لها بعد الاصطدام.');
+        }
+        ball1.peakDetectRising = rising;
+        ball1.peakDetectPrevHeight = h1Now;
+      }
     }
   }
 
@@ -911,7 +930,6 @@
 
     if (firstCollisionHappened){
       el('peak1').textContent = ball1.peakHeightAfterCollision.toFixed(2)+' m';
-      el('peak2').textContent = ball2.peakHeightAfterCollision.toFixed(2)+' m';
       if (params.enable3) el('peak3').textContent = ball3.peakHeightAfterCollision.toFixed(2)+' m';
     }
   }
