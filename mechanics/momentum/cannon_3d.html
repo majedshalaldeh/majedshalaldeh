@@ -69,15 +69,15 @@ canvas.dragging{cursor:grabbing}
   <h3>إعدادات الإطلاق</h3>
   <div class="row">
     <label><span>كتلة المدفع M</span><span id="Mval">60 kg</span></label>
-    <input type="range" id="M" min="30" max="150" value="60" step="1">
+    <input type="range" id="M" min="30" max="1000" value="60" step="1">
   </div>
   <div class="row">
     <label><span>كتلة القذيفة m</span><span id="mval">6 kg</span></label>
-    <input type="range" id="m" min="2" max="10" value="6" step="0.5">
+    <input type="range" id="m" min="1" max="50" value="6" step="0.1">
   </div>
   <div class="row">
     <label><span>سرعة القذيفة v (بالنسبة للأرض)</span><span id="vval">15 m/s</span></label>
-    <input type="range" id="v0" min="8" max="22" value="15" step="0.5">
+    <input type="range" id="v0" min="8" max="100" value="15" step="0.5">
   </div>
   <div class="row">
     <label><span>زاوية الإطلاق θ</span><span id="thval">30°</span></label>
@@ -169,7 +169,7 @@ const logoDisc = new THREE.Mesh(
   new THREE.MeshBasicMaterial({map:logoTexture, transparent:true, depthWrite:false})
 );
 logoDisc.rotation.x = -Math.PI/2;
-logoDisc.position.set(0, 0.02, 0);
+logoDisc.position.set(0, 0.17, 0);
 scene.add(logoDisc);
 
 // rail line

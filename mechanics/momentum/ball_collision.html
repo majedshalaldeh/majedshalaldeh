@@ -121,7 +121,7 @@
   <div id="navButtons">
     <!-- عدّل الروابط التالية لتطابق صفحات موقعك -->
     <a href="../../index.html">الصفحة الرئيسية</a>
-    <a href="collisions.html">العودة للتصادمات</a>
+    <a href="momentum.html">العودة للتصادمات</a>
   </div>
   <img id="logoTop" src="logo.png" alt="شعار الأستاذ ماجد شلالدة">
 
@@ -141,7 +141,7 @@
   <input type="range" id="gravity" min="1" max="25" step="0.1" value="9.8">
 
   <label>كتلة الكرة (kg) — <span class="val" id="valMass">1.0</span></label>
-  <input type="range" id="mass" min="0.1" max="10" step="0.1" value="1">
+  <input type="range" id="mass" min="0.1" max="20" step="0.1" value="1">
 
   <label>زمن التصادم / مدة الارتطام البصرية للأسطح الصلبة (ms) — <span class="val" id="valColl">150</span></label>
   <input type="range" id="collisionDuration" min="0" max="400" step="10" value="150">
@@ -157,24 +157,24 @@
 
     <div id="floorHeightBlock" class="modeblock">
       <label>الارتفاع عن سطح الأرض (m) — <span class="val" id="valHeight">8</span></label>
-      <input type="range" id="fallHeight" min="1" max="19" step="0.5" value="8">
+      <input type="range" id="fallHeight" min="1" max="35" step="0.1" value="8">
     </div>
 
     <label>السرعة الابتدائية للأسفل (m/s) — <span class="val" id="valV0">0</span></label>
-    <input type="range" id="fallV0" min="0" max="15" step="0.5" value="0">
+    <input type="range" id="fallV0" min="0" max="15" step="0.1" value="0">
 
     <label>السرعة بعد الاصطدام (٪ من سرعة الاصطدام) — <span class="val" id="valFallRest">78</span>%</label>
-    <input type="range" id="fallRest" min="0" max="100" step="1" value="78">
+    <input type="range" id="fallRest" min="0" max="100" step="0.1" value="78">
 
     <div id="ctrl-water-extra" class="modeblock">
       <label>الارتفاع عن سطح الماء (m) — <span class="val" id="valWaterHeight">6</span></label>
-      <input type="range" id="waterHeight" min="0.5" max="15" step="0.5" value="6">
+      <input type="range" id="waterHeight" min="0.5" max="15" step="0.1" value="6">
 
       <label>عمق سطح الماء عن الأرض (m) — <span class="val" id="valWaterDepth">4</span></label>
-      <input type="range" id="waterDepth" min="2" max="8" step="0.5" value="4">
+      <input type="range" id="waterDepth" min="2" max="8" step="0.1" value="4">
 
       <label>زمن التصادم/الدخول إلى الماء (ms) — <span class="val" id="valWaterColl">300</span></label>
-      <input type="range" id="waterCollDur" min="0" max="800" step="20" value="300">
+      <input type="range" id="waterCollDur" min="0" max="800" step="10" value="300">
     </div>
   </div>
 
@@ -182,26 +182,26 @@
   <div id="ctrl-rise" class="modeblock">
     <div class="section-title">حركة الصعود العمودي</div>
     <label>ارتفاع السقف عن الأرض (m) — <span class="val" id="valCeil">14</span></label>
-    <input type="range" id="ceilHeight" min="4" max="19" step="0.5" value="14">
+    <input type="range" id="ceilHeight" min="2.5" max="19" step="0.1" value="14">
 
     <label>السرعة الابتدائية للأعلى (m/s) — <span class="val" id="valRiseV0">10</span></label>
-    <input type="range" id="riseV0" min="1" max="15" step="0.5" value="10">
+    <input type="range" id="riseV0" min="1" max="25" step="0.1" value="10">
 
     <label>السرعة بعد الاصطدام (٪ من سرعة الاصطدام) — <span class="val" id="valCeilRest">70</span>%</label>
-    <input type="range" id="ceilRest" min="20" max="100" step="1" value="70">
+    <input type="range" id="ceilRest" min="20" max="100" step="0.1" value="70">
   </div>
 
   <!-- ===== جدار رأسي ===== -->
   <div id="ctrl-wall" class="modeblock">
     <div class="section-title">حركة على أرضية ملساء (بلا احتكاك)</div>
     <label>السرعة الابتدائية (m/s) — <span class="val" id="valWallSpeed">8</span></label>
-    <input type="range" id="wallSpeed" min="1" max="15" step="0.5" value="8">
+    <input type="range" id="wallSpeed" min="1" max="15" step="0.1" value="8">
 
     <label>زاوية السقوط عن العمود القائم (الناظم) على مستوى الجدار (°) — <span class="val" id="valWallAngle">30</span></label>
     <input type="range" id="wallAngle" min="-75" max="75" step="1" value="30">
 
     <label>السرعة بعد الاصطدام (٪ من السرعة قبل الاصطدام) — <span class="val" id="valWallRest">100</span>%</label>
-    <input type="range" id="wallRest" min="30" max="100" step="1" value="100">
+    <input type="range" id="wallRest" min="30" max="100" step="0.1" value="100">
   </div>
 
   <div class="row">
@@ -482,8 +482,8 @@ function updateSurfaceVisibility(){
   surfaces.waterBody.visible = state.mode==='water';
   surfaces.poolRim.visible = state.mode==='water';
   surfaces.baseFloor.visible = (state.mode==='wall' || state.mode==='water');
-  surfaces.logoFloor.visible = (state.mode!=='wall');
-  surfaces.logoWall.visible = (state.mode==='wall');
+  surfaces.logoFloor.visible = true;
+  surfaces.logoWall.visible = false;
 }
 
 function repositionSurfaces(){
