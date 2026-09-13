@@ -234,7 +234,7 @@ canvas.addEventListener('click', (ev) => {
 
     // وضع عنصر جديد (يستبدل أي عنصر سابق في نفس الموضع)
     const defaults = {
-        wire: {}, resistor: { value: 10 }, battery: { value: 9, flipped: false },
+        wire: {}, resistor: { value: 10 }, battery: { value: 9, flipped: false, internalR: 0 },
         switch: { closed: true }, lamp: { value: 15 }, ammeter: {}, voltmeter: {}
     };
     edgeComponents[key] = {
@@ -242,6 +242,7 @@ canvas.addEventListener('click', (ev) => {
         value: defaults[currentTool].value,
         flipped: defaults[currentTool].flipped || false,
         closed: defaults[currentTool].closed !== undefined ? defaults[currentTool].closed : true,
+        internalR: defaults[currentTool].internalR || 0,
         name: '',
         id: idCounter++
     };
@@ -262,13 +263,15 @@ function renderProps() {
     }
     const c = edgeComponents[selectedKey];
     const typeName = typeNames[c.type];
-    let html = `<label>العنصر #${c.id} — ${typeName}</label>`;
+    let html = `<label>${c.name ? `"${c.name}" — ` : ''}${typeName}</label>`;
     html += `<input type="text" id="nameInput" placeholder="اسم اختياري (مثال: R1، مصباح الغرفة)" value="${c.name || ''}" style="width:100%; padding:6px; border-radius:6px; border:none; font-family:inherit; margin-bottom:8px;">`;
 
     if (c.type === 'resistor' || c.type === 'lamp') {
         html += `<input type="number" id="valInput" min="0.1" step="0.5" value="${c.value}"> <span style="font-size:0.72rem;color:#94a3b8">أوم (Ω)</span>`;
     } else if (c.type === 'battery') {
         html += `<input type="number" id="valInput" min="0.1" step="0.5" value="${c.value}"> <span style="font-size:0.72rem;color:#94a3b8">فولت (V)</span>`;
+        html += `<label style="margin-top:8px;">المقاومة الداخلية للبطارية</label>`;
+        html += `<input type="number" id="rintInput" min="0" step="0.1" value="${c.internalR || 0}"> <span style="font-size:0.72rem;color:#94a3b8">أوم (Ω) — اتركها 0 لبطارية مثالية</span>`;
     } else if (c.type === 'ammeter' || c.type === 'voltmeter') {
         html += `<label style="margin-top:4px; font-size:0.75rem;">أداة قياس مثالية — لا تحتاج ضبط قيمة</label>`;
     } else if (c.type === 'switch') {
@@ -290,6 +293,11 @@ function renderProps() {
     });
     const flipBtn = document.getElementById('flipBtn');
     if (flipBtn) flipBtn.addEventListener('click', () => { c.flipped = !c.flipped; recomputeAndDraw(); });
+    const rintInput = document.getElementById('rintInput');
+    if (rintInput) rintInput.addEventListener('input', () => {
+        const v = parseFloat(rintInput.value);
+        if (!isNaN(v) && v >= 0) { c.internalR = v; recomputeAndDraw(); }
+    });
     const toggleBtn = document.getElementById('toggleBtn');
     if (toggleBtn) toggleBtn.addEventListener('click', () => { c.closed = !c.closed; renderProps(); recomputeAndDraw(); });
     const delBtn = document.getElementById('delBtn');
@@ -366,6 +374,7 @@ function solveCircuit() {
         const ip = idx(p), inn = idx(nn);
         if (ip >= 0) { M[ip][kk] += 1; M[kk][ip] += 1; }
         if (inn >= 0) { M[inn][kk] -= 1; M[kk][inn] -= 1; }
+        M[kk][kk] -= (c.internalR || 0); // مقاومة داخلية: تُنقص الجهد الفعلي بمقدار I×Rint عند سحب تيار
         rhs[kk] = circuitOn ? c.value : 0; // إيقاف الدائرة = كل البطاريات تصبح 0 فولت
     });
 
@@ -383,7 +392,8 @@ function solveCircuit() {
             const kIdx = batteries.indexOf(c);
             const Ibat = x[n + kIdx];
             current = c.flipped ? -Ibat : Ibat; // اتجاه التيار الفعلي داخل البطارية (يُكمل الحلقة، عكس اتجاهه في الفرع الخارجي)
-            voltage = circuitOn ? c.value : 0;
+            const p = c.flipped ? c.b : c.a, nn = c.flipped ? c.a : c.b;
+            voltage = circuitOn ? (V[p] - V[nn]) : 0; // الجهد الفعلي بين الطرفين (يقل عن EMF بمقدار I×Rint عند سحب تيار)
         } else {
             const R = getResistance(c);
             voltage = V[c.a] - V[c.b];
@@ -419,47 +429,150 @@ function drawZigzagOnEdge(p1, p2) {
     ctx.stroke();
 }
 
-function drawBatteryOnEdge(p1, p2, flipped) {
-    const { ux, uy, nx, ny } = unitVec(p1, p2);
-    const midX = (p1.x + p2.x) / 2, midY = (p1.y + p2.y) / 2;
-    const gap = 8;
-    const plus = flipped ? { x: midX + ux * gap, y: midY + uy * gap } : { x: midX - ux * gap, y: midY - uy * gap };
-    const minus = flipped ? { x: midX - ux * gap, y: midY - uy * gap } : { x: midX + ux * gap, y: midY + uy * gap };
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(plus.x - nx * 14, plus.y - ny * 14);
-    ctx.lineTo(plus.x + nx * 14, plus.y + ny * 14);
-    ctx.stroke();
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.moveTo(minus.x - nx * 7, minus.y - ny * 7);
-    ctx.lineTo(minus.x + nx * 7, minus.y + ny * 7);
-    ctx.stroke();
+// شفرة ألوان المقاومات القياسية (لتزيين جسم المقاومة الواقعي بألوان تمثّل قيمتها فعليًا)
+const RESISTOR_DIGIT_COLORS = ['#1a1a1a', '#8B4513', '#FF3B30', '#FF9500', '#FFD60A', '#34C759', '#0A84FF', '#AF52DE', '#8E8E93', '#FFFFFF'];
+function resistorColorBands(value) {
+    let v = Math.max(value, 0.1), exp = 0;
+    while (v >= 100) { v /= 10; exp++; }
+    while (v < 10) { v *= 10; exp--; }
+    const d1 = Math.floor(v / 10), d2 = Math.floor(v) % 10;
+    const c1 = RESISTOR_DIGIT_COLORS[d1], c2 = RESISTOR_DIGIT_COLORS[d2];
+    let c3;
+    if (exp >= 0 && exp <= 9) c3 = RESISTOR_DIGIT_COLORS[exp];
+    else if (exp === -1) c3 = '#D4AF37'; // ذهبي = ×0.1
+    else c3 = '#C0C0C0'; // فضي = ×0.01
+    return [c1, c2, c3];
 }
 
+function roundRectPath(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+}
+
+// جسم مقاومة واقعي: أسطوانة بيج مع أطواق ألوان تمثّل القيمة فعليًا (بدل الزجزاج التخطيطي البسيط)
+function drawResistorBody(p1, p2, value, strokeColor) {
+    const { ux, uy, len } = unitVec(p1, p2);
+    const bodyLen = Math.min(len * 0.5, 42), bodyHalfW = 8;
+    const midX = (p1.x + p2.x) / 2, midY = (p1.y + p2.y) / 2;
+    const startX = midX - ux * bodyLen / 2, startY = midY - uy * bodyLen / 2;
+    const endX = midX + ux * bodyLen / 2, endY = midY + uy * bodyLen / 2;
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y); ctx.lineTo(startX, startY);
+    ctx.moveTo(endX, endY); ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
+
+    const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    ctx.save();
+    ctx.translate(midX, midY);
+    ctx.rotate(angle);
+    roundRectPath(-bodyLen / 2, -bodyHalfW, bodyLen, bodyHalfW * 2, 5);
+    ctx.fillStyle = '#e3c193';
+    ctx.fill();
+    ctx.strokeStyle = '#8a6d3b';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    const colors = resistorColorBands(value);
+    const bandW = 4, spacing = bodyLen / 4.2;
+    colors.forEach((col, i) => {
+        ctx.fillStyle = col;
+        const bx = -bodyLen / 2 + spacing * (i + 0.9);
+        ctx.fillRect(bx, -bodyHalfW + 1, bandW, bodyHalfW * 2 - 2);
+    });
+    ctx.restore();
+}
+
+// بطارية واقعية: خليتان (طويل/قصير متكرر) + علامتا + و− صريحتان
+function drawBatteryOnEdge(p1, p2, flipped, internalR) {
+    const { ux, uy, nx, ny } = unitVec(p1, p2);
+    const midX = (p1.x + p2.x) / 2, midY = (p1.y + p2.y) / 2;
+    const cellGap = 9;
+    const order = flipped ? ['short', 'long', 'short', 'long'] : ['long', 'short', 'long', 'short'];
+    const offsets = [-1.5, -0.5, 0.5, 1.5].map(m => m * cellGap);
+    order.forEach((type, i) => {
+        const cx = midX + ux * offsets[i], cy = midY + uy * offsets[i];
+        const halfLen = type === 'long' ? 15 : 8;
+        ctx.lineWidth = type === 'long' ? 2.5 : 6;
+        ctx.beginPath();
+        ctx.moveTo(cx - nx * halfLen, cy - ny * halfLen);
+        ctx.lineTo(cx + nx * halfLen, cy + ny * halfLen);
+        ctx.stroke();
+    });
+    const plusSide = flipped ? 1 : -1; // أي طرف من الأربعة (الأول أو الأخير) هو الموجب
+    const plusOff = plusSide === -1 ? offsets[0] - 10 : offsets[3] + 10;
+    const minusOff = plusSide === -1 ? offsets[3] + 10 : offsets[0] - 10;
+
+    // مقاومة داخلية صغيرة (زجزاج) على جهة الطرف الموجب — تمثّل بصريًا EMF متصلة بمقاومة داخلية على التسلسل
+    if (internalR > 0) {
+        const zStart = plusOff + plusSide * 8, zEnd = plusOff + plusSide * 22;
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        for (let i = 0; i <= 5; i++) {
+            const frac = i / 5;
+            const off = zStart + (zEnd - zStart) * frac;
+            const perp = (i % 2 === 0) ? 0 : (i % 4 === 1 ? 4 : -4);
+            const px = midX + ux * off + nx * perp, py = midY + uy * off + ny * perp;
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+    }
+
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillStyle = '#ef4444';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('+', midX + ux * plusOff, midY + uy * plusOff);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('−', midX + ux * minusOff, midY + uy * minusOff);
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+}
+
+// مفتاح واقعي: مقبض بمقبس دائري وقوس متقطّع يوضّح مسار الحركة
 function drawSwitchOnEdge(p1, p2, closed) {
     const { ux, uy, nx, ny, len } = unitVec(p1, p2);
     const stub1 = { x: p1.x + ux * len * 0.35, y: p1.y + uy * len * 0.35 };
     const stub2 = { x: p1.x + ux * len * 0.65, y: p1.y + uy * len * 0.65 };
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y); ctx.lineTo(stub1.x, stub1.y);
     ctx.moveTo(stub2.x, stub2.y); ctx.lineTo(p2.x, p2.y);
     ctx.stroke();
-    ctx.beginPath(); ctx.arc(stub1.x, stub1.y, 3.5, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(stub2.x, stub2.y, 3.5, 0, Math.PI * 2); ctx.fill();
+    // مقبسا التلامس (دائرتان معدنيتان)
+    ctx.fillStyle = '#cbd5e1';
+    ctx.beginPath(); ctx.arc(stub1.x, stub1.y, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(stub2.x, stub2.y, 4, 0, Math.PI * 2); ctx.fill();
+
     if (closed) {
+        ctx.lineWidth = 3.5;
         ctx.beginPath(); ctx.moveTo(stub1.x, stub1.y); ctx.lineTo(stub2.x, stub2.y); ctx.stroke();
     } else {
+        // قوس متقطع خفيف يوضّح مسار ارتفاع الذراع
+        ctx.save();
+        ctx.strokeStyle = 'rgba(167,139,250,0.35)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath();
+        ctx.moveTo(stub1.x, stub1.y);
+        ctx.lineTo(stub1.x + ux * len * 0.3 + nx * 20, stub1.y + uy * len * 0.3 + ny * 20);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
         const liftX = stub1.x + ux * len * 0.22 + nx * 16;
         const liftY = stub1.y + uy * len * 0.22 + ny * 16;
+        ctx.lineWidth = 3.5;
         ctx.beginPath(); ctx.moveTo(stub1.x, stub1.y); ctx.lineTo(liftX, liftY); ctx.stroke();
+        // مقبض الذراع (كرة صغيرة في نهايته)
+        ctx.fillStyle = '#a78bfa';
+        ctx.beginPath(); ctx.arc(liftX, liftY, 4, 0, Math.PI * 2); ctx.fill();
     }
 }
-
-// مقياس سطوع مطلق (وليس نسبيًا لأقوى مصباح في المشهد) — لأن المقياس النسبي كان
-// يجعل أي مصباح وحيد يظهر دائمًا بأقصى سطوع (100%) بغضّ النظر عن قيمة تياره الفعلية.
-// 3 واط ≈ السطوع الأقصى المرجعي؛ عند هذه القيمة أو أعلى يظهر المصباح بكامل توهجه.
-const REFERENCE_POWER = 3;
 
 function lerpColor(c1, c2, t) {
     const p1 = parseInt(c1.slice(1), 16), p2 = parseInt(c2.slice(1), 16);
@@ -469,37 +582,75 @@ function lerpColor(c1, c2, t) {
     return `rgb(${r},${g},${b})`;
 }
 
+// مرجع القدرة عند السطوع الأقصى (واط). العلاقة الآن خطّية تمامًا (طردية) مع القدرة،
+// حتى يرى الطالب فرقًا مباشرًا ومتناسبًا بين مصباحين يحملان تيارين مختلفين.
+const REFERENCE_POWER = 10;
+
+// مصباح واقعي: حبابة زجاجية مستديرة + فتيل متوهّج بدل رمز X التخطيطي المجرد
 function drawLampOnEdge(p1, p2, power) {
     const { ux, uy, len } = unitVec(p1, p2);
     const midX = (p1.x + p2.x) / 2, midY = (p1.y + p2.y) / 2;
-    const r = 15;
+    const r = 16;
+
+    // تناسب طردي مباشر (خطّي) بين السطوع والقدرة المستنفَذة P = I²R
+    const brightness = Math.max(0, Math.min(1, power / REFERENCE_POWER));
+
+    // هالة توهّج واسعة خلف الحبابة (متدرّجة شعاعيًا) — أبرز بكثير من مجرد ظل الكانفاس البسيط
+    if (brightness > 0.01) {
+        const haloR = r * (2.2 + brightness * 2.5);
+        const grad = ctx.createRadialGradient(midX, midY, r * 0.3, midX, midY, haloR);
+        grad.addColorStop(0, `rgba(254,240,138,${0.55 * brightness})`);
+        grad.addColorStop(0.5, `rgba(253,224,71,${0.25 * brightness})`);
+        grad.addColorStop(1, 'rgba(253,224,71,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(midX, midY, haloR, 0, Math.PI * 2); ctx.fill();
+    }
+
+    ctx.strokeStyle = '#fde047';
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y); ctx.lineTo(midX - ux * r, midY - uy * r);
     ctx.moveTo(midX + ux * r, midY + uy * r); ctx.lineTo(p2.x, p2.y);
     ctx.stroke();
 
-    // مقياس مطلق مع تحويل غير خطّي (أُس 0.35) يوسّع نطاق الفروق المرئية بين
-    // التيارات الضعيفة والقوية، بدل مقارنة المصباح بغيره من المصابيح
-    const relative = Math.max(0, Math.min(1, power / REFERENCE_POWER));
-    const brightness = Math.pow(relative, 0.35);
-
-    if (brightness > 0.02) {
-        const glowColor = lerpColor('#7c4a03', '#fffdf0', brightness); // من توهج خافت بني إلى أبيض مصفرّ ساطع
-        ctx.save();
+    ctx.save();
+    if (brightness > 0.01) {
+        const glassColor = lerpColor('#2a2110', '#fffdf0', brightness);
         ctx.shadowColor = '#fde047';
-        ctx.shadowBlur = 6 + brightness * 34;
-        ctx.fillStyle = glowColor;
+        ctx.shadowBlur = 10 + brightness * 60;
+        ctx.fillStyle = glassColor;
+        // طبقة إضافية من نفس التوهّج تُرسم مرتين لتكثيف الظل الساطع حول الحبابة
         ctx.beginPath(); ctx.arc(midX, midY, r, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
+        ctx.beginPath(); ctx.arc(midX, midY, r, 0, Math.PI * 2); ctx.fill();
     } else {
         ctx.fillStyle = '#1e293b';
         ctx.beginPath(); ctx.arc(midX, midY, r, 0, Math.PI * 2); ctx.fill();
     }
+    ctx.restore();
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 1.3;
     ctx.beginPath(); ctx.arc(midX, midY, r, 0, Math.PI * 2); ctx.stroke();
+
+    // الفتيل (خيط متعرّج) يتوهّج تدريجيًا من بني خافت إلى أبيض ساطع حسب القدرة
+    const filamentColor = lerpColor('#78350f', '#fff7ed', brightness);
+    ctx.save();
+    if (brightness > 0.3) {
+        ctx.shadowColor = '#fffbeb';
+        ctx.shadowBlur = brightness * 12;
+    }
+    ctx.strokeStyle = filamentColor;
+    ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.moveTo(midX - r * 0.6, midY - r * 0.6); ctx.lineTo(midX + r * 0.6, midY + r * 0.6);
-    ctx.moveTo(midX + r * 0.6, midY - r * 0.6); ctx.lineTo(midX - r * 0.6, midY + r * 0.6);
+    ctx.moveTo(midX - 7, midY + 5);
+    ctx.lineTo(midX - 3.5, midY - 5);
+    ctx.lineTo(midX, midY + 5);
+    ctx.lineTo(midX + 3.5, midY - 5);
+    ctx.lineTo(midX + 7, midY + 5);
     ctx.stroke();
+    ctx.restore();
+    // قاعدة تلامس معدنية أسفل الحبابة
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(midX - 5, midY + r - 2, 10, 4);
 
     // عرض القدرة الفعلية بجانب المصباح ليدرك الطالب الفرق رقميًا لا بصريًا فقط
     ctx.fillStyle = '#cbd5e1';
@@ -507,22 +658,54 @@ function drawLampOnEdge(p1, p2, power) {
     ctx.fillText(`${power.toFixed(2)}W`, midX + r + 4, midY + 4);
 }
 
-function drawMeterOnEdge(p1, p2, letter, color) {
+// عداد واقعي: وجه دائري بمقياس مدرّج وإبرة تنحرف بحسب نسبة القراءة
+function drawMeterOnEdge(p1, p2, letter, color, reading, maxScale) {
     const { ux, uy } = unitVec(p1, p2);
     const midX = (p1.x + p2.x) / 2, midY = (p1.y + p2.y) / 2;
-    const r = 15;
+    const r = 16;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y); ctx.lineTo(midX - ux * r, midY - uy * r);
     ctx.moveTo(midX + ux * r, midY + uy * r); ctx.lineTo(p2.x, p2.y);
     ctx.stroke();
+
+    // وجه العداد (لا يدور مع اتجاه السلك، ليبقى مقروءًا دائمًا)
     ctx.fillStyle = '#0b1220';
     ctx.beginPath(); ctx.arc(midX, midY, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(midX, midY, r - 3, 0, Math.PI * 2); ctx.stroke();
     ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(midX, midY, r, 0, Math.PI * 2); ctx.stroke();
+
+    // مدرّجات صغيرة على محيط الوجه (تصميم عداد تناظري)
+    for (let a = -120; a <= 120; a += 30) {
+        const rad = a * Math.PI / 180 - Math.PI / 2;
+        const x1 = midX + Math.cos(rad) * (r - 2), y1 = midY + Math.sin(rad) * (r - 2);
+        const x2 = midX + Math.cos(rad) * (r - 5), y2 = midY + Math.sin(rad) * (r - 5);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+
+    // الإبرة: تنحرف من -120° إلى +120° بحسب نسبة القراءة إلى المقياس الأقصى
+    const frac = Math.max(0, Math.min(1, Math.abs(reading || 0) / maxScale));
+    const needleAngle = (-120 + frac * 240) * Math.PI / 180 - Math.PI / 2;
+    ctx.strokeStyle = '#ef4444';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(midX, midY);
+    ctx.lineTo(midX + Math.cos(needleAngle) * (r - 7), midY + Math.sin(needleAngle) * (r - 7));
+    ctx.stroke();
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath(); ctx.arc(midX, midY, 1.8, 0, Math.PI * 2); ctx.fill();
+
     ctx.fillStyle = color;
-    ctx.font = 'bold 15px sans-serif';
+    ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(letter, midX, midY);
+    ctx.fillText(letter, midX, midY + 8);
     ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
 }
 
@@ -559,24 +742,19 @@ function draw(exportMode) {
             if (c.type === 'wire') {
                 ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
             } else {
-                drawMeterOnEdge(p1, p2, 'A', isSelected ? '#f8fafc' : color);
+                drawMeterOnEdge(p1, p2, 'A', isSelected ? '#f8fafc' : color, r ? r.current : 0, 5);
             }
         } else if (c.type === 'voltmeter') {
-            drawMeterOnEdge(p1, p2, 'V', isSelected ? '#f8fafc' : color);
+            drawMeterOnEdge(p1, p2, 'V', isSelected ? '#f8fafc' : color, r ? r.voltage : 0, 24);
         } else if (c.type === 'resistor') {
-            const { ux, uy, len } = unitVec(p1, p2);
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y); ctx.lineTo(p1.x + ux * len * 0.25, p1.y + uy * len * 0.25);
-            ctx.moveTo(p1.x + ux * len * 0.75, p1.y + uy * len * 0.75); ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-            drawZigzagOnEdge(p1, p2);
+            drawResistorBody(p1, p2, c.value, isSelected ? '#f8fafc' : color);
         } else if (c.type === 'battery') {
             const { ux, uy, len } = unitVec(p1, p2);
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y); ctx.lineTo(p1.x + ux * len * 0.4, p1.y + uy * len * 0.4);
             ctx.moveTo(p1.x + ux * len * 0.6, p1.y + uy * len * 0.6); ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
-            drawBatteryOnEdge(p1, p2, c.flipped);
+            drawBatteryOnEdge(p1, p2, c.flipped, c.internalR || 0);
         } else if (c.type === 'switch') {
             drawSwitchOnEdge(p1, p2, c.closed);
         } else if (c.type === 'lamp') {
@@ -584,19 +762,19 @@ function draw(exportMode) {
             drawLampOnEdge(p1, p2, circuitOn ? power : 0);
         }
 
-        // تسمية القيمة + رقم العنصر
+        // تسمية القيمة (بدون رقم تعريف تلقائي) + اسم مخصص إن وُجد
         const midX = (p1.x + p2.x) / 2, midY = (p1.y + p2.y) / 2;
         ctx.fillStyle = '#f8fafc';
         ctx.font = 'bold 11px sans-serif';
-        const tag = c.name ? c.name : `#${c.id}`;
+        const tag = c.name ? c.name + ' ' : '';
         let label;
-        if (c.type === 'resistor' || c.type === 'lamp') label = `${tag} ${c.value}Ω`;
-        else if (c.type === 'battery') label = `${tag} ${c.value}V`;
-        else if (c.type === 'switch') label = `${tag} ${c.closed ? '(مغلق)' : '(مفتوح)'}`;
-        else if (c.type === 'ammeter') label = `${tag} ${r ? Math.abs(r.current).toFixed(2) + 'A' : ''}`;
-        else if (c.type === 'voltmeter') label = `${tag} ${r ? Math.abs(r.voltage).toFixed(2) + 'V' : ''}`;
-        else label = tag;
-        ctx.fillText(label, midX + 8, midY - 22);
+        if (c.type === 'resistor' || c.type === 'lamp') label = `${tag}${c.value}Ω`;
+        else if (c.type === 'battery') label = `${tag}${c.value}V${c.internalR > 0 ? ' (r=' + c.internalR + 'Ω)' : ''}`;
+        else if (c.type === 'switch') label = `${tag}${c.closed ? '(مغلق)' : '(مفتوح)'}`;
+        else if (c.type === 'ammeter') label = `${tag}${r ? Math.abs(r.current).toFixed(2) + 'A' : ''}`;
+        else if (c.type === 'voltmeter') label = `${tag}${r ? Math.abs(r.voltage).toFixed(2) + 'V' : ''}`;
+        else label = tag.trim();
+        if (label) ctx.fillText(label, midX + 8, midY - 22);
 
         // نقاط التيار المتحركة (تُستبعد عند التصدير كصورة لتبقى الصورة نظيفة)
         if (!exportMode && r && Math.abs(r.current) > 1e-4) {
@@ -644,8 +822,9 @@ function renderResults() {
         const dir = r.current >= 0 ? '(من طرفه الأول إلى الثاني)' : '(من طرفه الثاني إلى الأول)';
         let extra = '';
         if (c.type === 'switch') extra = c.closed ? ' [مغلق]' : ' [مفتوح]';
-        const tag = c.name ? `#${c.id} "${c.name}"` : `#${c.id}`;
-        text += `${tag} ${typeName}${extra}  |  I = ${Math.abs(r.current).toFixed(3)} A ${dir}  |  V = ${Math.abs(r.voltage).toFixed(2)} V\n`;
+        if (c.type === 'battery' && c.internalR > 0) extra = ` [مقاومة داخلية ${c.internalR}Ω، EMF=${c.value}V]`;
+        const tag = c.name ? `"${c.name}" ` : '';
+        text += `${tag}${typeName}${extra}  |  I = ${Math.abs(r.current).toFixed(3)} A ${dir}  |  V = ${Math.abs(r.voltage).toFixed(2)} V\n`;
     });
     if (solveResult.warning) text += `\n<span class="warn">⚠️ ${solveResult.warning}</span>`;
     resultsList.innerHTML = text;
