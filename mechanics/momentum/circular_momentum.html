@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>التغير في الزخم الخطي في المسار الدائري</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:Arial,"Tahoma",sans-serif;background:#071018;color:#eef4f7}canvas{display:block;width:100vw;height:100vh;cursor:default}
+.navigation{position:fixed;top:12px;right:14px;z-index:10;display:flex;gap:7px;direction:rtl}
+.navigation button{border:0;border-radius:8px;padding:8px 13px;background:#1d3f6e;color:#f0c869;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.navigation button:hover{background:#2a5688}
+.panel-logo{display:block;width:112px;height:112px;object-fit:contain;border-radius:50%;margin:0 auto 12px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.title em{display:block;font-style:normal;font-size:12px;font-weight:800;color:#f0c869;margin-top:4px}
+.panel{position:fixed;right:18px;top:82px;width:285px;z-index:5;background:rgba(16,22,28,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px;box-shadow:0 8px 28px rgba(0,0,0,.4)}
+h2{margin:0 0 4px;color:#e9c66b;font-size:17px;text-align:center}.sub{font-size:11px;color:#9fc0d6;text-align:center;margin-bottom:12px}.row{margin:10px 0}label{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px}input[type=range]{width:100%}.value{color:#e9c66b}.buttons{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}.buttons button{min-width:0}button{border:0;border-radius:8px;padding:9px 8px;background:#245477;color:#fff;font-family:inherit;font-weight:700;cursor:pointer;flex:1}button:hover{background:#316b96}button.active{background:#8a6420}
+.info{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;line-height:1.8}.info div{display:flex;justify-content:space-between;gap:8px}.info b{color:#e9c66b}.legend{margin-top:9px;font-size:11px;color:#b8c8d0;line-height:1.7}.title{position:fixed;top:16px;left:50%;transform:translateX(-50%);text-align:center;z-index:4;pointer-events:none;white-space:nowrap}.title strong{font-size:20px;color:#e9c66b}.title span{display:block;font-size:12px;color:#a9c5d7;margin-top:3px}.hint{position:fixed;left:18px;bottom:16px;z-index:5;background:rgba(16,22,28,.9);padding:9px 12px;border-radius:9px;color:#b9c8cf;font-size:11px;max-width:390px;line-height:1.6}
+@media(max-width:700px){
+ .navigation{top:7px;right:7px;gap:4px}.navigation button{padding:7px 9px;font-size:10px}
+ .panel{width:245px;right:8px;top:108px}
+ .panel-logo{width:88px;height:88px}
+ .title{left:46%;top:6px}.title strong{font-size:14px}.title span{font-size:9px}.title em{font-size:9px}
+ .hint{left:8px;bottom:8px;font-size:10px;max-width:270px}
+}
+</style></head><body>
+<div class="navigation">
+  <button id="momentumBtn" type="button">العودة للزخم الخطي</button>
+  <button id="homeBtn" type="button">العودة للصفحة الرئيسية</button>
+</div>
+<div class="title">
+  <strong>التغير في الزخم الخطي لجسم يتحرك في مسار دائري</strong>
+  <span>تحديد نقطتي البداية والنهاية ثم تحليل متجهي السرعة والزخم</span>
+  <em>إعداد وتطوير الأستاذ: ماجد شلالده 0599870176</em>
+</div>
+<div class="panel">
+<img class="panel-logo" src="logo.png" alt="شعار">
+<h2>إعدادات المحاكاة</h2><div class="sub">اسحب النقطتين على المسار الدائري أو استخدم أزرار الاختيار</div>
+<div class="row"><label><span>كتلة الجسم m</span><span class="value" id="massVal">2 kg</span></label><input id="mass" type="range" min="0.5" max="10" step="0.5" value="2"></div>
+<div class="row"><label><span>مقدار السرعة v</span><span class="value" id="speedVal">8 m/s</span></label><input id="speed" type="range" min="1" max="20" step="0.5" value="8"></div>
+<div class="row"><label><span>زاوية نقطة البداية</span><span class="value" id="startVal">210°</span></label><input id="startAngle" type="range" min="0" max="359" value="210"></div>
+<div class="row"><label><span>زاوية نقطة النهاية</span><span class="value" id="endVal">60°</span></label><input id="endAngle" type="range" min="0" max="359" value="60"></div>
+<div class="row">
+  <label><span>اتجاه الدوران</span><span class="value" id="dirVal">عكس عقارب الساعة</span></label>
+  <div style="display:flex;gap:7px">
+    <button id="ccwBtn" type="button">عكس عقارب الساعة</button>
+    <button id="cwBtn" type="button">مع عقارب الساعة</button>
+  </div>
+</div>
+<div class="buttons"><button id="reset">إعادة ضبط</button></div>
+<div class="info"><div><span>الزخم الابتدائي p₁</span><b id="p1"></b></div><div><span>الزخم النهائي p₂</span><b id="p2"></b></div><div><span>زاوية الدوران θ</span><b id="rotAngle"></b></div><div><span>الزاوية بين v₂ و −v₁</span><b id="vectorAngle"></b></div><div><span>التغير في الزخم Δp</span><b id="dp"></b></div><div><span>اتجاه Δp</span><b id="dpDir"></b></div></div>
+<div class="row" style="margin-top:12px"><label><span>إظهار المتجهات</span></label>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700">
+<label style="display:flex;justify-content:flex-start;gap:6px;font-weight:700"><input type="checkbox" id="showV1" checked style="width:auto"> v₁</label>
+<label style="display:flex;justify-content:flex-start;gap:6px;font-weight:700"><input type="checkbox" id="showV2" checked style="width:auto"> v₂</label>
+<label style="display:flex;justify-content:flex-start;gap:6px;font-weight:700"><input type="checkbox" id="showNegV1" checked style="width:auto"> −v₁ (والزاوية)</label>
+<label style="display:flex;justify-content:flex-start;gap:6px;font-weight:700"><input type="checkbox" id="showDp" checked style="width:auto"> Δp</label>
+</div></div>
+<div class="legend">• الأزرق: v₁<br>• البرتقالي: v₂<br>• الأحمر: −v₁<br>• الأخضر: Δp = p₂ − p₁</div></div>
+<div class="hint">اسحب <b>نقطة البداية</b> أو <b>نقطة النهاية</b> مباشرة على الدائرة، أو اسحب من <b>داخل الدائرة</b> لتحريكها بالكامل. تظهر المماسات والامتدادات والزاوية ومتجه Δp تلقائيًا.</div>
+<canvas id="canvas"></canvas>
+<script>
+const c=document.getElementById('canvas'),x=c.getContext('2d');let W,H,dpr,cx,cy,R;let m=2,v=8,sA=210,eA=60,drag=null,rotationDir=1,dragOffX=0,dragOffY=0;
+const $=i=>document.getElementById(i),rad=d=>d*Math.PI/180,norm=d=>(d%360+360)%360;
+function resize(){
+  W=innerWidth;H=innerHeight;
+  dpr=Math.min(devicePixelRatio||1,2);
+  c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';
+  x.setTransform(dpr,0,0,dpr,0,0);
+
+  // مساحة الرسم المتاحة يسار لوحة التحكم
+  let aw=Math.max(280,W-335), ah=Math.max(260,H-90);
+
+  // نحسب مدى امتداد نقطة تقاطع مماسي السرعتين بوحدة R=1
+  let A=rad(sA),B=rad(eA);
+  let p1={x:Math.cos(A),y:-Math.sin(A)};
+  let p2={x:Math.cos(B),y:-Math.sin(B)};
+  let d1={x:-rotationDir*Math.sin(A),y:-rotationDir*Math.cos(A)};   // -v1 direction
+  let d2={x:-rotationDir*Math.sin(B),y:-rotationDir*Math.cos(B)}; // v2 direction
+  let cr=d1.x*d2.y-d1.y*d2.x;
+  let factor=1;
+  if(Math.abs(cr)>1e-7){
+    let qx=p2.x-p1.x,qy=p2.y-p1.y;
+    let t=(qx*d2.y-qy*d2.x)/cr;
+    let mx=p1.x+t*d1.x,my=p1.y+t*d1.y;
+    factor=Math.max(1,Math.hypot(mx,my));
+  }
+
+  R=Math.max(180,Math.min(840,aw*0.92/factor,ah*0.88/factor));
+  cx=Math.max(R+25,Math.min(aw*0.52,W-335-R));
+  cy=Math.max(R+65,Math.min(H*0.56,H-R-35));
+  draw()
+}addEventListener('resize',resize);
+function pt(d){let a=rad(d);return{x:cx+R*Math.cos(a),y:cy-R*Math.sin(a)}}function tan(d){let a=rad(d),sg=rotationDir;return{x:-sg*Math.sin(a),y:-sg*Math.cos(a)}}
+function signedTravel(){let d=norm(eA-sA);if(rotationDir<0){d=-norm(sA-eA)}return d}function ad(){return Math.abs(signedTravel())}function sd(){return signedTravel()}
+function arrow(x1,y1,x2,y2,col,w=4,h=15,dash=[]){x.save();x.strokeStyle=col;x.fillStyle=col;x.lineWidth=w;x.setLineDash(dash);x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();x.setLineDash([]);let a=Math.atan2(y2-y1,x2-x1),sweep=Math.PI/11;x.beginPath();x.moveTo(x2+h*0.35*Math.cos(a),y2+h*0.35*Math.sin(a));x.lineTo(x2-h*Math.cos(a-sweep),y2-h*Math.sin(a-sweep));x.lineTo(x2-h*0.55*Math.cos(a),y2-h*0.55*Math.sin(a));x.lineTo(x2-h*Math.cos(a+sweep),y2-h*Math.sin(a+sweep));x.closePath();x.fill();x.restore()}
+function lab(t,X,Y,col='#eef4f7',sz=12){x.save();x.font='700 '+sz+'px Arial';x.textAlign='center';x.textBaseline='middle';let q=x.measureText(t),p=5;x.fillStyle='rgba(7,16,24,.78)';x.fillRect(X-q.width/2-p,Y-sz/2-p,q.width+2*p,sz+2*p);x.fillStyle=col;x.fillText(t,X,Y);x.restore()}
+function ball3D(px,py,r,base){
+  let g=x.createRadialGradient(px-r*.35,py-r*.42,r*.08,px,py,r);
+  g.addColorStop(0,'#ffffff');
+  g.addColorStop(.18,base);
+  g.addColorStop(.72,base);
+  g.addColorStop(1,'rgba(0,0,0,.82)');
+  x.save();
+  x.fillStyle=g;
+  x.shadowColor='rgba(0,0,0,.55)';
+  x.shadowBlur=9;
+  x.shadowOffsetY=5;
+  x.beginPath();x.arc(px,py,r,0,2*Math.PI);x.fill();
+  x.shadowColor='transparent';
+  x.strokeStyle='rgba(255,255,255,.75)';x.lineWidth=1.5;x.stroke();
+  x.restore();
+}
+function draw(){if(!W)return;x.clearRect(0,0,W,H);x.save();x.strokeStyle='rgba(255,255,255,.035)';for(let X=0;X<W;X+=40){x.beginPath();x.moveTo(X,0);x.lineTo(X,H);x.stroke()}for(let Y=0;Y<H;Y+=40){x.beginPath();x.moveTo(0,Y);x.lineTo(W,Y);x.stroke()}x.restore();
+let s=pt(sA),e=pt(eA),u1=tan(sA),u2=tan(eA),L=Math.max(80,Math.min(145,14*v));
+let negU1={x:-u1.x,y:-u1.y};
+x.save();x.strokeStyle='#71838c';x.lineWidth=3;x.beginPath();x.arc(cx,cy,R,0,2*Math.PI);x.stroke();x.setLineDash([5,6]);x.lineWidth=1;x.beginPath();x.moveTo(cx-R-30,cy);x.lineTo(cx+R+30,cy);x.stroke();x.beginPath();x.moveTo(cx,cy-R-30);x.lineTo(cx,cy+R+30);x.stroke();x.restore();
+x.save();x.strokeStyle='rgba(88,165,255,.45)';x.setLineDash([6,5]);x.beginPath();x.moveTo(cx,cy);x.lineTo(s.x,s.y);x.stroke();x.strokeStyle='rgba(255,157,71,.45)';x.beginPath();x.moveTo(cx,cy);x.lineTo(e.x,e.y);x.stroke();x.restore();
+let showV1=$('showV1').checked, showV2=$('showV2').checked, showNegV1=$('showNegV1').checked, showDp=$('showDp').checked;
+function pv(p,u,col,t){let X=p.x+u.x*L,Y=p.y+u.y*L;arrow(p.x,p.y,X,Y,col);lab(t,X,Y-18,col);return[X,Y]};
+if(showV1)pv(s,u1,'#4ea1ff','v₁');
+if(showV2)pv(e,u2,'#ff9d47','v₂');
+if(showNegV1){arrow(s.x,s.y,s.x+negU1.x*L,s.y+negU1.y*L,'#e53935',4,15);lab('−v₁',s.x+negU1.x*L,s.y+negU1.y*L-18,'#e53935');}
+// ------------------------------------------------------------
+// البناء المتجهي الصحيح:
+// امتداد −v₁ يبدأ من ذيل متجه v₁ (أي من الجسم الأول)
+// وامتداد v₂ يبدأ من ذيل متجه v₂ (أي من الجسم الثاني).
+// نمدّ خطيّهما حتى يلتقي ذيلا المتجهين في نقطة مشتركة.
+// ------------------------------------------------------------
+
+
+function intersection(p1,d1,p2,d2){
+  let cr=d1.x*d2.y-d1.y*d2.x;
+  if(Math.abs(cr)<1e-8)return null;
+  let qx=p2.x-p1.x,qy=p2.y-p1.y;
+  let t=(qx*d2.y-qy*d2.x)/cr;
+  return {x:p1.x+t*d1.x,y:p1.y+t*d1.y};
+}
+
+// نقطة ذيل −v₁ = موضع الجسم الأول
+const tail1={x:s.x,y:s.y};
+
+// نقطة ذيل v₂ = موضع الجسم الثاني
+const tail2={x:e.x,y:e.y};
+
+// خطا الامتداد يبدآن من الذيلين نفسيهما.
+if(showNegV1 && showV2){
+let meet=intersection(tail1,negU1,tail2,u2);
+
+if(meet){
+  x.save();x.lineWidth=3;x.setLineDash([9,6]);
+
+  // امتداد −v₁ من ذيله إلى نقطة الالتقاء
+  x.strokeStyle='rgba(229,57,53,.95)';
+  x.beginPath();x.moveTo(tail1.x,tail1.y);x.lineTo(meet.x,meet.y);x.stroke();
+
+  // امتداد v₂ من ذيله إلى نقطة الالتقاء
+  x.strokeStyle='rgba(255,157,71,.95)';
+  x.beginPath();x.moveTo(tail2.x,tail2.y);x.lineTo(meet.x,meet.y);x.stroke();
+
+  x.setLineDash([]);
+  x.fillStyle='#e9c66b';
+  x.beginPath();x.arc(meet.x,meet.y,6,0,2*Math.PI);x.fill();
+  x.restore();
+
+  lab('امتداد −v₁',(tail1.x+meet.x)/2,(tail1.y+meet.y)/2-17,'#e53935',11);
+  lab('امتداد v₂',(tail2.x+meet.x)/2,(tail2.y+meet.y)/2-17,'#ff9d47',11);
+  lab('التقاء ذيلي الامتدادين',meet.x,meet.y+20,'#e9c66b',11);
+
+  // الزاوية بين v₂ و −v₁ عند نقطة الالتقاء
+  let a1=Math.atan2(tail1.y-meet.y,tail1.x-meet.x);
+  let a2=Math.atan2(tail2.y-meet.y,tail2.x-meet.x);
+  let da=a2-a1;
+  while(da>Math.PI)da-=2*Math.PI;
+  while(da<-Math.PI)da+=2*Math.PI;
+
+  x.save();
+  x.strokeStyle='#e9c66b';x.lineWidth=3;
+  x.beginPath();x.arc(meet.x,meet.y,40,a1,a1+da,da<0);x.stroke();
+  x.restore();
+
+  let am=a1+da/2;
+  lab('φ',meet.x+Math.cos(am)*52,meet.y+Math.sin(am)*52,'#e9c66b',14);
+}else{
+  // عند توازي الامتدادين، نرسمهما من الذيلين دون ادعاء وجود نقطة التقاء
+  x.save();x.lineWidth=3;x.setLineDash([9,6]);
+  x.strokeStyle='#e53935';
+  x.beginPath();x.moveTo(tail1.x,tail1.y);x.lineTo(tail1.x+negU1.x*L*1.35,tail1.y+negU1.y*L*1.35);x.stroke();
+  x.strokeStyle='#ff9d47';
+  x.beginPath();x.moveTo(tail2.x,tail2.y);x.lineTo(tail2.x+u2.x*L*1.35,tail2.y+u2.y*L*1.35);x.stroke();
+  x.setLineDash([]);x.restore();
+  lab('امتداد −v₁',tail1.x+negU1.x*L*.7,tail1.y+negU1.y*L*.7-16,'#e53935',11);
+  lab('امتداد v₂',tail2.x+u2.x*L*.7,tail2.y+u2.y*L*.7-16,'#ff9d47',11);
+}
+}
+
+// Δp = p₂ − p₁ = m(v₂ − v₁)
+// الاتجاه يُحسب من طرح المتجهين فعليًا (وليس افتراض دائم نحو المركز).
+// ------------------------------------------------------------
+let midX=(s.x+e.x)/2,midY=(s.y+e.y)/2;
+let dvX=u2.x-u1.x, dvY=u2.y-u1.y, dvN=Math.hypot(dvX,dvY)||1;
+let dirX=dvX/dvN, dirY=dvY/dvN;
+let toCX=cx-midX, toCY=cy-midY, toCN=Math.hypot(toCX,toCY)||1;
+let towardCenter=(dirX*toCX+dirY*toCY)>0;
+let dpLen=Math.max(70,Math.min(155,10*m*v*Math.sin(rad(ad())/2)));
+
+let dpX=midX+dirX*dpLen;
+let dpY=midY+dirY*dpLen;
+
+if(showDp){
+arrow(midX,midY,dpX,dpY,'#65d98b',5,17);
+lab('Δp = p₂ − p₁',dpX,dpY-20,'#65d98b');
+
+x.save();x.strokeStyle='rgba(101,217,139,.30)';x.lineWidth=2;x.setLineDash([5,5]);
+x.beginPath();x.moveTo(midX,midY);x.lineTo(cx,cy);x.stroke();
+x.setLineDash([]);x.restore();
+
+lab(towardCenter?'نحو المركز':'بعيدًا عن المركز',midX+dirX*52,midY+dirY*52,'#65d98b',11);
+}
+
+ball3D(s.x,s.y,13,'#2f8cff');
+ball3D(e.x,e.y,13,'#ff8b3d');
+lab('نقطة البداية',s.x,s.y-27,'#4ea1ff');
+lab('نقطة النهاية',e.x,e.y-27,'#ff9d47');
+ball3D(cx,cy,7,'#d9e2e8');
+let p=m*v,dp=2*p*Math.sin(rad(ad())/2);$('dirVal').textContent=rotationDir===1?'عكس عقارب الساعة':'مع عقارب الساعة';$('massVal').textContent=m+' kg';$('speedVal').textContent=v+' m/s';$('startVal').textContent=Math.round(norm(sA))+'°';$('endVal').textContent=Math.round(norm(eA))+'°';$('p1').textContent=p.toFixed(2)+' kg·m/s';$('p2').textContent=p.toFixed(2)+' kg·m/s';$('rotAngle').textContent=ad().toFixed(2)+'°';$('vectorAngle').textContent=(180-ad()).toFixed(2)+'°';$('dp').textContent=dp.toFixed(2)+' kg·m/s';$('dpDir').textContent=norm(Math.atan2(-dirY,dirX)*180/Math.PI).toFixed(1)+'°'}
+function near(X,Y,p){return Math.hypot(X-p.x,Y-p.y)<25}c.addEventListener('pointerdown',e=>{let r=c.getBoundingClientRect(),X=e.clientX-r.left,Y=e.clientY-r.top;if(near(X,Y,pt(sA))){drag='s';c.setPointerCapture(e.pointerId)}else if(near(X,Y,pt(eA))){drag='e';c.setPointerCapture(e.pointerId)}else if(Math.hypot(X-cx,Y-cy)<=R){drag='c';dragOffX=X-cx;dragOffY=Y-cy;c.setPointerCapture(e.pointerId);c.style.cursor='grabbing'}});c.addEventListener('pointermove',e=>{if(!drag)return;let r=c.getBoundingClientRect(),X=e.clientX-r.left,Y=e.clientY-r.top;if(drag==='c'){cx=X-dragOffX;cy=Y-dragOffY;draw();return}let d=norm(Math.atan2(cy-Y,X-cx)*180/Math.PI);if(drag==='s'){sA=d;$('startAngle').value=Math.round(d)}else{eA=d;$('endAngle').value=Math.round(d)}draw()});c.addEventListener('pointerup',()=>{drag=null;c.style.cursor='default'});c.addEventListener('pointercancel',()=>{drag=null;c.style.cursor='default'});
+$('mass').oninput=()=>{m=+$('mass').value;draw()};$('speed').oninput=()=>{v=+$('speed').value;draw()};$('startAngle').oninput=e=>{sA=+e.target.value;draw()};$('endAngle').oninput=e=>{eA=+e.target.value;draw()};$('reset').onclick=()=>{m=2;v=8;sA=210;eA=60;$('mass').value=2;$('speed').value=8;$('startAngle').value=210;$('endAngle').value=60;resize()};
+$('homeBtn').onclick=()=>{window.location.href='../../index.html'};
+$('momentumBtn').onclick=()=>{window.location.href='momentum.html'};
+['showV1','showV2','showNegV1','showDp'].forEach(id=>$(id).onchange=draw);
+$('ccwBtn').classList.add('active');resize();
+</script></body></html>
