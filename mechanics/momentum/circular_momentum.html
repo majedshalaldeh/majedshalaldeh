@@ -10,12 +10,15 @@
 .navigation button:hover{background:#2a5688}
 .panel-logo{display:block;width:112px;height:112px;object-fit:contain;border-radius:50%;margin:0 auto 12px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
 .title em{display:block;font-style:normal;font-size:12px;font-weight:800;color:#f0c869;margin-top:4px}
-.panel{position:fixed;right:18px;top:82px;width:285px;z-index:5;background:rgba(16,22,28,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px;box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.panel{position:fixed;right:18px;top:82px;width:285px;z-index:5;background:rgba(16,22,28,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px;box-shadow:0 8px 28px rgba(0,0,0,.4);max-height:calc(100vh - 100px);overflow-y:auto}
 h2{margin:0 0 4px;color:#e9c66b;font-size:17px;text-align:center}.sub{font-size:11px;color:#9fc0d6;text-align:center;margin-bottom:12px}.row{margin:10px 0}label{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px}input[type=range]{width:100%}.value{color:#e9c66b}.buttons{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}.buttons button{min-width:0}button{border:0;border-radius:8px;padding:9px 8px;background:#245477;color:#fff;font-family:inherit;font-weight:700;cursor:pointer;flex:1}button:hover{background:#316b96}button.active{background:#8a6420}
-.info{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;line-height:1.8}.info div{display:flex;justify-content:space-between;gap:8px}.info b{color:#e9c66b}.legend{margin-top:9px;font-size:11px;color:#b8c8d0;line-height:1.7}.title{position:fixed;top:16px;left:50%;transform:translateX(-50%);text-align:center;z-index:4;pointer-events:none;white-space:nowrap}.title strong{font-size:20px;color:#e9c66b}.title span{display:block;font-size:12px;color:#a9c5d7;margin-top:3px}.hint{position:fixed;left:18px;bottom:16px;z-index:5;background:rgba(16,22,28,.9);padding:9px 12px;border-radius:9px;color:#b9c8cf;font-size:11px;max-width:390px;line-height:1.6}
+.info{margin-top:0;padding-top:0;border-top:0;font-size:12px;line-height:1.9}.info div{display:flex;justify-content:space-between;gap:8px}.info b{color:#e9c66b}.legend{margin-top:9px;font-size:11px;color:#b8c8d0;line-height:1.7}.title{position:fixed;top:16px;left:50%;transform:translateX(-50%);text-align:center;z-index:4;pointer-events:none;white-space:nowrap}.title strong{font-size:20px;color:#e9c66b}.title span{display:block;font-size:12px;color:#a9c5d7;margin-top:3px}.hint{position:fixed;left:18px;bottom:16px;z-index:5;background:rgba(16,22,28,.9);padding:9px 12px;border-radius:9px;color:#b9c8cf;font-size:11px;max-width:390px;line-height:1.6}
+.readoutPanel{position:fixed;left:18px;top:82px;width:230px;z-index:5;background:rgba(16,22,28,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:15px;box-shadow:0 8px 28px rgba(0,0,0,.4);max-height:calc(100vh - 170px);overflow-y:auto}
+.readoutPanel h3{margin:0 0 10px;color:#e9c66b;font-size:14px;text-align:center}
+@media(max-width:700px){.readoutPanel{width:170px;left:8px;top:108px;max-height:calc(100vh - 130px);padding:10px}.readoutPanel h3{font-size:12px}}
 @media(max-width:700px){
  .navigation{top:7px;right:7px;gap:4px}.navigation button{padding:7px 9px;font-size:10px}
- .panel{width:245px;right:8px;top:108px}
+ .panel{width:245px;right:8px;top:108px;max-height:calc(100vh - 120px)}
  .panel-logo{width:88px;height:88px}
  .title{left:46%;top:6px}.title strong{font-size:14px}.title span{font-size:9px}.title em{font-size:9px}
  .hint{left:8px;bottom:8px;font-size:10px;max-width:270px}
@@ -45,7 +48,6 @@ h2{margin:0 0 4px;color:#e9c66b;font-size:17px;text-align:center}.sub{font-size:
   </div>
 </div>
 <div class="buttons"><button id="reset">إعادة ضبط</button></div>
-<div class="info"><div><span>الزخم الابتدائي p₁</span><b id="p1"></b></div><div><span>الزخم النهائي p₂</span><b id="p2"></b></div><div><span>زاوية الدوران θ</span><b id="rotAngle"></b></div><div><span>الزاوية بين v₂ و −v₁</span><b id="vectorAngle"></b></div><div><span>التغير في الزخم Δp</span><b id="dp"></b></div><div><span>اتجاه Δp</span><b id="dpDir"></b></div></div>
 <div class="row" style="margin-top:12px"><label><span>إظهار المتجهات</span></label>
 <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700">
 <label style="display:flex;justify-content:flex-start;gap:6px;font-weight:700"><input type="checkbox" id="showV1" checked style="width:auto"> v₁</label>
@@ -54,6 +56,11 @@ h2{margin:0 0 4px;color:#e9c66b;font-size:17px;text-align:center}.sub{font-size:
 <label style="display:flex;justify-content:flex-start;gap:6px;font-weight:700"><input type="checkbox" id="showDp" checked style="width:auto"> Δp</label>
 </div></div>
 <div class="legend">• الأزرق: v₁<br>• البرتقالي: v₂<br>• الأحمر: −v₁<br>• الأخضر: Δp = p₂ − p₁</div></div>
+<div class="readoutPanel">
+<h3>القراءات الحية</h3>
+<div class="info"><div><span>الزخم الابتدائي p₁</span><b id="p1"></b></div><div><span>الزخم النهائي p₂</span><b id="p2"></b></div><div><span>زاوية الدوران θ</span><b id="rotAngle"></b></div><div><span>الزاوية بين v₂ و −v₁</span><b id="vectorAngle"></b></div><div><span>التغير في الزخم Δp</span><b id="dp"></b></div><div><span>اتجاه Δp</span><b id="dpDir"></b></div></div>
+<div class="legend">• الأزرق: v₁<br>• البرتقالي: v₂<br>• الأحمر: −v₁<br>• الأخضر: Δp = p₂ − p₁</div>
+</div>
 <div class="hint">اسحب <b>نقطة البداية</b> أو <b>نقطة النهاية</b> مباشرة على الدائرة، أو اسحب من <b>داخل الدائرة</b> لتحريكها بالكامل. تظهر المماسات والامتدادات والزاوية ومتجه Δp تلقائيًا.</div>
 <canvas id="canvas"></canvas>
 <script>
@@ -222,9 +229,11 @@ lab('نقطة النهاية',e.x,e.y-27,'#ff9d47');
 ball3D(cx,cy,7,'#d9e2e8');
 let p=m*v,dp=2*p*Math.sin(rad(ad())/2);$('dirVal').textContent=rotationDir===1?'عكس عقارب الساعة':'مع عقارب الساعة';$('massVal').textContent=m+' kg';$('speedVal').textContent=v+' m/s';$('startVal').textContent=Math.round(norm(sA))+'°';$('endVal').textContent=Math.round(norm(eA))+'°';$('p1').textContent=p.toFixed(2)+' kg·m/s';$('p2').textContent=p.toFixed(2)+' kg·m/s';$('rotAngle').textContent=ad().toFixed(2)+'°';$('vectorAngle').textContent=(180-ad()).toFixed(2)+'°';$('dp').textContent=dp.toFixed(2)+' kg·m/s';$('dpDir').textContent=norm(Math.atan2(-dirY,dirX)*180/Math.PI).toFixed(1)+'°'}
 function near(X,Y,p){return Math.hypot(X-p.x,Y-p.y)<25}c.addEventListener('pointerdown',e=>{let r=c.getBoundingClientRect(),X=e.clientX-r.left,Y=e.clientY-r.top;if(near(X,Y,pt(sA))){drag='s';c.setPointerCapture(e.pointerId)}else if(near(X,Y,pt(eA))){drag='e';c.setPointerCapture(e.pointerId)}else if(Math.hypot(X-cx,Y-cy)<=R){drag='c';dragOffX=X-cx;dragOffY=Y-cy;c.setPointerCapture(e.pointerId);c.style.cursor='grabbing'}});c.addEventListener('pointermove',e=>{if(!drag)return;let r=c.getBoundingClientRect(),X=e.clientX-r.left,Y=e.clientY-r.top;if(drag==='c'){cx=X-dragOffX;cy=Y-dragOffY;draw();return}let d=norm(Math.atan2(cy-Y,X-cx)*180/Math.PI);if(drag==='s'){sA=d;$('startAngle').value=Math.round(d)}else{eA=d;$('endAngle').value=Math.round(d)}draw()});c.addEventListener('pointerup',()=>{drag=null;c.style.cursor='default'});c.addEventListener('pointercancel',()=>{drag=null;c.style.cursor='default'});
-$('mass').oninput=()=>{m=+$('mass').value;draw()};$('speed').oninput=()=>{v=+$('speed').value;draw()};$('startAngle').oninput=e=>{sA=+e.target.value;draw()};$('endAngle').oninput=e=>{eA=+e.target.value;draw()};$('reset').onclick=()=>{m=2;v=8;sA=210;eA=60;$('mass').value=2;$('speed').value=8;$('startAngle').value=210;$('endAngle').value=60;resize()};
+$('mass').oninput=()=>{m=+$('mass').value;draw()};$('speed').oninput=()=>{v=+$('speed').value;draw()};$('startAngle').oninput=e=>{sA=+e.target.value;draw()};$('endAngle').oninput=e=>{eA=+e.target.value;draw()};$('reset').onclick=()=>{m=2;v=8;sA=210;eA=60;rotationDir=1;$('mass').value=2;$('speed').value=8;$('startAngle').value=210;$('endAngle').value=60;$('ccwBtn').classList.add('active');$('cwBtn').classList.remove('active');resize()};
 $('homeBtn').onclick=()=>{window.location.href='../../index.html'};
 $('momentumBtn').onclick=()=>{window.location.href='momentum.html'};
 ['showV1','showV2','showNegV1','showDp'].forEach(id=>$(id).onchange=draw);
+$('ccwBtn').onclick=()=>{rotationDir=1;$('ccwBtn').classList.add('active');$('cwBtn').classList.remove('active');resize()};
+$('cwBtn').onclick=()=>{rotationDir=-1;$('cwBtn').classList.add('active');$('ccwBtn').classList.remove('active');resize()};
 $('ccwBtn').classList.add('active');resize();
 </script></body></html>
