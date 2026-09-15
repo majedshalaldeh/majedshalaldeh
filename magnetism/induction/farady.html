@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محاكاة الحث الكهرومغناطيسي</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #0a0e1a; color: #f1f5f9;
+    overflow: hidden; height: 100vh;
+  }
+  body { display: flex; flex-direction: column; }
+
+  header {
+    background: linear-gradient(135deg, #131a2e, #0a0e1a);
+    border-bottom: 2px solid #38bdf8;
+    padding: 12px 24px 14px;
+    text-align: center;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    position: relative;
+    flex-shrink: 0;
+    min-height: 90px;
+  }
+
+  .top-nav {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    display: flex;
+    gap: 8px;
+    z-index: 110;
+  }
+  .top-nav .nav-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    white-space: nowrap;
+  }
+  .top-nav .nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+  }
+  .top-nav .nav-btn:active { transform: translateY(0); }
+  .top-nav .nav-btn.home-btn {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #000;
+  }
+  .top-nav .nav-btn.home-btn:hover {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    color: #fff;
+  }
+  .top-nav .nav-btn.back-btn {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+  }
+  .top-nav .nav-btn.back-btn:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+  }
+
+  header h1 {
+    font-size: 22px;
+    color: #38bdf8;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    text-shadow: 0 0 20px rgba(56,189,248,0.4);
+  }
+  header .subtitle {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  header .developer-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(56,189,248,0.2);
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  header .dev-label { color: #cbd5e1; font-weight: 600; }
+  header .dev-name {
+    color: #fbbf24; font-weight: 800; font-size: 15px;
+    background: rgba(251,191,36,0.1);
+    padding: 4px 14px; border-radius: 14px;
+    border: 1px solid rgba(251,191,36,0.35);
+    text-shadow: 0 0 12px rgba(251,191,36,0.3);
+  }
+  header .dev-phone {
+    color: #22c55e; font-weight: bold; font-size: 13px;
+    direction: ltr;
+    background: rgba(34,197,94,0.1);
+    padding: 4px 12px; border-radius: 14px;
+    border: 1px solid rgba(34,197,94,0.3);
+    font-family: 'Courier New', monospace;
+  }
+
+  .main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    gap: 10px;
+    padding: 10px;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .sidebar {
+    background: #131a2e;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    padding: 14px 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  }
+  .sidebar-logo-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    background: linear-gradient(135deg, #0a0e1a, #131a2e);
+    border-radius: 50%;
+    border: 2px solid #38bdf8;
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 6px;
+    box-shadow: 0 0 25px rgba(56,189,248,0.35),
+                inset 0 0 20px rgba(56,189,248,0.15);
+    overflow: hidden;
+  }
+  .sidebar-logo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .sidebar-section-title {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-align: center;
+    margin: 10px 0 2px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #223052;
+    text-transform: uppercase;
+  }
+
+  .sidebar .hdr-btn {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.22s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid #334155;
+    background: #1e2740;
+    color: #f1f5f9;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    white-space: nowrap;
+  }
+  .sidebar .hdr-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+  }
+  .sidebar .hdr-btn:active { transform: translateY(0); }
+  .sidebar .hdr-btn.active {
+    background: #38bdf8; color: #000; border-color: #38bdf8;
+  }
+  .sidebar .hdr-btn.flip-btn {
+    background: linear-gradient(135deg, #dc2626, #2563eb);
+    color: #fff; border: none; font-size: 12px;
+  }
+  .sidebar .hdr-btn.flip-btn:hover { filter: brightness(1.15); }
+
+  .slider-group.vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    background: #0a0e1a;
+    border: 1px solid #223052;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .slider-group label {
+    color: #94a3b8; font-weight: 600; font-size: 11px; text-align: center;
+  }
+  .slider-group input[type="range"] {
+    width: 100%; height: 5px;
+    -webkit-appearance: none; appearance: none;
+    background: #334155; border-radius: 3px;
+    outline: none; cursor: pointer;
+  }
+  .slider-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px;
+    background: #38bdf8; border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(56,189,248,0.6);
+  }
+  .slider-group .value {
+    color: #38bdf8; font-family: 'Courier New', monospace;
+    font-weight: bold;
+    direction: ltr; text-align: center;
+    background: rgba(56,189,248,0.1);
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 13px;
+    align-self: center;
+  }
+
+  .view-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  #scene-container {
+    position: relative;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #334155;
+    min-height: 0;
+  }
+  #scene { width: 100%; height: 100%; display: block; }
+
+  .mode-indicator {
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,14,26,0.92);
+    border: 2px solid #38bdf8;
+    border-radius: 12px;
+    padding: 8px 18px;
+    display: flex; align-items: center; gap: 10px;
+    z-index: 30;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 30px rgba(56,189,248,0.3);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .mode-indicator.magnet-mode {
+    border-color: #fbbf24;
+    box-shadow: 0 8px 30px rgba(251,191,36,0.35);
+  }
+  .mode-indicator.camera-mode {
+    border-color: #22c55e;
+    box-shadow: 0 8px 30px rgba(34,197,94,0.35);
+  }
+  .mode-indicator .mode-icon {
+    font-size: 18px;
+    animation: pulseIcon 2s infinite;
+  }
+  @keyframes pulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  .mode-indicator .mode-text {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+  }
+  .mode-indicator.magnet-mode .mode-text { color: #fbbf24; }
+  .mode-indicator.camera-mode .mode-text { color: #22c55e; }
+
+  .dblclick-hint {
+    position: absolute;
+    bottom: 60px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(56,189,248,0.15);
+    border: 1px dashed #38bdf8;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 11px; color: #38bdf8;
+    z-index: 15;
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+    animation: fadeInOut 5s infinite;
+  }
+  @keyframes fadeInOut {
+    0%, 20%, 80%, 100% { opacity: 0; }
+    30%, 70% { opacity: 1; }
+  }
+
+  .scene-hint {
+    position: absolute; bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,14,26,0.85);
+    padding: 8px 20px; border-radius: 20px;
+    border: 1px solid #334155;
+    font-size: 12px; color: #94a3b8;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; gap: 8px;
+    max-width: calc(100% - 40px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .scene-hint .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 1.5s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+
+  .panel {
+    background: #131a2e;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    padding: 16px;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  .panel h2 {
+    font-size: 13px; color: #38bdf8;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid #334155;
+    font-weight: 600;
+  }
+
+  .reading {
+    background: #0a0e1a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #223052;
+  }
+  .reading-title { font-size: 11px; color: #94a3b8; margin-bottom: 4px; font-weight: 600; }
+  .reading-value {
+    font-size: 20px; font-weight: bold;
+    font-family: 'Courier New', monospace;
+    direction: ltr; text-align: left;
+    transition: color 0.2s;
+  }
+  .reading-value.blue { color: #38bdf8; }
+  .reading-value.green { color: #22c55e; }
+  .reading-value.yellow { color: #fbbf24; }
+
+  .direction-indicator {
+    display: flex; align-items: center; gap: 10px;
+    background: #0a0e1a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #223052;
+    transition: all 0.2s;
+  }
+  .direction-indicator.forward {
+    border-color: #22c55e;
+    background: linear-gradient(135deg, rgba(34,197,94,0.1), #0a0e1a);
+  }
+  .direction-indicator.backward {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239,68,68,0.1), #0a0e1a);
+  }
+  .direction-arrow {
+    font-size: 24px; font-weight: bold;
+    min-width: 40px; text-align: center;
+    transition: all 0.2s;
+  }
+  .direction-indicator.forward .direction-arrow { color: #22c55e; }
+  .direction-indicator.backward .direction-arrow { color: #ef4444; }
+  .direction-text {
+    font-size: 12px; font-weight: 600; color: #64748b;
+    transition: color 0.2s;
+  }
+  .direction-indicator.forward .direction-text { color: #22c55e; }
+  .direction-indicator.backward .direction-text { color: #ef4444; }
+
+  .lamp-indicator {
+    display: flex; align-items: center; gap: 10px;
+    background: #0a0e1a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid #223052;
+    transition: all 0.15s;
+  }
+  .lamp-indicator.on {
+    border-color: #fbbf24;
+    background: linear-gradient(135deg, rgba(251,191,36,0.1), #0a0e1a);
+    box-shadow: 0 0 20px rgba(251,191,36,0.2);
+  }
+  .lamp-icon { font-size: 24px; transition: all 0.15s; }
+  .lamp-status { font-size: 13px; font-weight: 600; color: #64748b; transition: color 0.15s; }
+  .lamp-indicator.on .lamp-status { color: #fbbf24; }
+
+  .formula-card {
+    background: linear-gradient(135deg, #1e3a5f, #0a0e1a);
+    border-right: 3px solid #38bdf8;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 14px;
+  }
+  .formula-card .f-title { font-size: 11px; color: #38bdf8; font-weight: 600; margin-bottom: 6px; }
+  .formula-card .f-eq {
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    color: #fbbf24;
+    font-size: 15px;
+    direction: ltr;
+    margin: 8px 0;
+  }
+
+  @media (max-width: 1100px) {
+    .main { grid-template-columns: 190px 1fr 240px; }
+    .sidebar-logo-wrap { width: 110px; height: 110px; }
+    header h1 { font-size: 18px; }
+    .top-nav .nav-btn { padding: 7px 10px; font-size: 11px; }
+  }
+
+  @media (max-width: 900px) {
+    .main {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+      overflow-y: auto;
+    }
+    .sidebar {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px;
+      gap: 6px;
+    }
+    .sidebar-logo-wrap { width: 70px; height: 70px; margin: 0; }
+    .sidebar .hdr-btn { width: auto; padding: 8px 12px; }
+    .sidebar-section-title { width: 100%; margin: 4px 0 0; }
+    .slider-group.vertical {
+      flex-direction: row; align-items: center; padding: 6px 10px;
+    }
+    .slider-group.vertical input[type="range"] { width: 100px; }
+    .view-buttons-row { display: flex; gap: 6px; }
+    .panel { max-height: 280px; }
+    header h1 { font-size: 15px; }
+    header .dev-name { font-size: 13px; }
+    header .subtitle { font-size: 10px; }
+    .top-nav {
+      position: static;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top-nav">
+    <button class="nav-btn home-btn" onclick="goToMainPage()">🏠 الرئيسية</button>
+    <button class="nav-btn back-btn" onclick="goToInductionPage()">🧲 الحث الكهرومغناطيسي</button>
+  </div>
+
+  <h1>مختبر الحث الكهرومغناطيسي</h1>
+  <div class="subtitle">تجربة تفاعلية ثلاثية الأبعاد</div>
+  <div class="developer-line">
+    <span class="dev-label">إعداد وتطوير الأستاذ :</span>
+    <span class="dev-name">ماجد شلالده</span>
+    <span class="dev-phone">📱 0599870176</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo-wrap">
+      <img src="logo.png" alt="شعار"
+           onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=&quot;color:#38bdf8;font-weight:bold;font-size:14px;text-align:center;line-height:1.3;&quot;>مختبر<br>الفيزياء</span>';">
+    </div>
+
+    <div class="sidebar-section-title">التحكم</div>
+
+    <div class="slider-group vertical">
+      <label>عدد اللفات</label>
+      <input type="range" id="turnsRange" min="5" max="40" step="1" value="20">
+      <span class="value" id="turnsVal">20</span>
+    </div>
+
+    <button class="hdr-btn flip-btn" onclick="flipMagnetPoles()">🔄 قلب الأقطاب</button>
+
+    <div class="view-buttons-row">
+      <button class="hdr-btn active" onclick="setView('side', event)">الجانب</button>
+      <button class="hdr-btn" onclick="setView('perspective', event)">منظور</button>
+    </div>
+
+    <button class="hdr-btn" onclick="resetScene()">♻️ إعادة</button>
+  </aside>
+
+  <div id="scene-container">
+    <canvas id="scene"></canvas>
+
+    <div class="mode-indicator magnet-mode" id="modeIndicator">
+      <span class="mode-icon" id="modeIcon">🧲</span>
+      <span class="mode-text" id="modeText">وضع المغناطيس</span>
+    </div>
+
+    <div class="dblclick-hint">
+      💡 نقرة مزدوجة = تبديل الوضع
+    </div>
+
+    <div class="scene-hint">
+      <span class="dot"></span>
+      <span id="hintText">اسحب المغناطيس من جسمه يميناً ويساراً — ويمكنك إبعاده كثيراً عن الملف</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>القياسات</h2>
+
+    <div class="reading">
+      <div class="reading-title">القوة الدافعة الكهربائية (EMF)</div>
+      <div class="reading-value blue" id="emfValue">0.000 V</div>
+    </div>
+
+    <div class="reading">
+      <div class="reading-title">التيار المار</div>
+      <div class="reading-value green" id="currentValue">0.000 A</div>
+    </div>
+
+    <div class="direction-indicator" id="directionIndicator">
+      <span class="direction-arrow" id="directionArrow">⏸</span>
+      <div>
+        <div class="direction-text" id="directionText">لا يوجد تيار</div>
+      </div>
+    </div>
+
+    <div class="reading">
+      <div class="reading-title">سرعة المغناطيس</div>
+      <div class="reading-value yellow" id="speedValue">0.00</div>
+    </div>
+
+    <div class="lamp-indicator" id="lampIndicator">
+      <span class="lamp-icon" id="lampIcon">⚫</span>
+      <span class="lamp-status" id="lampStatus">المصباح مطفأ</span>
+    </div>
+
+    <div class="formula-card">
+      <div class="f-title">قانون فاراداي</div>
+      <div class="f-eq">ε = -N · dΦ/dt</div>
+      <div style="font-size: 11px; color: #94a3b8; line-height: 1.7; text-align: center;">
+        الجهد ∝ (سرعة المغناطيس) × (عدد اللفات)
+      </div>
+    </div>
+
+    <div class="formula-card" style="border-right-color: #22c55e; margin-top: 10px;">
+      <div class="f-title" style="color: #22c55e;">🎯 تحكم سريع</div>
+      <div style="font-size: 11px; color: #cbd5e1; line-height: 1.9;">
+        <b>🧲 وضع المغناطيس:</b><br>
+        اسحب من جسم المغناطيس فقط<br>
+        يمكنك إبعاده كثيراً عن الملف<br><br>
+        <b>🎥 وضع الكاميرا:</b><br>
+        اسحب لتدوير المشهد في 3D<br>
+        استخدم عجلة الماوس للتقريب<br><br>
+        <b>🔄 للتبديل:</b><br>
+        انقر مرتين على أي مكان
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// الإعدادات
+// ═══════════════════════════════════════════════════════════
+const PHYSICS = {
+  turns: 20,
+  coilRadius: 1.0,
+  coilHeight: 2.4,
+  magnetStrength: 1.0,
+  lampResistance: 20,
+  coilResistance: 2,
+  fluxSigma: 1.0,
+  magnetRadius: 0.22,
+  magnetHeight: 1.2
+};
+
+let scene, camera, renderer, controls;
+let coilGroup, coilCurve;
+let magnetGroup, magnetLinesGroup;
+let lampGroup, lampBulb, lampGlow, lampLight;
+let circuitWires = [];
+let electronGroup, electronParticles = [];
+let logoGroup;
+
+let magnetX = 0;
+let isDraggingMagnet = false;
+
+let poleDirection = 1;
+let interactionMode = 'magnet';
+
+let electronFlowOffset = 0;
+
+let lastFlux = 0;
+let currentEmf = 0;
+let currentCurrent = 0;
+let smoothedVelocity = 0;
+let lastMagnetX = 0;
+let lastTime = performance.now();
+
+const LAMP_POS = new THREE.Vector3(0, -2.8, 0);
+const LAMP_IN  = new THREE.Vector3(-0.2, -3.0, 0);
+const LAMP_OUT = new THREE.Vector3( 0.2, -3.0, 0);
+
+// ═══════════════════════════════════════════════════════════
+// التهيئة
+// ═══════════════════════════════════════════════════════════
+function init() {
+  const container = document.getElementById('scene-container');
+  const canvas = document.getElementById('scene');
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0e1a);
+  scene.fog = new THREE.FogExp2(0x0a0e1a, 0.03);
+
+  camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+  camera.position.set(0, 1.5, 7.5);
+  camera.lookAt(0, -0.5, 0);
+
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0x0a0e1a, 1);
+
+  scene.add(new THREE.AmbientLight(0x8899bb, 0.55));
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  dirLight.position.set(5, 8, 6);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  scene.add(dirLight);
+
+  const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.4);
+  fillLight.position.set(-5, 3, -5);
+  scene.add(fillLight);
+
+  const grid = new THREE.GridHelper(24, 48, 0x1e293b, 0x1e293b);
+  grid.position.y = -3.5;
+  scene.add(grid);
+
+  buildLogoOnFloor();
+  buildCoil();
+  buildMagnet();
+  buildLamp();
+  buildAmmeterDisplay();
+  buildCircuitWires();
+  buildElectronParticles();
+
+  controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 3;
+  controls.maxDistance = 20;
+  controls.target.set(0, -0.5, 0);
+  controls.enablePan = false;
+  controls.enableRotate = true;
+  controls.enableZoom = true;
+  controls.rotateSpeed = 0.6;
+
+  setupPointerHandlers();
+  setupDoubleClickToggle();
+
+  applyInteractionMode();
+
+  window.addEventListener('resize', onResize);
+
+  animate();
+}
+
+function onResize() {
+  const container = document.getElementById('scene-container');
+  if (!container.clientWidth || !container.clientHeight) return;
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ★★★ الشعار الدائري على الأرضية ★★★
+// ═══════════════════════════════════════════════════════════
+function buildLogoOnFloor() {
+  if (logoGroup) scene.remove(logoGroup);
+  logoGroup = new THREE.Group();
+  logoGroup.position.set(0, -3.47, -4.0);
+
+  const R_LOGO = 1.75;   // نصف قطر الشعار الدائري
+
+  // ── 1) قرص خلفي داكن ──
+  const backDisc = new THREE.Mesh(
+    new THREE.CircleGeometry(R_LOGO + 0.05, 96),
+    new THREE.MeshBasicMaterial({
+      color: 0x0f172a,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.95
+    })
+  );
+  backDisc.rotation.x = -Math.PI / 2;
+  backDisc.position.y = -0.01;
+  logoGroup.add(backDisc);
+
+  // ── 2) هالة ضوئية (توهج حول الشعار) ──
+  const glowCanvas = document.createElement('canvas');
+  glowCanvas.width = 512;
+  glowCanvas.height = 512;
+  const gctx = glowCanvas.getContext('2d');
+  const grd = gctx.createRadialGradient(256, 256, 100, 256, 256, 256);
+  grd.addColorStop(0,   'rgba(56,189,248,0.55)');
+  grd.addColorStop(0.5, 'rgba(56,189,248,0.18)');
+  grd.addColorStop(1,   'rgba(56,189,248,0)');
+  gctx.fillStyle = grd;
+  gctx.fillRect(0, 0, 512, 512);
+  const glowTex = new THREE.CanvasTexture(glowCanvas);
+  const glowMesh = new THREE.Mesh(
+    new THREE.CircleGeometry(R_LOGO + 0.9, 96),
+    new THREE.MeshBasicMaterial({
+      map: glowTex,
+      transparent: true,
+      opacity: 0.7,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    })
+  );
+  glowMesh.rotation.x = -Math.PI / 2;
+  glowMesh.position.y = -0.005;
+  logoGroup.add(glowMesh);
+
+  // ── 3) حلقة ذهبية داخلية ──
+  const ringInner = new THREE.Mesh(
+    new THREE.RingGeometry(R_LOGO + 0.05, R_LOGO + 0.13, 96),
+    new THREE.MeshBasicMaterial({
+      color: 0xfbbf24,
+      transparent: true,
+      opacity: 0.85,
+      side: THREE.DoubleSide
+    })
+  );
+  ringInner.rotation.x = -Math.PI / 2;
+  ringInner.position.y = 0.005;
+  logoGroup.add(ringInner);
+
+  // ── 4) حلقة زرقاء خارجية ──
+  const ringOuter = new THREE.Mesh(
+    new THREE.RingGeometry(R_LOGO + 0.18, R_LOGO + 0.28, 96),
+    new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.9,
+      side: THREE.DoubleSide
+    })
+  );
+  ringOuter.rotation.x = -Math.PI / 2;
+  ringOuter.position.y = 0.006;
+  logoGroup.add(ringOuter);
+
+  // ── 5) نقشات نقطية (زخرفة دائرية حول الشعار) ──
+  const dotCount = 32;
+  const dotRadius = R_LOGO + 0.4;
+  const dotGeo = new THREE.CircleGeometry(0.045, 12);
+  const dotMat = new THREE.MeshBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.75,
+    side: THREE.DoubleSide
+  });
+  for (let i = 0; i < dotCount; i++) {
+    const a = (i / dotCount) * Math.PI * 2;
+    const dot = new THREE.Mesh(dotGeo, dotMat);
+    dot.rotation.x = -Math.PI / 2;
+    dot.position.set(Math.cos(a) * dotRadius, 0.007, Math.sin(a) * dotRadius);
+    logoGroup.add(dot);
+  }
+
+  scene.add(logoGroup);
+
+  // ── 6) تحميل صورة الشعار وطباعتها بشكل دائري ──
+  const loader = new THREE.TextureLoader();
+  loader.load(
+    'logo.png',
+    (texture) => {
+      texture.anisotropy = 16;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+
+      // قرص دائري مطبوع عليه الشعار
+      const logoMesh = new THREE.Mesh(
+        new THREE.CircleGeometry(R_LOGO, 128),
+        new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          opacity: 1.0,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        })
+      );
+      logoMesh.rotation.x = -Math.PI / 2;
+      logoMesh.position.y = 0.01;
+      logoGroup.add(logoMesh);
+    },
+    undefined,
+    (err) => {
+      console.warn('فشل تحميل الشعار — سيظهر قرص بديل ملوّن', err);
+      // في حال عدم توفر logo.png: قرص بديل ملوّن مع أحرف
+      const fallbackMesh = new THREE.Mesh(
+        new THREE.CircleGeometry(R_LOGO, 128),
+        new THREE.MeshBasicMaterial({
+          color: 0x1e3a5f,
+          side: THREE.DoubleSide
+        })
+      );
+      fallbackMesh.rotation.x = -Math.PI / 2;
+      fallbackMesh.position.y = 0.01;
+      logoGroup.add(fallbackMesh);
+    }
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// التنقل
+// ═══════════════════════════════════════════════════════════
+function goToMainPage() {
+  if (confirm('العودة إلى الصفحة الرئيسية؟')) {
+    window.location.href = '../../index.html';
+  }
+}
+function goToInductionPage() {
+  if (confirm('العودة إلى صفحة الحث الكهرومغناطيسي؟')) {
+    window.location.href = 'induction.html';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// تبديل الوضع
+// ═══════════════════════════════════════════════════════════
+function setupDoubleClickToggle() {
+  const canvas = renderer.domElement;
+
+  canvas.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleInteractionMode();
+  });
+
+  canvas.addEventListener('selectstart', (e) => e.preventDefault());
+  canvas.addEventListener('mousedown', (e) => {
+    if (e.detail === 2) e.preventDefault();
+  });
+}
+
+function toggleInteractionMode() {
+  interactionMode = (interactionMode === 'magnet') ? 'camera' : 'magnet';
+  applyInteractionMode();
+
+  const modeName = interactionMode === 'magnet' ? '🧲 وضع المغناطيس' : '🎥 وضع الكاميرا';
+  showToast(`تم التبديل إلى: ${modeName}`);
+}
+
+function applyInteractionMode() {
+  const indicator = document.getElementById('modeIndicator');
+  const icon = document.getElementById('modeIcon');
+  const text = document.getElementById('modeText');
+  const hint = document.getElementById('hintText');
+
+  if (interactionMode === 'magnet') {
+    controls.enabled = false;
+
+    indicator.className = 'mode-indicator magnet-mode';
+    icon.textContent = '🧲';
+    text.textContent = 'وضع المغناطيس';
+    hint.textContent = 'اسحب المغناطيس من جسمه يميناً ويساراً — ويمكنك إبعاده كثيراً عن الملف';
+
+    renderer.domElement.style.cursor = 'default';
+  } else {
+    controls.enabled = true;
+
+    indicator.className = 'mode-indicator camera-mode';
+    icon.textContent = '🎥';
+    text.textContent = 'وضع الكاميرا';
+    hint.textContent = 'اسحب لتدوير المشهد • عجلة الماوس للتقريب';
+
+    renderer.domElement.style.cursor = 'move';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// سحب المغناطيس
+// ═══════════════════════════════════════════════════════════
+function setupPointerHandlers() {
+  const canvas = renderer.domElement;
+
+  const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+  const dragRaycaster = new THREE.Raycaster();
+
+  let dragStartWorldX = 0;
+  let dragStartMagnetX = 0;
+
+  function getMagnetBodies() {
+    if (!magnetGroup) return [];
+    const bodies = [];
+    magnetGroup.children.forEach(child => {
+      if (child.userData && child.userData.isMagnetBody === true) {
+        bodies.push(child);
+      }
+    });
+    return bodies;
+  }
+
+  function screenToWorldX(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((clientY - rect.top) / rect.height) * 2 + 1;
+    dragRaycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera);
+    const intersection = new THREE.Vector3();
+    const hit = dragRaycaster.ray.intersectPlane(dragPlane, intersection);
+    if (hit) return intersection.x;
+    return null;
+  }
+
+  function isClickOnMagnet(clientX, clientY) {
+    const bodies = getMagnetBodies();
+    if (bodies.length === 0) return false;
+
+    const rect = canvas.getBoundingClientRect();
+    const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((clientY - rect.top) / rect.height) * 2 + 1;
+    dragRaycaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera);
+
+    const intersects = dragRaycaster.intersectObjects(bodies, false);
+    return intersects.length > 0;
+  }
+
+  function startDrag(clientX, clientY) {
+    if (interactionMode !== 'magnet') return;
+    if (!isClickOnMagnet(clientX, clientY)) return;
+
+    const worldX = screenToWorldX(clientX, clientY);
+    if (worldX === null) return;
+
+    isDraggingMagnet = true;
+    dragStartWorldX = worldX;
+    dragStartMagnetX = magnetX;
+
+    document.body.style.userSelect = 'none';
+    canvas.style.cursor = 'grabbing';
+  }
+
+  function doDrag(clientX, clientY) {
+    if (!isDraggingMagnet) return;
+
+    const worldX = screenToWorldX(clientX, clientY);
+    if (worldX === null) return;
+
+    const deltaWorldX = worldX - dragStartWorldX;
+    magnetX = dragStartMagnetX + deltaWorldX;
+    magnetX = Math.max(-4.5, Math.min(4.5, magnetX));
+  }
+
+  function endDrag() {
+    if (isDraggingMagnet) {
+      isDraggingMagnet = false;
+      document.body.style.userSelect = '';
+      canvas.style.cursor = 'default';
+    }
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (interactionMode !== 'magnet') return;
+    if (e.button !== 0) return;
+    startDrag(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (isDraggingMagnet) {
+      e.preventDefault();
+      doDrag(e.clientX, e.clientY);
+    } else if (interactionMode === 'magnet') {
+      canvas.style.cursor = isClickOnMagnet(e.clientX, e.clientY) ? 'grab' : 'default';
+    }
+  });
+
+  document.addEventListener('mouseup', endDrag);
+
+  canvas.addEventListener('touchstart', (e) => {
+    if (interactionMode !== 'magnet') return;
+    if (e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    if (isClickOnMagnet(touch.clientX, touch.clientY)) {
+      startDrag(touch.clientX, touch.clientY);
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDraggingMagnet || e.touches.length !== 1) return;
+    e.preventDefault();
+    doDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
+
+  document.addEventListener('touchend', endDrag);
+}
+
+// ═══════════════════════════════════════════════════════════
+// الملف اللولبي
+// ═══════════════════════════════════════════════════════════
+function buildCoil() {
+  if (coilGroup) scene.remove(coilGroup);
+  coilGroup = new THREE.Group();
+
+  const R = PHYSICS.coilRadius;
+  const N = PHYSICS.turns;
+  const L = PHYSICS.coilHeight;
+  const turnSpacing = L / N;
+  const wireRadius = 0.045;
+
+  const arcSegs = 16;
+
+  const entryArcPoints = [];
+  for (let i = 0; i <= arcSegs; i++) {
+    const t = i / arcSegs;
+    const angle = Math.PI - t * Math.PI;
+    entryArcPoints.push(new THREE.Vector3(-L/2, Math.cos(angle) * R, Math.sin(angle) * R));
+  }
+
+  const entryStart = new THREE.Vector3(-L/2 - 0.4, -R - 0.3, 0);
+  const entryLeadPoints = [];
+  for (let i = 0; i < 15; i++) {
+    const t = i / 15;
+    entryLeadPoints.push(new THREE.Vector3(
+      entryStart.x + (entryArcPoints[0].x - entryStart.x) * t,
+      entryStart.y + (entryArcPoints[0].y - entryStart.y) * t,
+      entryStart.z
+    ));
+  }
+
+  const entryPoints = [...entryLeadPoints, ...entryArcPoints];
+
+  const helixPoints = [];
+  const segsPerTurn = 48;
+  const totalSegs = N * segsPerTurn;
+
+  for (let i = 0; i <= totalSegs; i++) {
+    const t = i / segsPerTurn;
+    const angle = t * Math.PI * 2;
+    const x = -L/2 + t * turnSpacing;
+    helixPoints.push(new THREE.Vector3(x, Math.cos(angle) * R, Math.sin(angle) * R));
+  }
+
+  const lastAngle = N * Math.PI * 2;
+  const exitArcPoints = [];
+  for (let i = 0; i <= arcSegs; i++) {
+    const t = i / arcSegs;
+    const angle = lastAngle + t * Math.PI;
+    exitArcPoints.push(new THREE.Vector3(L/2, Math.cos(angle) * R, Math.sin(angle) * R));
+  }
+
+  const exitEnd = new THREE.Vector3(L/2 + 0.4, -R - 0.3, 0);
+  const exitLeadPoints = [];
+  for (let i = 1; i <= 15; i++) {
+    const t = i / 15;
+    exitLeadPoints.push(new THREE.Vector3(
+      exitArcPoints[exitArcPoints.length - 1].x + (exitEnd.x - exitArcPoints[exitArcPoints.length - 1].x) * t,
+      exitArcPoints[exitArcPoints.length - 1].y + (exitEnd.y - exitArcPoints[exitArcPoints.length - 1].y) * t,
+      exitEnd.z
+    ));
+  }
+
+  const exitPoints = [...exitArcPoints, ...exitLeadPoints];
+
+  const allPoints = [...entryPoints, ...helixPoints, ...exitPoints];
+  coilCurve = new THREE.CatmullRomCurve3(allPoints, false, 'catmullrom', 0.5);
+
+  const tubeGeo = new THREE.TubeGeometry(coilCurve, allPoints.length * 2, wireRadius, 12, false);
+
+  const copperMat = new THREE.MeshStandardMaterial({
+    color: 0xb87333,
+    metalness: 0.9,
+    roughness: 0.25,
+    emissive: 0x000000,
+    emissiveIntensity: 0
+  });
+
+  const coilMesh = new THREE.Mesh(tubeGeo, copperMat);
+  coilMesh.castShadow = true;
+  coilMesh.receiveShadow = true;
+  coilMesh.userData.isCoil = true;
+  coilGroup.add(coilMesh);
+
+  coilGroup.userData = {
+    entryPoint: entryPoints[0].clone(),
+    exitPoint: exitPoints[exitPoints.length - 1].clone(),
+    curve: coilCurve
+  };
+
+  scene.add(coilGroup);
+
+  addTerminal(entryPoints[0]);
+  addTerminal(exitPoints[exitPoints.length - 1]);
+}
+
+function addTerminal(position) {
+  const geo = new THREE.SphereGeometry(0.09, 16, 16);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xffd700,
+    metalness: 1.0,
+    roughness: 0.15,
+    emissive: 0xffd700,
+    emissiveIntensity: 0.4
+  });
+  const sphere = new THREE.Mesh(geo, mat);
+  sphere.position.copy(position);
+  coilGroup.add(sphere);
+}
+
+// ═══════════════════════════════════════════════════════════
+// نسيج الحرف
+// ═══════════════════════════════════════════════════════════
+function createLetterTexture(letter, bgColor) {
+  const size = 512;
+  const c = document.createElement('canvas');
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext('2d');
+
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, size, size);
+
+  const grd = ctx.createRadialGradient(size/2, size/3, size*0.1, size/2, size/2, size*0.8);
+  grd.addColorStop(0, 'rgba(255,255,255,0.25)');
+  grd.addColorStop(0.5, 'rgba(0,0,0,0.05)');
+  grd.addColorStop(1, 'rgba(0,0,0,0.35)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, size, size);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 340px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetX = 6;
+  ctx.shadowOffsetY = 6;
+  ctx.fillText(letter, size/2, size/2 + 20);
+
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(letter, size/2, size/2 + 20);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(10, 10, size - 20, size - 20);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 16;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+// ═══════════════════════════════════════════════════════════
+// المغناطيس
+// ═══════════════════════════════════════════════════════════
+function buildMagnet() {
+  if (magnetGroup) scene.remove(magnetGroup);
+  magnetGroup = new THREE.Group();
+
+  const r = PHYSICS.magnetRadius;
+  const h = PHYSICS.magnetHeight;
+
+  const northX = (poleDirection === 1) ? h / 4 : -h / 4;
+  const southX = (poleDirection === 1) ? -h / 4 : h / 4;
+
+  const nOuterIsTop = northX > 0;
+  const sOuterIsTop = southX > 0;
+
+  const nLetterTex = createLetterTexture('N', '#dc2626');
+  const nSideMat = new THREE.MeshStandardMaterial({
+    map: nLetterTex,
+    metalness: 0.35, roughness: 0.5,
+    emissive: 0x991111, emissiveIntensity: 0.25
+  });
+  const nCapLetterMat = new THREE.MeshStandardMaterial({
+    map: nLetterTex,
+    metalness: 0.5, roughness: 0.4,
+    emissive: 0x991111, emissiveIntensity: 0.3
+  });
+  const nCapPlainMat = new THREE.MeshStandardMaterial({
+    color: 0xdc2626, metalness: 0.5, roughness: 0.4,
+    emissive: 0x991111, emissiveIntensity: 0.3
+  });
+
+  const nGeo = new THREE.CylinderGeometry(r, r, h/2, 48, 1, false);
+  const northMesh = new THREE.Mesh(
+    nGeo,
+    nOuterIsTop ? [nSideMat, nCapLetterMat, nCapPlainMat] : [nSideMat, nCapPlainMat, nCapLetterMat]
+  );
+  northMesh.castShadow = true;
+  northMesh.rotation.z = -Math.PI / 2;
+  northMesh.userData.isMagnetBody = true;
+
+  const sLetterTex = createLetterTexture('S', '#2563eb');
+  const sSideMat = new THREE.MeshStandardMaterial({
+    map: sLetterTex,
+    metalness: 0.35, roughness: 0.5,
+    emissive: 0x112288, emissiveIntensity: 0.25
+  });
+  const sCapLetterMat = new THREE.MeshStandardMaterial({
+    map: sLetterTex,
+    metalness: 0.5, roughness: 0.4,
+    emissive: 0x112288, emissiveIntensity: 0.3
+  });
+  const sCapPlainMat = new THREE.MeshStandardMaterial({
+    color: 0x2563eb, metalness: 0.5, roughness: 0.4,
+    emissive: 0x112288, emissiveIntensity: 0.3
+  });
+
+  const sGeo = new THREE.CylinderGeometry(r, r, h/2, 48, 1, false);
+  const southMesh = new THREE.Mesh(
+    sGeo,
+    sOuterIsTop ? [sSideMat, sCapLetterMat, sCapPlainMat] : [sSideMat, sCapPlainMat, sCapLetterMat]
+  );
+  southMesh.castShadow = true;
+  southMesh.rotation.z = -Math.PI / 2;
+  southMesh.userData.isMagnetBody = true;
+
+  northMesh.position.x = northX;
+  southMesh.position.x = southX;
+
+  magnetGroup.add(northMesh);
+  magnetGroup.add(southMesh);
+
+  magnetLinesGroup = new THREE.Group();
+  magnetLinesGroup.name = 'fieldLines';
+  buildRealisticFieldLines(magnetLinesGroup);
+  magnetGroup.add(magnetLinesGroup);
+
+  magnetGroup.position.set(magnetX, 0, 0);
+  scene.add(magnetGroup);
+}
+
+// ═══════════════════════════════════════════════════════════
+// الحقل المغناطيسي — نموذج ثنائي القطب
+// ═══════════════════════════════════════════════════════════
+function magneticFieldAt(point, magnetPos) {
+  const halfH = PHYSICS.magnetHeight * 0.45;
+  const nx = magnetPos.x + poleDirection * halfH;
+  const sx = magnetPos.x - poleDirection * halfH;
+
+  let dx = point.x - nx, dy = point.y, dz = point.z;
+  let r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (r < 0.06) r = 0.06;
+  const inv1 = 1 / (r * r * r);
+  let bx = dx * inv1, by = dy * inv1, bz = dz * inv1;
+
+  dx = point.x - sx; dy = point.y; dz = point.z;
+  r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  if (r < 0.06) r = 0.06;
+  const inv2 = 1 / (r * r * r);
+  bx -= dx * inv2; by -= dy * inv2; bz -= dz * inv2;
+
+  return new THREE.Vector3(bx, by, bz);
+}
+
+function buildRealisticFieldLines(group) {
+  const magnetPos = { x: 0 };
+  const halfH = PHYSICS.magnetHeight / 2;
+  const nPole = new THREE.Vector3(poleDirection * halfH, 0, 0);
+
+  const thetaList = [30, 55, 80, 105];
+  const phiCount  = 8;
+  const seedDist  = 0.06;
+
+  thetaList.forEach((thetaDeg) => {
+    const th = thetaDeg * Math.PI / 180;
+    for (let i = 0; i < phiCount; i++) {
+      const ph = (i / phiCount) * Math.PI * 2;
+      const dir = new THREE.Vector3(
+        poleDirection * Math.cos(th),
+        Math.sin(th) * Math.cos(ph),
+        Math.sin(th) * Math.sin(ph)
+      );
+      const start = nPole.clone().addScaledVector(dir, seedDist);
+      traceAndDraw(start, magnetPos, group);
+    }
+  });
+}
+
+function traceAndDraw(startPoint, magnetPos, group) {
+  const fieldLine = traceFieldLine(startPoint, magnetPos, {
+    stepSize: 0.05,
+    maxSteps: 900,
+    bounds: 5.0
+  });
+
+  if (fieldLine.length < 12) return;
+
+  const curve = new THREE.CatmullRomCurve3(fieldLine);
+  const pts = curve.getPoints(Math.min(fieldLine.length * 2, 500));
+
+  const geometry = new THREE.BufferGeometry().setFromPoints(pts);
+
+  const colors = [];
+  const n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    colors.push(1.0 - t * 0.75, 0.30 + t * 0.15, 0.25 + t * 0.75);
+  }
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+  const mat = new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0.75
+  });
+  group.add(new THREE.Line(geometry, mat));
+
+  const arrowTs = [0.10, 0.30, 0.50, 0.70, 0.88];
+  arrowTs.forEach((t) => {
+    const idx = Math.max(0, Math.min(fieldLine.length - 1,
+      Math.round(t * (fieldLine.length - 1))));
+    const p = fieldLine[idx];
+
+    const dir = magneticFieldAt(p, magnetPos);
+    if (dir.lengthSq() < 1e-12) return;
+    dir.normalize();
+
+    const arrow = new THREE.ArrowHelper(dir, p, 0.2, 0x9ad4ff, 0.1, 0.07);
+    arrow.line.material.transparent = true;
+    arrow.line.material.opacity = 0.7;
+    arrow.cone.material.transparent = true;
+    arrow.cone.material.opacity = 0.95;
+    group.add(arrow);
+  });
+}
+
+function traceFieldLine(startPoint, magnetPos, options) {
+  const { stepSize, maxSteps, bounds } = options;
+  const points = [startPoint.clone()];
+  const current = startPoint.clone();
+
+  const halfH  = PHYSICS.magnetHeight / 2;
+  const sPoleX = -poleDirection * halfH;
+
+  for (let i = 0; i < maxSteps; i++) {
+    const k1 = magneticFieldAt(current, magnetPos);
+    if (k1.lengthSq() < 1e-18) break;
+    k1.normalize();
+
+    const p2 = current.clone().addScaledVector(k1, stepSize / 2);
+    const k2 = magneticFieldAt(p2, magnetPos);
+    if (k2.lengthSq() < 1e-18) break;
+    k2.normalize();
+
+    const p3 = current.clone().addScaledVector(k2, stepSize / 2);
+    const k3 = magneticFieldAt(p3, magnetPos);
+    if (k3.lengthSq() < 1e-18) break;
+    k3.normalize();
+
+    const p4 = current.clone().addScaledVector(k3, stepSize);
+    const k4 = magneticFieldAt(p4, magnetPos);
+    if (k4.lengthSq() < 1e-18) break;
+    k4.normalize();
+
+    current.x += (k1.x + 2 * k2.x + 2 * k3.x + k4.x) * stepSize / 6;
+    current.y += (k1.y + 2 * k2.y + 2 * k3.y + k4.y) * stepSize / 6;
+    current.z += (k1.z + 2 * k2.z + 2 * k3.z + k4.z) * stepSize / 6;
+
+    points.push(current.clone());
+
+    if (current.length() > bounds) break;
+
+    const dS = Math.sqrt(
+      (current.x - sPoleX) * (current.x - sPoleX) +
+      current.y * current.y + current.z * current.z
+    );
+    if (i > 5 && dS < 0.1) {
+      points.push(new THREE.Vector3(sPoleX, 0, 0));
+      break;
+    }
+  }
+
+  return points;
+}
+
+// ═══════════════════════════════════════════════════════════
+// قلب الأقطاب
+// ═══════════════════════════════════════════════════════════
+function flipMagnetPoles() {
+  poleDirection *= -1;
+  buildMagnet();
+  showToast('🔄 تم قلب الأقطاب');
+}
+
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = `
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(56,189,248,0.95); color: #000;
+    padding: 10px 20px; border-radius: 8px;
+    font-weight: bold; font-size: 13px;
+    z-index: 9999; pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    transition: opacity 0.3s;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 300);
+  }, 1500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// المصباح
+// ═══════════════════════════════════════════════════════════
+function buildLamp() {
+  if (lampGroup) scene.remove(lampGroup);
+  lampGroup = new THREE.Group();
+  lampGroup.position.copy(LAMP_POS);
+
+  const baseMat = new THREE.MeshStandardMaterial({
+    color: 0x475569, metalness: 0.9, roughness: 0.2
+  });
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.18, 0.18, 24), baseMat);
+  base.position.y = -0.28;
+  base.castShadow = true;
+  lampGroup.add(base);
+
+  const screwMat = new THREE.MeshStandardMaterial({
+    color: 0x94a3b8, metalness: 0.85, roughness: 0.3
+  });
+  const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.1, 16), screwMat);
+  screw.position.y = -0.16;
+  lampGroup.add(screw);
+
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff, transparent: true, opacity: 0.12,
+    roughness: 0.05, metalness: 0, transmission: 0.9, thickness: 0.5
+  });
+  const glass = new THREE.Mesh(new THREE.SphereGeometry(0.24, 32, 32), glassMat);
+  glass.scale.set(1, 1.15, 1);
+  lampGroup.add(glass);
+
+  const filamentMat = new THREE.MeshStandardMaterial({
+    color: 0x333333, emissive: 0x000000, emissiveIntensity: 0
+  });
+  const filament = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.008, 8, 16), filamentMat);
+  filament.rotation.x = Math.PI / 2;
+  lampBulb = filament;
+  lampGroup.add(filament);
+
+  const glowCanvas = document.createElement('canvas');
+  glowCanvas.width = 256;
+  glowCanvas.height = 256;
+  const gctx = glowCanvas.getContext('2d');
+  const grd = gctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grd.addColorStop(0, 'rgba(255,255,200,1)');
+  grd.addColorStop(0.25, 'rgba(255,230,150,0.7)');
+  grd.addColorStop(0.5, 'rgba(255,200,80,0.3)');
+  grd.addColorStop(1, 'rgba(255,180,50,0)');
+  gctx.fillStyle = grd;
+  gctx.fillRect(0, 0, 256, 256);
+  const glowTex = new THREE.CanvasTexture(glowCanvas);
+
+  lampGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTex, transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  }));
+  lampGlow.scale.set(1.2, 1.2, 1);
+  lampGroup.add(lampGlow);
+
+  lampLight = new THREE.PointLight(0xffdd88, 0, 5);
+  lampGroup.add(lampLight);
+
+  scene.add(lampGroup);
+}
+
+// ═══════════════════════════════════════════════════════════
+// الأمبيرمتر
+// ═══════════════════════════════════════════════════════════
+let ammeterDisplayObj;
+
+function buildAmmeterDisplay() {
+  const canvas2 = document.createElement('canvas');
+  canvas2.width = 256;
+  canvas2.height = 128;
+  const ctx = canvas2.getContext('2d');
+  ctx.fillStyle = '#052e16';
+  ctx.fillRect(0, 0, 256, 128);
+  ctx.fillStyle = '#22c55e';
+  ctx.font = 'bold 60px Courier New';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('0.000', 128, 64);
+  ctx.font = 'bold 24px Arial';
+  ctx.fillText('A', 230, 30);
+  const tex = new THREE.CanvasTexture(canvas2);
+
+  const geo = new THREE.PlaneGeometry(1.2, 0.6);
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+  ammeterDisplayObj = new THREE.Mesh(geo, mat);
+  ammeterDisplayObj.position.set(-3.2, -2.3, 0);
+  ammeterDisplayObj.userData = { canvas: canvas2, texture: tex };
+
+  scene.add(ammeterDisplayObj);
+}
+
+function updateAmmeterDisplay(current) {
+  if (!ammeterDisplayObj) return;
+  const { canvas: c, texture } = ammeterDisplayObj.userData;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#052e16';
+  ctx.fillRect(0, 0, 256, 128);
+  ctx.fillStyle = '#22c55e';
+  ctx.font = 'bold 54px Courier New';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(Math.abs(current).toFixed(3), 128, 68);
+  ctx.font = 'bold 24px Arial';
+  ctx.fillText('A', 230, 30);
+  texture.needsUpdate = true;
+}
+
+// ═══════════════════════════════════════════════════════════
+// الأسلاك
+// ═══════════════════════════════════════════════════════════
+function buildCircuitWires() {
+  circuitWires.forEach(w => scene.remove(w.mesh));
+  circuitWires = [];
+
+  if (!coilGroup) return;
+
+  const entryPt = coilGroup.userData.entryPoint;
+  const exitPt = coilGroup.userData.exitPoint;
+
+  const wireMat = new THREE.MeshStandardMaterial({
+    color: 0x38bdf8, metalness: 0.7, roughness: 0.35,
+    emissive: 0x0a2540, emissiveIntensity: 0.3
+  });
+
+  addWireSegment(
+    [entryPt.x, entryPt.y, entryPt.z],
+    [LAMP_IN.x, LAMP_IN.y, LAMP_IN.z],
+    wireMat
+  );
+
+  addWireSegment(
+    [LAMP_OUT.x, LAMP_OUT.y, LAMP_OUT.z],
+    [exitPt.x, exitPt.y, exitPt.z],
+    wireMat
+  );
+}
+
+function addWireSegment(p1, p2, material) {
+  const start = new THREE.Vector3(...p1);
+  const end = new THREE.Vector3(...p2);
+
+  const mid1 = new THREE.Vector3(
+    start.x,
+    Math.min(start.y, end.y) - 0.7,
+    start.z
+  );
+  const mid2 = new THREE.Vector3(
+    end.x,
+    Math.min(start.y, end.y) - 0.7,
+    end.z
+  );
+
+  const points = [start, mid1, mid2, end];
+  const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.3);
+  const geo = new THREE.TubeGeometry(curve, 60, 0.035, 8, false);
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.castShadow = true;
+  scene.add(mesh);
+
+  circuitWires.push({ mesh, material, curve });
+}
+
+// ═══════════════════════════════════════════════════════════
+// الجسيمات
+// ═══════════════════════════════════════════════════════════
+function buildElectronParticles() {
+  if (electronGroup) scene.remove(electronGroup);
+  electronGroup = new THREE.Group();
+  electronParticles = [];
+
+  const count = 80;
+  const geo = new THREE.SphereGeometry(0.055, 12, 12);
+
+  for (let i = 0; i < count; i++) {
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0x22c55e, transparent: true, opacity: 0
+    });
+    const sphere = new THREE.Mesh(geo, mat);
+    sphere.userData.baseT = i / count;
+    electronGroup.add(sphere);
+    electronParticles.push(sphere);
+  }
+
+  scene.add(electronGroup);
+}
+
+// ═══════════════════════════════════════════════════════════
+// الفيض
+// ═══════════════════════════════════════════════════════════
+function computeFlux(x) {
+  const sigma = PHYSICS.fluxSigma;
+  return poleDirection * PHYSICS.magnetStrength * Math.exp(-(x * x) / (2 * sigma * sigma));
+}
+
+// ═══════════════════════════════════════════════════════════
+// الحلقة الرئيسية
+// ═══════════════════════════════════════════════════════════
+function animate() {
+  requestAnimationFrame(animate);
+
+  const now = performance.now();
+  const dt = Math.min(0.05, (now - lastTime) / 1000);
+  lastTime = now;
+
+  if (magnetGroup) magnetGroup.position.x = magnetX;
+
+  const instantVel = (magnetX - lastMagnetX) / (dt || 0.016);
+  lastMagnetX = magnetX;
+  smoothedVelocity = smoothedVelocity * 0.65 + instantVel * 0.35;
+
+  const flux = computeFlux(magnetX);
+  const dFlux = (flux - lastFlux) / (dt || 0.016);
+  lastFlux = flux;
+
+  const emfRaw = -PHYSICS.turns * dFlux * 0.3;
+  currentEmf = currentEmf * 0.7 + emfRaw * 0.3;
+
+  const totalR = PHYSICS.lampResistance + PHYSICS.coilResistance;
+  currentCurrent = currentEmf / totalR;
+
+  updateElectronParticles(currentCurrent, dt);
+  updateLampVisual(currentCurrent);
+  updateWiresVisual(currentCurrent);
+  updateUI(currentEmf, currentCurrent, smoothedVelocity);
+
+  // دوران بطيء للشعار على الأرضية
+  if (logoGroup) {
+    logoGroup.rotation.y += 0.0008;
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+function updateElectronParticles(current, dt) {
+  if (!electronGroup || circuitWires.length < 2) return;
+
+  const intensity = Math.min(1, Math.abs(current) * 8);
+  const direction = current > 0 ? 1 : -1;
+  const speed = direction * (0.05 + intensity * 0.5) * 0.15;
+
+  electronFlowOffset += speed * dt * 3;
+  electronFlowOffset = ((electronFlowOffset % 1) + 1) % 1;
+
+  electronParticles.forEach((particle) => {
+    let t = particle.userData.baseT + electronFlowOffset;
+    t = ((t % 1) + 1) % 1;
+
+    const pos = getPositionOnCircuit(t);
+    if (pos) particle.position.copy(pos);
+
+    particle.material.opacity = intensity;
+    particle.scale.setScalar(0.6 + intensity * 0.8);
+  });
+}
+
+function getPositionOnCircuit(t) {
+  if (!coilGroup || circuitWires.length < 2) return null;
+
+  if (t >= 0.00 && t < 0.28) {
+    const localT = t / 0.28;
+    return circuitWires[0].curve.getPoint(localT);
+  }
+
+  if (t >= 0.28 && t < 0.34) {
+    const localT = (t - 0.28) / 0.06;
+    return new THREE.Vector3(
+      LAMP_IN.x + (LAMP_OUT.x - LAMP_IN.x) * localT,
+      LAMP_IN.y + Math.sin(localT * Math.PI) * 0.1,
+      LAMP_IN.z
+    );
+  }
+
+  if (t >= 0.34 && t < 0.62) {
+    const localT = (t - 0.34) / 0.28;
+    return circuitWires[1].curve.getPoint(localT);
+  }
+
+  if (t >= 0.62 && t <= 1.00) {
+    const localT = (t - 0.62) / 0.38;
+    return coilCurve.getPoint(localT);
+  }
+
+  return null;
+}
+
+function updateLampVisual(current) {
+  if (!lampBulb || !lampGlow || !lampLight) return;
+
+  const intensity = Math.min(1, Math.abs(current) * 15);
+
+  if (intensity > 0.02) {
+    const filamentColor = new THREE.Color().lerpColors(
+      new THREE.Color(0x333333),
+      new THREE.Color(0xffff88),
+      intensity
+    );
+    lampBulb.material.color.copy(filamentColor);
+    lampBulb.material.emissive = new THREE.Color(0xffaa44).multiplyScalar(intensity);
+    lampBulb.material.emissiveIntensity = intensity;
+
+    lampGlow.material.opacity = intensity * 0.9;
+    const scale = 1.0 + intensity * 1.5;
+    lampGlow.scale.set(scale, scale, 1);
+    lampLight.intensity = intensity * 3;
+  } else {
+    lampBulb.material.color.setHex(0x333333);
+    lampBulb.material.emissive = new THREE.Color(0x000000);
+    lampBulb.material.emissiveIntensity = 0;
+    lampGlow.material.opacity = 0;
+    lampLight.intensity = 0;
+  }
+}
+
+function updateWiresVisual(current) {
+  const intensity = Math.min(1, Math.abs(current) * 10);
+
+  circuitWires.forEach(w => {
+    if (intensity > 0.05) {
+      w.material.color.setHex(0x22c55e);
+      w.material.emissive = new THREE.Color(0x22c55e).multiplyScalar(intensity * 0.8);
+      w.material.emissiveIntensity = intensity;
+    } else {
+      w.material.color.setHex(0x38bdf8);
+      w.material.emissive = new THREE.Color(0x0a2540);
+      w.material.emissiveIntensity = 0.3;
+    }
+  });
+
+  coilGroup.children.forEach(mesh => {
+    if (mesh.userData.isCoil && mesh.material) {
+      const glow = Math.min(1, Math.abs(current) * 12);
+      if (glow > 0.02) {
+        mesh.material.emissive = new THREE.Color(0xffcc44).multiplyScalar(glow * 0.6);
+        mesh.material.emissiveIntensity = glow;
+      } else {
+        mesh.material.emissive = new THREE.Color(0x000000);
+        mesh.material.emissiveIntensity = 0;
+      }
+    }
+  });
+}
+
+let uiAccumulator = 0;
+
+function updateUI(emf, current, velocity) {
+  uiAccumulator += 0.016;
+  if (uiAccumulator < 0.06) return;
+  uiAccumulator = 0;
+
+  document.getElementById('emfValue').textContent = Math.abs(emf).toFixed(3) + ' V';
+  document.getElementById('currentValue').textContent = Math.abs(current).toFixed(3) + ' A';
+  document.getElementById('speedValue').textContent = Math.abs(velocity).toFixed(2);
+
+  const dirIndicator = document.getElementById('directionIndicator');
+  const dirArrow = document.getElementById('directionArrow');
+  const dirText = document.getElementById('directionText');
+
+  if (Math.abs(current) > 0.005) {
+    if (current > 0) {
+      dirIndicator.className = 'direction-indicator forward';
+      dirArrow.textContent = '▶';
+      dirText.textContent = 'التيار في الاتجاه الموجب';
+    } else {
+      dirIndicator.className = 'direction-indicator backward';
+      dirArrow.textContent = '◀';
+      dirText.textContent = 'التيار في الاتجاه السالب';
+    }
+  } else {
+    dirIndicator.className = 'direction-indicator';
+    dirArrow.textContent = '⏸';
+    dirText.textContent = 'لا يوجد تيار';
+  }
+
+  const lampEl = document.getElementById('lampIndicator');
+  const lampStatus = document.getElementById('lampStatus');
+  const lampIcon = document.getElementById('lampIcon');
+
+  if (Math.abs(current) > 0.01) {
+    lampEl.classList.add('on');
+    lampStatus.textContent = 'المصباح مضيء';
+    lampIcon.textContent = '💡';
+  } else {
+    lampEl.classList.remove('on');
+    lampStatus.textContent = 'المصباح مطفأ';
+    lampIcon.textContent = '⚫';
+  }
+
+  updateAmmeterDisplay(current);
+}
+
+document.getElementById('turnsRange').addEventListener('input', (e) => {
+  PHYSICS.turns = parseInt(e.target.value);
+  document.getElementById('turnsVal').textContent = PHYSICS.turns;
+  buildCoil();
+  buildCircuitWires();
+});
+
+function setView(view, event) {
+  document.querySelectorAll('.hdr-btn').forEach(b => {
+    if (b.textContent.includes('جانب') || b.textContent.includes('منظور') ||
+        b.textContent.includes('الجانب')) {
+      b.classList.remove('active');
+    }
+  });
+  if (event && event.target) event.target.classList.add('active');
+
+  const positions = {
+    side: new THREE.Vector3(0, 1.5, 7.5),
+    perspective: new THREE.Vector3(5, 3, 6)
+  };
+
+  const targetPos = positions[view];
+  const startPos = camera.position.clone();
+  const startTime = performance.now();
+  const duration = 600;
+
+  function step() {
+    const t = Math.min(1, (performance.now() - startTime) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    camera.position.lerpVectors(startPos, targetPos, eased);
+    camera.lookAt(0, -0.5, 0);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  step();
+}
+
+function resetScene() {
+  magnetX = 0;
+  smoothedVelocity = 0;
+  currentEmf = 0;
+  currentCurrent = 0;
+  lastFlux = computeFlux(0);
+  lastMagnetX = 0;
+  electronFlowOffset = 0;
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
