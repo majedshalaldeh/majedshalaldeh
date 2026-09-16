@@ -59,6 +59,7 @@
     gap: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     white-space: nowrap;
+    text-decoration: none;
   }
   .top-nav .nav-btn:hover {
     transform: translateY(-2px);
@@ -531,8 +532,8 @@
 
 <header>
   <div class="top-nav">
-    <button class="nav-btn home-btn" onclick="goToMainPage()">🏠 الرئيسية</button>
-    <button class="nav-btn back-btn" onclick="goToInductionPage()">🧲 الحث الكهرومغناطيسي</button>
+    <a class="nav-btn home-btn" href="../../index.html" title="العودة إلى الصفحة الرئيسية للموقع">🏠 الرئيسية</a>
+    <a class="nav-btn back-btn" href="../../index.html" title="العودة الى الحث الكهرومغناطيسي">⬅ الحث الكهرو مغناطيسي</a>
   </div>
   <h1>مختبر الحث الكهرومغناطيسي</h1>
   <div class="subtitle">تجربة تفاعلية ثلاثية الأبعاد</div>
@@ -920,18 +921,8 @@ function buildLogoOnFloor() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// التنقل
+// التنقل — أصبح روابط <a> مباشرة في الرأس بدل confirm()
 // ═══════════════════════════════════════════════════════════
-function goToMainPage() {
-  if (confirm('العودة إلى الصفحة الرئيسية؟')) {
-    window.location.href = '../../index.html';
-  }
-}
-function goToInductionPage() {
-  if (confirm('العودة إلى صفحة الحث الكهرومغناطيسي؟')) {
-    window.location.href = '../../index.html';
-  }
-}
 
 // ═══════════════════════════════════════════════════════════
 // ★★★ أزرار تحكم الكاميرا ★★★
