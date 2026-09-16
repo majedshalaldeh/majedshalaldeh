@@ -137,6 +137,11 @@
     gap: 9px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.35);
   }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-track { background: #0a0e1a; border-radius: 3px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  .sidebar::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
   .sidebar-logo-wrap {
     display: flex;
     justify-content: center;
@@ -151,6 +156,7 @@
     box-shadow: 0 0 25px rgba(56,189,248,0.35),
                 inset 0 0 20px rgba(56,189,248,0.15);
     overflow: hidden;
+    flex-shrink: 0;
   }
   .sidebar-logo-wrap img {
     width: 100%;
@@ -197,12 +203,57 @@
   .sidebar .hdr-btn:active { transform: translateY(0); }
   .sidebar .hdr-btn.active {
     background: #38bdf8; color: #000; border-color: #38bdf8;
+    box-shadow: 0 0 16px rgba(56,189,248,0.55);
   }
   .sidebar .hdr-btn.flip-btn {
     background: linear-gradient(135deg, #dc2626, #2563eb);
     color: #fff; border: none; font-size: 12px;
   }
   .sidebar .hdr-btn.flip-btn:hover { filter: brightness(1.15); }
+
+  /* ═══ أزرار التحكم المدمجة الجديدة ═══ */
+  .ctrl-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+  .ctrl-btn {
+    padding: 9px 2px;
+    border-radius: 7px;
+    border: 1px solid #334155;
+    background: #1e2740;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  .ctrl-btn:hover {
+    background: #2a3757;
+    border-color: #38bdf8;
+    color: #38bdf8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  }
+  .ctrl-btn:active { transform: translateY(0) scale(0.94); }
+  .ctrl-btn.active {
+    background: #38bdf8; border-color: #38bdf8; color: #000;
+    box-shadow: 0 0 12px rgba(56,189,248,0.55);
+  }
+  .ctrl-btn.amber:hover {
+    border-color: #fbbf24; color: #fbbf24;
+  }
+  .ctrl-btn.green:hover {
+    border-color: #22c55e; color: #22c55e;
+  }
 
   .slider-group.vertical {
     display: flex;
@@ -453,10 +504,12 @@
       justify-content: center;
       padding: 10px;
       gap: 6px;
+      overflow-y: visible;
     }
     .sidebar-logo-wrap { width: 70px; height: 70px; margin: 0; }
     .sidebar .hdr-btn { width: auto; padding: 8px 12px; }
     .sidebar-section-title { width: 100%; margin: 4px 0 0; }
+    .ctrl-grid { min-width: 168px; flex: 0 0 auto; }
     .slider-group.vertical {
       flex-direction: row; align-items: center; padding: 6px 10px;
     }
@@ -499,7 +552,8 @@
            onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=&quot;color:#38bdf8;font-weight:bold;font-size:14px;text-align:center;line-height:1.3;&quot;>مختبر<br>الفيزياء</span>';">
     </div>
 
-    <div class="sidebar-section-title">التحكم</div>
+    <!-- ═══════════ الإعدادات العامة ═══════════ -->
+    <div class="sidebar-section-title">الإعدادات</div>
 
     <div class="slider-group vertical">
       <label>عدد اللفات</label>
@@ -514,7 +568,39 @@
       <button class="hdr-btn" onclick="setView('perspective', event)">منظور</button>
     </div>
 
-    <button class="hdr-btn" onclick="resetScene()">♻️ إعادة</button>
+    <button class="hdr-btn" id="modeBtn" onclick="toggleInteractionMode()">🎥 التبديل لوضع الكاميرا</button>
+
+    <button class="hdr-btn" onclick="resetScene()">♻️ إعادة ضبط التجربة</button>
+
+    <!-- ═══════════ تحكم الكاميرا ═══════════ -->
+    <div class="sidebar-section-title">🎥 تحكم الكاميرا</div>
+
+    <div class="ctrl-grid">
+      <button class="ctrl-btn" onclick="orbitCamera(-0.25, 0)" title="تدوير لليسار">↺</button>
+      <button class="ctrl-btn" onclick="orbitCamera(0.25, 0)"  title="تدوير لليمين">↻</button>
+      <button class="ctrl-btn" onclick="orbitCamera(0, -0.15)" title="رفع الكاميرا">▲</button>
+      <button class="ctrl-btn" onclick="orbitCamera(0, 0.15)"  title="خفض الكاميرا">▼</button>
+    </div>
+
+    <div class="ctrl-grid">
+      <button class="ctrl-btn" onclick="zoomCamera(-0.8)" title="تقريب">＋</button>
+      <button class="ctrl-btn" onclick="zoomCamera(0.8)"  title="إبعاد">－</button>
+      <button class="ctrl-btn" onclick="topView()"     title="منظر من الأعلى">🔭</button>
+      <button class="ctrl-btn" onclick="resetCamera()" title="إعادة ضبط الكاميرا">⟲</button>
+    </div>
+
+    <!-- ═══════════ تحكم المغناطيس ═══════════ -->
+    <div class="sidebar-section-title">🧲 تحكم المغناطيس</div>
+
+    <div class="ctrl-grid">
+      <button class="ctrl-btn amber" onclick="nudgeMagnet(-1)" title="إزاحة لليسار">◀</button>
+      <button class="ctrl-btn amber" onclick="nudgeMagnet(1)"  title="إزاحة لليمين">▶</button>
+      <button class="ctrl-btn green" onclick="returnMagnet()"  title="إعادة إلى المنتصف">🎯</button>
+      <button class="ctrl-btn amber" onclick="shakeMagnet()"   title="رجّة سريعة">⚡</button>
+    </div>
+
+    <button class="hdr-btn" id="autoBtn" onclick="toggleAutoMagnet()">▶️ تحريك تلقائي</button>
+
   </aside>
 
   <div id="scene-container">
@@ -629,9 +715,18 @@ let smoothedVelocity = 0;
 let lastMagnetX = 0;
 let lastTime = performance.now();
 
+/* ★ حالة أزرار تحكم المغناطيس */
+let magnetTargetX = null;   // هدف حركة ناعمة
+let autoMagnet    = false;  // تحريك تلقائي متذبذب
+let autoMagnetTime = 0;
+let shakeTime     = 0;      // مدة الرجّة المتبقية
+let shakeBaseX    = 0;
+
 const LAMP_POS = new THREE.Vector3(0, -2.8, 0);
 const LAMP_IN  = new THREE.Vector3(-0.2, -3.0, 0);
 const LAMP_OUT = new THREE.Vector3( 0.2, -3.0, 0);
+
+const MAGNET_LIMIT = 4.5;
 
 // ═══════════════════════════════════════════════════════════
 // التهيئة
@@ -717,23 +812,19 @@ function buildLogoOnFloor() {
   logoGroup = new THREE.Group();
   logoGroup.position.set(0, -3.47, -4.0);
 
-  const R_LOGO = 1.75;   // نصف قطر الشعار الدائري
+  const R_LOGO = 1.75;
 
-  // ── 1) قرص خلفي داكن ──
   const backDisc = new THREE.Mesh(
     new THREE.CircleGeometry(R_LOGO + 0.05, 96),
     new THREE.MeshBasicMaterial({
-      color: 0x0f172a,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.95
+      color: 0x0f172a, side: THREE.DoubleSide,
+      transparent: true, opacity: 0.95
     })
   );
   backDisc.rotation.x = -Math.PI / 2;
   backDisc.position.y = -0.01;
   logoGroup.add(backDisc);
 
-  // ── 2) هالة ضوئية (توهج حول الشعار) ──
   const glowCanvas = document.createElement('canvas');
   glowCanvas.width = 512;
   glowCanvas.height = 512;
@@ -748,11 +839,8 @@ function buildLogoOnFloor() {
   const glowMesh = new THREE.Mesh(
     new THREE.CircleGeometry(R_LOGO + 0.9, 96),
     new THREE.MeshBasicMaterial({
-      map: glowTex,
-      transparent: true,
-      opacity: 0.7,
-      side: THREE.DoubleSide,
-      depthWrite: false,
+      map: glowTex, transparent: true, opacity: 0.7,
+      side: THREE.DoubleSide, depthWrite: false,
       blending: THREE.AdditiveBlending
     })
   );
@@ -760,13 +848,10 @@ function buildLogoOnFloor() {
   glowMesh.position.y = -0.005;
   logoGroup.add(glowMesh);
 
-  // ── 3) حلقة ذهبية داخلية ──
   const ringInner = new THREE.Mesh(
     new THREE.RingGeometry(R_LOGO + 0.05, R_LOGO + 0.13, 96),
     new THREE.MeshBasicMaterial({
-      color: 0xfbbf24,
-      transparent: true,
-      opacity: 0.85,
+      color: 0xfbbf24, transparent: true, opacity: 0.85,
       side: THREE.DoubleSide
     })
   );
@@ -774,13 +859,10 @@ function buildLogoOnFloor() {
   ringInner.position.y = 0.005;
   logoGroup.add(ringInner);
 
-  // ── 4) حلقة زرقاء خارجية ──
   const ringOuter = new THREE.Mesh(
     new THREE.RingGeometry(R_LOGO + 0.18, R_LOGO + 0.28, 96),
     new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
-      transparent: true,
-      opacity: 0.9,
+      color: 0x38bdf8, transparent: true, opacity: 0.9,
       side: THREE.DoubleSide
     })
   );
@@ -788,14 +870,11 @@ function buildLogoOnFloor() {
   ringOuter.position.y = 0.006;
   logoGroup.add(ringOuter);
 
-  // ── 5) نقشات نقطية (زخرفة دائرية حول الشعار) ──
   const dotCount = 32;
   const dotRadius = R_LOGO + 0.4;
   const dotGeo = new THREE.CircleGeometry(0.045, 12);
   const dotMat = new THREE.MeshBasicMaterial({
-    color: 0x38bdf8,
-    transparent: true,
-    opacity: 0.75,
+    color: 0x38bdf8, transparent: true, opacity: 0.75,
     side: THREE.DoubleSide
   });
   for (let i = 0; i < dotCount; i++) {
@@ -808,7 +887,6 @@ function buildLogoOnFloor() {
 
   scene.add(logoGroup);
 
-  // ── 6) تحميل صورة الشعار وطباعتها بشكل دائري ──
   const loader = new THREE.TextureLoader();
   loader.load(
     'logo.png',
@@ -817,15 +895,11 @@ function buildLogoOnFloor() {
       texture.minFilter = THREE.LinearMipmapLinearFilter;
       texture.magFilter = THREE.LinearFilter;
 
-      // قرص دائري مطبوع عليه الشعار
       const logoMesh = new THREE.Mesh(
         new THREE.CircleGeometry(R_LOGO, 128),
         new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: true,
-          opacity: 1.0,
-          side: THREE.DoubleSide,
-          depthWrite: false
+          map: texture, transparent: true, opacity: 1.0,
+          side: THREE.DoubleSide, depthWrite: false
         })
       );
       logoMesh.rotation.x = -Math.PI / 2;
@@ -835,13 +909,9 @@ function buildLogoOnFloor() {
     undefined,
     (err) => {
       console.warn('فشل تحميل الشعار — سيظهر قرص بديل ملوّن', err);
-      // في حال عدم توفر logo.png: قرص بديل ملوّن مع أحرف
       const fallbackMesh = new THREE.Mesh(
         new THREE.CircleGeometry(R_LOGO, 128),
-        new THREE.MeshBasicMaterial({
-          color: 0x1e3a5f,
-          side: THREE.DoubleSide
-        })
+        new THREE.MeshBasicMaterial({ color: 0x1e3a5f, side: THREE.DoubleSide })
       );
       fallbackMesh.rotation.x = -Math.PI / 2;
       fallbackMesh.position.y = 0.01;
@@ -860,7 +930,95 @@ function goToMainPage() {
 }
 function goToInductionPage() {
   if (confirm('العودة إلى صفحة الحث الكهرومغناطيسي؟')) {
-    window.location.href = 'induction.html';
+    window.location.href = '../../index.html';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ★★★ أزرار تحكم الكاميرا ★★★
+// ═══════════════════════════════════════════════════════════
+function orbitCamera(dTheta, dPhi) {
+  if (!camera || !controls) return;
+  const target = controls.target;
+  const offset = camera.position.clone().sub(target);
+  const sph = new THREE.Spherical().setFromVector3(offset);
+  sph.theta += dTheta;
+  sph.phi = Math.max(0.12, Math.min(Math.PI - 0.12, sph.phi + dPhi));
+  offset.setFromSpherical(sph);
+  camera.position.copy(target).add(offset);
+  camera.lookAt(target);
+}
+
+function zoomCamera(delta) {
+  if (!camera || !controls) return;
+  const target = controls.target;
+  const offset = camera.position.clone().sub(target);
+  let dist = offset.length();
+  dist = Math.max(controls.minDistance, Math.min(controls.maxDistance, dist + delta));
+  offset.setLength(dist);
+  camera.position.copy(target).add(offset);
+  camera.lookAt(target);
+}
+
+function topView() {
+  if (!camera || !controls) return;
+  const t = controls.target;
+  camera.position.set(t.x, t.y + 9, t.z + 0.001);
+  camera.lookAt(t);
+  showToast('🔭 منظر من الأعلى');
+}
+
+function resetCamera() {
+  if (!camera || !controls) return;
+  camera.position.set(0, 1.5, 7.5);
+  controls.target.set(0, -0.5, 0);
+  camera.lookAt(0, -0.5, 0);
+  showToast('⟲ تمت إعادة ضبط الكاميرا');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ★★★ أزرار تحكم المغناطيس ★★★
+// ═══════════════════════════════════════════════════════════
+function nudgeMagnet(dir) {
+  autoMagnet = false; updateAutoBtn();
+  shakeTime = 0;
+  const base = (magnetTargetX !== null) ? magnetTargetX : magnetX;
+  magnetTargetX = Math.max(-MAGNET_LIMIT, Math.min(MAGNET_LIMIT, base + dir * 0.8));
+}
+
+function returnMagnet() {
+  autoMagnet = false; updateAutoBtn();
+  shakeTime = 0;
+  magnetTargetX = 0;
+  showToast('🎯 عودة المغناطيس إلى المنتصف');
+}
+
+function shakeMagnet() {
+  autoMagnet = false; updateAutoBtn();
+  magnetTargetX = null;
+  shakeBaseX = magnetX;
+  shakeTime = 1.4;
+  showToast('⚡ رجّة سريعة');
+}
+
+function toggleAutoMagnet() {
+  autoMagnet = !autoMagnet;
+  magnetTargetX = null;
+  shakeTime = 0;
+  if (autoMagnet) autoMagnetTime = 0;
+  updateAutoBtn();
+  showToast(autoMagnet ? '▶️ التحريك التلقائي: مُفعّل' : '⏸️ التحريك التلقائي: متوقف');
+}
+
+function updateAutoBtn() {
+  const btn = document.getElementById('autoBtn');
+  if (!btn) return;
+  if (autoMagnet) {
+    btn.classList.add('active');
+    btn.textContent = '⏸️ إيقاف التحريك التلقائي';
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '▶️ تحريك تلقائي';
   }
 }
 
@@ -895,6 +1053,7 @@ function applyInteractionMode() {
   const icon = document.getElementById('modeIcon');
   const text = document.getElementById('modeText');
   const hint = document.getElementById('hintText');
+  const modeBtn = document.getElementById('modeBtn');
 
   if (interactionMode === 'magnet') {
     controls.enabled = false;
@@ -904,6 +1063,8 @@ function applyInteractionMode() {
     text.textContent = 'وضع المغناطيس';
     hint.textContent = 'اسحب المغناطيس من جسمه يميناً ويساراً — ويمكنك إبعاده كثيراً عن الملف';
 
+    if (modeBtn) modeBtn.textContent = '🎥 التبديل لوضع الكاميرا';
+
     renderer.domElement.style.cursor = 'default';
   } else {
     controls.enabled = true;
@@ -912,6 +1073,8 @@ function applyInteractionMode() {
     icon.textContent = '🎥';
     text.textContent = 'وضع الكاميرا';
     hint.textContent = 'اسحب لتدوير المشهد • عجلة الماوس للتقريب';
+
+    if (modeBtn) modeBtn.textContent = '🧲 التبديل لوضع المغناطيس';
 
     renderer.domElement.style.cursor = 'move';
   }
@@ -975,6 +1138,11 @@ function setupPointerHandlers() {
     dragStartWorldX = worldX;
     dragStartMagnetX = magnetX;
 
+    /* إيقاف أي حركة تلقائية عند السحب اليدوي */
+    magnetTargetX = null;
+    shakeTime = 0;
+    if (autoMagnet) { autoMagnet = false; updateAutoBtn(); }
+
     document.body.style.userSelect = 'none';
     canvas.style.cursor = 'grabbing';
   }
@@ -987,7 +1155,7 @@ function setupPointerHandlers() {
 
     const deltaWorldX = worldX - dragStartWorldX;
     magnetX = dragStartMagnetX + deltaWorldX;
-    magnetX = Math.max(-4.5, Math.min(4.5, magnetX));
+    magnetX = Math.max(-MAGNET_LIMIT, Math.min(MAGNET_LIMIT, magnetX));
   }
 
   function endDrag() {
@@ -1651,6 +1819,27 @@ function animate() {
   const dt = Math.min(0.05, (now - lastTime) / 1000);
   lastTime = now;
 
+  // ─── تحديث موضع المغناطيس (تلقائي / أزرار) ───
+  if (!isDraggingMagnet) {
+    if (shakeTime > 0) {
+      shakeTime -= dt;
+      const k = Math.max(0, shakeTime / 1.4);
+      magnetX = Math.max(-MAGNET_LIMIT, Math.min(MAGNET_LIMIT,
+        shakeBaseX + Math.sin((1.4 - shakeTime) * 22) * 1.2 * k));
+    } else if (autoMagnet) {
+      autoMagnetTime += dt;
+      magnetX = Math.sin(autoMagnetTime * 1.7) * 3.5;
+    } else if (magnetTargetX !== null) {
+      const diff = magnetTargetX - magnetX;
+      if (Math.abs(diff) < 0.005) {
+        magnetX = magnetTargetX;
+        magnetTargetX = null;
+      } else {
+        magnetX += diff * Math.min(1, dt * 7);
+      }
+    }
+  }
+
   if (magnetGroup) magnetGroup.position.x = magnetX;
 
   const instantVel = (magnetX - lastMagnetX) / (dt || 0.016);
@@ -1672,7 +1861,6 @@ function animate() {
   updateWiresVisual(currentCurrent);
   updateUI(currentEmf, currentCurrent, smoothedVelocity);
 
-  // دوران بطيء للشعار على الأرضية
   if (logoGroup) {
     logoGroup.rotation.y += 0.0008;
   }
@@ -1882,6 +2070,14 @@ function resetScene() {
   lastFlux = computeFlux(0);
   lastMagnetX = 0;
   electronFlowOffset = 0;
+
+  /* ★ إعادة تعيين حالة أزرار تحكم المغناطيس */
+  magnetTargetX  = null;
+  shakeTime      = 0;
+  autoMagnetTime = 0;
+  if (autoMagnet) { autoMagnet = false; updateAutoBtn(); }
+
+  showToast('♻️ تمت إعادة ضبط التجربة');
 }
 
 window.addEventListener('load', init);
