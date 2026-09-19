@@ -176,7 +176,7 @@
   .legend input{accent-color:#4da3ff;cursor:pointer;width:14px;height:14px}
   .legend i{width:12px;height:12px;border-radius:3px;flex-shrink:0;
     box-shadow:0 0 8px currentColor}
-  .foot{margin-top:10px;font-size:10.5px;color:#5a6a8f;
+  .foot{margin-top:10px;font-size:10.5px;color:5a6a8f;
     text-align:center;line-height:1.6}
   @media (max-width:960px){
     #header{max-width:calc(100vw - 40px);top:64px;padding:8px 16px}
@@ -325,7 +325,10 @@ const BASE_W       = 5.4;
 const BASE_H       = 0.28;
 const BASE_D       = 4.0;
 
-/* ★★★ حجم الشعار على القاعدة (0.70 من الحجم الأقصى) ★★★ */
+/* ★★★ لون موحّد للحامل بالكامل (العمودان + العارضة + القاعدة) ★★★ */
+const STAND_COLOR  = 0x7a8ba8;
+
+/* حجم الشعار */
 const LOGO_SCALE   = 0.70;
 
 /* ================= الحالة ================= */
@@ -410,30 +413,35 @@ scene.add(grid);
 const standGroup = new THREE.Group();
 scene.add(standGroup);
 
-const postMat = new THREE.MeshStandardMaterial({
-  color: 0x7a8ba8, metalness: 0.75, roughness: 0.35
+/* ★★★ مادة موحّدة للحامل بالكامل ★★★ */
+const standMat = new THREE.MeshStandardMaterial({
+  color: STAND_COLOR,
+  metalness: 0.75,
+  roughness: 0.35
 });
 
+/* العمودان */
 const postGeo = new THREE.CylinderGeometry(0.10, 0.10, POST_H, 14);
-const postLeft = new THREE.Mesh(postGeo, postMat);
+const postLeft = new THREE.Mesh(postGeo, standMat);
 postLeft.position.set(-POST_X, POST_H/2, 0);
 postLeft.castShadow = true;
 standGroup.add(postLeft);
 
-const postRight = new THREE.Mesh(postGeo, postMat);
+const postRight = new THREE.Mesh(postGeo, standMat);
 postRight.position.set(POST_X, POST_H/2, 0);
 postRight.castShadow = true;
 standGroup.add(postRight);
 
+/* العارضة */
 const beamGeo = new THREE.BoxGeometry(BEAM_W, BEAM_H, BEAM_D);
-const beam = new THREE.Mesh(beamGeo, postMat);
+const beam = new THREE.Mesh(beamGeo, standMat);
 beam.position.set(0, POST_H, 0);
 beam.castShadow = true;
 standGroup.add(beam);
 
-/* القاعدة السفلية */
+/* ★★★ القاعدة — بنفس لون الحامل الآن ★★★ */
 const baseGeo = new THREE.BoxGeometry(BASE_W, BASE_H, BASE_D);
-const base = new THREE.Mesh(baseGeo, postMat);
+const base = new THREE.Mesh(baseGeo, standMat);
 base.position.set(0, BASE_H/2, 0);
 base.castShadow = true;
 base.receiveShadow = true;
@@ -450,7 +458,7 @@ const baseEdges = new THREE.LineSegments(
 baseEdges.position.copy(base.position);
 standGroup.add(baseEdges);
 
-/* سطح القاعدة العلوي الأبيض */
+/* سطح القاعدة العلوي الأبيض (خلفية الشعار) */
 const baseTopMat = new THREE.MeshStandardMaterial({
   color: 0xffffff,
   metalness: 0.1,
@@ -468,47 +476,35 @@ baseTop.receiveShadow = true;
 standGroup.add(baseTop);
 
 /* ============================================================
-   ★★★ تحميل الشعار من الملف المرفق وتقنيعه بشكل دائري ★★★
+   تحميل الشعار وتقنيعه بشكل دائري
    ============================================================ */
 const LOGO_SIZE = Math.min(BASE_W, BASE_D) * LOGO_SCALE;
-const LOGO_RADIUS = LOGO_SIZE / 2;
 
 function loadCircularLogo() {
-  /* قماش مربع بحجم مناسب */
   const S = 1024;
   const cvs = document.createElement('canvas');
   cvs.width = S;
   cvs.height = S;
   const ctx = cvs.getContext('2d');
 
-  /* صورة الشعار */
   const img = new Image();
   img.crossOrigin = 'anonymous';
 
   img.onload = () => {
-    /* ★★★ تقنيع دائري: نرسم الصورة داخل قناع دائري ★★★ */
-
-    /* ارسم قناعاً دائرياً */
     ctx.save();
-
-    /* الدائرة الكاملة في منتصف القماش */
     ctx.beginPath();
     ctx.arc(S/2, S/2, S/2 - 2, 0, Math.PI * 2);
     ctx.closePath();
     ctx.clip();
 
-    /* ارسم الصورة لتغطي القماش بالكامل داخل الدائرة */
-    /* نجعل الصورة مربعة تماماً ثم نملأ القماش بها */
     const ar = img.width / img.height;
     let dw, dh, dx, dy;
     if (ar > 1) {
-      /* الصورة أعرض من طولها — نقصّ الجوانب */
       dh = S;
       dw = S * ar;
       dx = (S - dw) / 2;
       dy = 0;
     } else {
-      /* الصورة أطول من عرضها — نقصّ الأعلى والأسفل */
       dw = S;
       dh = S / ar;
       dx = 0;
@@ -518,21 +514,20 @@ function loadCircularLogo() {
 
     ctx.restore();
 
-    /* ★★★ حلقة ذهبية رقيقة حول حافة الدائرة ★★★ */
+    /* حلقة ذهبية رقيقة */
     ctx.strokeStyle = '#bf9b5f';
     ctx.lineWidth = S * 0.012;
     ctx.beginPath();
     ctx.arc(S/2, S/2, S/2 - S * 0.008, 0, Math.PI * 2);
     ctx.stroke();
 
-    /* حلقة كحلية خارجية رقيقة */
+    /* حلقة كحلية خارجية */
     ctx.strokeStyle = '#1e3a6e';
     ctx.lineWidth = S * 0.006;
     ctx.beginPath();
     ctx.arc(S/2, S/2, S/2 - S * 0.020, 0, Math.PI * 2);
     ctx.stroke();
 
-    /* تحويل القماش إلى نسيج ووضعه على القاعدة */
     const tex = new THREE.CanvasTexture(cvs);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -545,7 +540,6 @@ function loadCircularLogo() {
       opacity: 1.0
     });
 
-    /* مستطيل مربع بحجم قطر الدائرة */
     const logoMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(LOGO_SIZE, LOGO_SIZE),
       logoMat
@@ -578,7 +572,7 @@ standGroup.add(shaft);
 
 /* وصلة عمودية تربط العارضة بالشافت */
 const linkGeo = new THREE.BoxGeometry(0.22, POST_H - PULLEY_CY, 0.22);
-const link = new THREE.Mesh(linkGeo, postMat);
+const link = new THREE.Mesh(linkGeo, standMat);
 link.position.set(0, (POST_H + PULLEY_CY)/2, 0);
 link.castShadow = true;
 standGroup.add(link);
