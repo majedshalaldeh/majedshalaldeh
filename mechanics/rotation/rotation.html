@@ -5,175 +5,353 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الحركة الدورانية | الأستاذ ماجد شلالدة</title>
     <style>
+        /* ============================================
+           المتغيرات الأساسية
+           ============================================ */
         :root {
             --bg-color: #0b1329;
+            --bg-secondary: #0f1a35;
             --main-card-bg: #1c2541;
             --sub-card-bg: #3a506b;
+            --sub-card-hover: #465f7e;
             --text-color: #ffffff;
+            --text-muted: #c0c8d8;
             --accent-cyan: #00b4d8;
+            --accent-blue: #4cc9f0;
+            --accent-green: #06d6a0;
+            --accent-gold: #ffd166;
             --accent-purple: #b5179e;
+            --accent-purple-soft: #b185ff;
+            --accent-red: #ef476f;
+            --border-soft: rgba(255, 255, 255, 0.08);
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 12px 30px rgba(181, 23, 158, 0.2);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-pill: 50px;
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
         }
 
+        /* ============================================
+           الوضع النهاري
+           ============================================ */
+        body.light-mode {
+            --bg-color: #f0f4f8;
+            --bg-secondary: #e2e8f0;
+            --main-card-bg: #ffffff;
+            --sub-card-bg: #e8eef5;
+            --sub-card-hover: #d8e2ec;
+            --text-color: #1a202c;
+            --text-muted: #4a5568;
+            --border-soft: rgba(0, 0, 0, 0.08);
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 12px 30px rgba(181, 23, 158, 0.2);
+        }
+
+        /* ============================================
+           Reset وإعدادات عامة
+           ============================================ */
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 0;
             min-height: 100vh;
-            box-sizing: border-box;
-            position: relative;
+            line-height: 1.6;
+            transition: background-color var(--transition-normal),
+                        color var(--transition-normal);
         }
 
-        /* الشعار كعلامة مائية بالخلفية */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb {
+            background: var(--sub-card-bg);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
+
+        /* ============================================
+           العلامة المائية
+           ============================================ */
         .watermark-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://squarespace-cdn.com');
+            inset: 0;
+            background-image: url('../../logo.png');
             background-size: 180px;
+            background-repeat: repeat;
             opacity: 0.02;
             pointer-events: none;
             z-index: 0;
-            transform: rotate(-15deg) scale(1.2);
         }
 
+        /* ============================================
+           شريط التنقل
+           ============================================ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background: rgba(28, 37, 65, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-soft);
+            transition: background var(--transition-normal);
+        }
+
+        body.light-mode .navbar {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .nav-brand {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            transition: background var(--transition-fast),
+                        color var(--transition-fast);
+        }
+
+        .nav-links a:hover {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-soft);
+            color: var(--text-color);
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform var(--transition-fast),
+                        background var(--transition-fast);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+            background: var(--sub-card-bg);
+        }
+
+        /* ============================================
+           الحاوية
+           ============================================ */
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
             position: relative;
             z-index: 1;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
+        /* ============================================
+           Breadcrumb
+           ============================================ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
         }
 
-        .back-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: var(--main-card-bg);
+        .breadcrumb a {
             color: var(--accent-cyan);
             text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover { color: var(--accent-blue); }
+
+        .breadcrumb .separator { opacity: 0.5; }
+
+        .breadcrumb .current {
+            color: var(--text-color);
             font-weight: bold;
-            border: 1px solid var(--accent-cyan);
-            transition: all 0.2s ease;
         }
 
-        .back-btn:hover {
-            background-color: var(--accent-cyan);
-            color: var(--bg-color);
+        /* ============================================
+           الهيدر
+           ============================================ */
+        header.page-header {
+            text-align: center;
+            padding: 20px 20px 30px;
         }
 
-        header h1 {
-            font-size: 2.5rem;
+        header.page-header h1 {
+            font-size: 2.4rem;
             color: var(--accent-purple);
-            margin-bottom: 10px;
-            margin-top: 40px;
+            margin: 0 0 12px 0;
+            line-height: 1.3;
         }
 
-        header p {
-            color: #a5a5a5;
-            font-size: 1.1rem;
+        header.page-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin: 0 auto;
+            max-width: 700px;
         }
 
+        /* ============================================
+           شبكة البطاقات
+           ============================================ */
         .grid-layout {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 22px;
+            margin: 20px 0 40px;
+            position: relative;
+            z-index: 1;
         }
 
+        /* ============================================
+           البطاقة
+           ============================================ */
         .topic-card {
             background-color: var(--main-card-bg);
-            border-radius: 14px;
+            border-radius: var(--radius-lg);
             padding: 25px;
             text-decoration: none;
             color: var(--text-color);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-soft);
+            transition: transform var(--transition-normal),
+                        border-color var(--transition-normal),
+                        box-shadow var(--transition-normal);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-        }
-
-        .topic-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent-purple);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-        }
-
-        .inertia-menu-card,
-        .momentum-menu-card:not(.circular-menu-card),
-        .newton-menu-card {
-            z-index: 2;
-        }
-
-        .topic-card .icon {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-        }
-
-        .topic-card h2 {
-            margin: 0 0 12px 0;
-            font-size: 1.6rem;
-            color: var(--accent-cyan);
-        }
-
-        .topic-card p {
-            margin: 0;
-            font-size: 1rem;
-            color: #cdcdcd;
-            line-height: 1.6;
-        }
-
-        .tag {
-            background-color: rgba(181, 23, 158, 0.15);
-            color: var(--accent-purple);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        .relation-card { grid-column: 1 / -1; background: linear-gradient(135deg,#1c2541,#243b55); border:1px solid rgba(0,180,216,.35); border-radius:14px; padding:25px; box-shadow:0 8px 25px rgba(0,0,0,.3); text-align:center; }
-        .relation-card h2 { color:var(--accent-cyan); margin:0 0 18px; }
-        .relation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; align-items:center; }
-        .relation-item { background:rgba(255,255,255,.06); border-radius:10px; padding:14px 10px; font-weight:bold; font-size:1.1rem; }
-        .relation-arrow { color:var(--accent-purple); font-size:1.7rem; font-weight:bold; }
-        .relation-note { margin-top:16px; color:#d8d8d8; line-height:1.7; }
-
-        /* قائمة حفظ الزخم الزاوي المنسدلة */
-        .momentum-menu-card {
             position: relative;
             overflow: visible;
         }
 
-        /* رفع بطاقة الحركة الدائرية وقائمتها فوق البطاقات المجاورة */
-        .circular-menu-card {
-            z-index: 1000;
+        .topic-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-purple-soft));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform var(--transition-normal);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         }
 
+        .topic-card:hover::before { transform: scaleX(1); }
+
+        .topic-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-purple);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .topic-card.clickable { cursor: pointer; }
+
+        .topic-card.clickable::after {
+            content: "↗";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.1rem;
+            color: var(--accent-purple);
+            opacity: 0;
+            transform: translate(-5px, 5px);
+            transition: opacity var(--transition-normal),
+                        transform var(--transition-normal);
+        }
+
+        .topic-card.clickable:hover::after {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+
+        .topic-card .icon {
+            font-size: 3.4rem;
+            margin-bottom: 14px;
+            transition: transform var(--transition-normal);
+            display: inline-block;
+        }
+
+        .topic-card:hover .icon {
+            transform: scale(1.15) rotate(-5deg);
+        }
+
+        .topic-card h2 {
+            margin: 0 0 12px 0;
+            font-size: 1.35rem;
+            color: var(--accent-cyan);
+            line-height: 1.4;
+        }
+
+        .topic-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            flex-grow: 1;
+        }
+
+        /* ============================================
+           Tag المعادلة
+           ============================================ */
+        .tag {
+            background-color: rgba(181, 23, 158, 0.15);
+            color: var(--accent-purple-soft);
+            padding: 5px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.82rem;
+            margin-top: 16px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            border: 1px solid rgba(181, 23, 158, 0.25);
+        }
+
+        /* ============================================
+           رفع بطاقات القوائم فوق بعضها
+           ============================================ */
+        .momentum-menu-card { z-index: 2; }
+        .circular-menu-card { z-index: 1000; }
         .circular-menu-card .dropdown-wrap,
-        .circular-menu-card .dropdown-menu {
-            z-index: 1100;
-        }
+        .circular-menu-card .dropdown-menu { z-index: 1100; }
 
-        .grid-layout {
-            position: relative;
-            z-index: 1;
-        }
-
+        /* ============================================
+           القوائم المنسدلة (Dropdown)
+           ============================================ */
         .dropdown-wrap {
             width: 100%;
             max-width: 430px;
@@ -189,23 +367,28 @@
             color: #fff;
             padding: 14px 18px;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.25s ease;
+            transition: all var(--transition-fast);
             font-family: inherit;
+        }
+
+        body.light-mode .dropdown-btn {
+            background: var(--sub-card-bg);
+            color: var(--text-color);
         }
 
         .dropdown-btn:hover {
             background: var(--accent-cyan);
-            color: var(--bg-color);
+            color: #000;
         }
 
         .dropdown-btn .arrow {
-            transition: transform 0.25s ease;
+            transition: transform var(--transition-fast);
         }
 
         .dropdown-btn.active .arrow {
@@ -219,52 +402,61 @@
             right: 0;
             left: 0;
             background: #18243d;
-            border: 1px solid rgba(0,180,216,.5);
-            border-radius: 12px;
+            border: 1px solid rgba(0, 180, 216, 0.5);
+            border-radius: var(--radius-md);
             padding: 8px;
-            box-shadow: 0 15px 35px rgba(0,0,0,.55);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.55);
+            z-index: 1100;
+        }
+
+        body.light-mode .dropdown-menu {
+            background: #ffffff;
+            border-color: rgba(181, 23, 158, 0.3);
         }
 
         .dropdown-menu.show {
             display: block;
-            animation: dropIn .18s ease-out;
+            animation: dropIn 0.18s ease-out;
         }
 
         .dropdown-menu a {
             text-decoration: none;
-            color: #fff;
+            color: var(--text-color);
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px;
             border-radius: 9px;
-            transition: background .2s ease, transform .2s ease;
+            transition: background var(--transition-fast),
+                        transform var(--transition-fast);
             text-align: right;
         }
 
         .dropdown-menu a:hover {
-            background: rgba(0,180,216,.15);
+            background: rgba(0, 180, 216, 0.15);
             transform: translateX(-3px);
         }
 
         .dropdown-menu a > span:first-child {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             width: 38px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .dropdown-menu strong {
             display: block;
             color: var(--accent-cyan);
-            font-size: 1rem;
+            font-size: 0.92rem;
             margin-bottom: 3px;
+            line-height: 1.4;
         }
 
         .dropdown-menu small {
             display: block;
-            color: #cfcfcf;
-            font-size: .82rem;
-            line-height: 1.4;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
         }
 
         @keyframes dropIn {
@@ -277,30 +469,182 @@
                 transform: translateY(0);
             }
         }
+
+        /* ============================================
+           بطاقة العلاقات (إذا أردت استخدامها لاحقاً)
+           ============================================ */
+        .relation-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #1c2541, #243b55);
+            border: 1px solid rgba(0, 180, 216, 0.35);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+        }
+
+        .relation-card h2 {
+            color: var(--accent-cyan);
+            margin: 0 0 18px;
+        }
+
+        .relation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            align-items: center;
+        }
+
+        .relation-item {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 14px 10px;
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        .relation-arrow {
+            color: var(--accent-purple-soft);
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+
+        .relation-note {
+            margin-top: 16px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           الفوتر
+           ============================================ */
+        footer.page-footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            border-top: 1px solid var(--border-soft);
+            margin-top: 20px;
+        }
+
+        footer.page-footer strong { color: var(--accent-cyan); }
+
+        /* ============================================
+           زر العودة للأعلى
+           ============================================ */
+        .back-to-top {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(181, 23, 158, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: opacity var(--transition-normal),
+                        transform var(--transition-normal);
+            z-index: 99;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover { transform: translateY(-3px); }
+
+        /* ============================================
+           التجاوب
+           ============================================ */
+        @media (max-width: 768px) {
+            header.page-header h1 { font-size: 1.7rem; }
+            header.page-header p { font-size: 0.95rem; }
+
+            .navbar {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: 0.82rem;
+            }
+
+            .grid-layout { grid-template-columns: 1fr; }
+            .topic-card { padding: 20px; }
+            .topic-card h2 { font-size: 1.2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .nav-brand span { display: none; }
+            header.page-header h1 { font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body>
 
     <div class="watermark-overlay"></div>
 
+    <!-- ===== شريط التنقل ===== -->
+    <nav class="navbar">
+        <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+        <div class="nav-links">
+            <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+            <a href="../../index.html#electricity">⚡ الكهرباء</a>
+            <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+            <a href="../../index.html#modern">🔬 الحديثة</a>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+    </nav>
+
     <div class="container">
-        <!-- زر العودة المباشر للرئيسية -->
-        <header>
-            <a href="../../index.html" class="back-btn">🏠 العودة للرئيسية</a>
-            <h1>🔄  الحركة الدورانية</h1>
-            <p>إعداد الأستاذ ماجد شلالدة - اختر موضوع المحاكاة الدورانية لاستكشاف القوانين حركياً</p>
+
+        <!-- ===== Breadcrumb ===== -->
+        <div class="breadcrumb">
+            <a href="../../index.html">🏠 الرئيسية</a>
+            <span class="separator">›</span>
+            <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+            <span class="separator">›</span>
+            <span class="current">🔄 الحركة الدورانية</span>
+        </div>
+
+        <!-- ===== الهيدر ===== -->
+        <header class="page-header">
+            <h1>🔄 الحركة الدورانية</h1>
+            <p>إعداد الأستاذ ماجد شلالدة — اختر موضوع المحاكاة الدورانية لاستكشاف القوانين حركياً</p>
         </header>
 
+        <!-- ===== البطاقات ===== -->
         <main class="grid-layout">
-            
-            <!-- قائمة الحركة الدائرية -->
+
+            <!-- 1. الحركة الدائرية (قائمة منسدلة) -->
             <div class="topic-card momentum-menu-card circular-menu-card">
                 <div class="icon">🔄</div>
                 <h2>الحركة الدائرية</h2>
                 <p>اختر نوع موضوع الحركة الدائرية الذي تريد استكشافه.</p>
 
                 <div class="dropdown-wrap">
-                    <button class="dropdown-btn" type="button" onclick="toggleCircularMenu()">
+                    <button class="dropdown-btn" type="button"
+                            data-dropdown="circularDropdown"
+                            aria-label="فتح قائمة الحركة الدائرية">
                         اختر الموضوع
                         <span class="arrow">▼</span>
                     </button>
@@ -313,15 +657,13 @@
                                 <small>دراسة الموضع الزاوي والإزاحة الزاوية والسرعة الزاوية والتسارع الزاوي</small>
                             </span>
                         </a>
-
                         <a href="circular_linear_motion.html">
                             <span>🔗</span>
                             <span>
-                                <strong>العلاقة بين  متغيرات الحركة الدائرية والحركة الخطية (المماسية)</strong>
+                                <strong>العلاقة بين متغيرات الحركة الدائرية والخطية</strong>
                                 <small>دراسة العلاقات المماسية بين θ و x، وبين ω و v، وبين α و a</small>
                             </span>
                         </a>
-
                         <a href="radian.html">
                             <span>📐</span>
                             <span>
@@ -335,22 +677,24 @@
                 <span class="tag">θ ↔ ω ↔ α</span>
             </div>
 
-            <!-- فرع عزم القوة -->
-            <a href="torque.html" class="topic-card">
+            <!-- 2. عزم الدوران -->
+            <a href="torque.html" class="topic-card clickable">
                 <div class="icon">🔧</div>
                 <h2>عزم الدوران (Torque)</h2>
                 <p>تحليل مقدرة القوة على إحداث دوران للجسم حول محور، ودراسة ذراع القوة والزوايا.</p>
                 <span class="tag">τ = r · F · sinθ</span>
             </a>
 
-            <!-- قائمة القصور الدوراني -->
+            <!-- 3. القصور الدوراني (قائمة منسدلة) -->
             <div class="topic-card momentum-menu-card inertia-menu-card">
                 <div class="icon">🎡</div>
                 <h2>القصور الدوراني</h2>
                 <p>اختر نوع النظام الذي تريد حساب القصور الدوراني له.</p>
 
                 <div class="dropdown-wrap">
-                    <button class="dropdown-btn" type="button" onclick="toggleInertiaMenu()">
+                    <button class="dropdown-btn" type="button"
+                            data-dropdown="inertiaDropdown"
+                            aria-label="فتح قائمة القصور الدوراني">
                         اختر المحاكاة
                         <span class="arrow">▼</span>
                     </button>
@@ -359,30 +703,29 @@
                         <a href="rigid_bodies_inertia.html">
                             <span>🧱</span>
                             <span>
-                                <strong>القصور الدوراني للأجسام الصلبة الجاسئة</strong>
-                                <small>حساب القصور الدوراني للأجسام الصلبة الجاسئة حول محاور الدوران المختلفة</small>
+                                <strong>القصور الدوراني للأجسام الصلبة</strong>
+                                <small>حساب القصور الدوراني للأجسام الصلبة الجاسئة حول محاور مختلفة</small>
                             </span>
                         </a>
-
                         <a href="rotational_inertia.html">
                             <span>🔵</span>
                             <span>
-                                <strong>القصور الدوراني لمجموع أجسام نقطية (3D) نموذج1</strong>
-                                <small>حساب القصور الدوراني لمجموعة من الأجسام النقطية حول محور الدوران ثلاثي ابعاد نموذج1</small>
+                                <strong>القصور الدوراني لمجموعة نقاط (3D) — نموذج 1</strong>
+                                <small>حساب القصور الدوراني لمجموعة من الأجسام النقطية حول محور ثلاثي الأبعاد</small>
                             </span>
                         </a>
                         <a href="inertia_calculator_3d.html">
                             <span>🔵</span>
                             <span>
-                                <strong>القصور الدوراني لمجموع أجسام نقطية (3D)نموذج2</strong>
-                                <small>حساب القصور الدوراني لمجموعة من الأجسام النقطية حول محور الدوران ثلاثي ابعاد نموذج2</small>
+                                <strong>القصور الدوراني لمجموعة نقاط (3D) — نموذج 2</strong>
+                                <small>حساب القصور الدوراني لمجموعة من الأجسام النقطية حول محور ثلاثي الأبعاد</small>
                             </span>
                         </a>
-                       <a href="inertia_calculator_2d.html">
+                        <a href="inertia_calculator_2d.html">
                             <span>🔵</span>
                             <span>
-                                <strong>القصور الدوراني لمجموع أجسام نقطية (2D)</strong>
-                                <small>حساب القصور الدوراني لمجموعة من الأجسام النقطية حول محور الدوران نوذج في بعدين</small>
+                                <strong>القصور الدوراني لمجموعة نقاط (2D)</strong>
+                                <small>حساب القصور الدوراني لمجموعة من الأجسام النقطية في بعدين</small>
                             </span>
                         </a>
                         <a href="wheel.html">
@@ -392,7 +735,6 @@
                                 <small>حساب القصور الدوراني لنظام يتكون من عجلة وأقطار حول محور الدوران</small>
                             </span>
                         </a>
-
                         <a href="rod system.html">
                             <span>📏</span>
                             <span>
@@ -406,14 +748,16 @@
                 <span class="tag">I = ∑m · r²</span>
             </div>
 
-            <!-- قائمة حفظ الزخم الزاوي -->
+            <!-- 4. حفظ الزخم الزاوي (قائمة منسدلة) -->
             <div class="topic-card momentum-menu-card">
                 <div class="icon">⛸️</div>
                 <h2>حفظ الزخم الزاوي</h2>
-                <p>اختر نوع المحاكاة التي تريد استكشافها</p>
+                <p>اختر نوع المحاكاة التي تريد استكشافها.</p>
 
                 <div class="dropdown-wrap">
-                    <button class="dropdown-btn" type="button" onclick="toggleMomentumMenu()">
+                    <button class="dropdown-btn" type="button"
+                            data-dropdown="momentumDropdown"
+                            aria-label="فتح قائمة حفظ الزخم الزاوي">
                         اختر المحاكاة
                         <span class="arrow">▼</span>
                     </button>
@@ -426,7 +770,6 @@
                                 <small>دراسة الزخم الزاوي للقرص الدوار</small>
                             </span>
                         </a>
-
                         <a href="rod_balls_angular_momentum.html">
                             <span>📏</span>
                             <span>
@@ -434,7 +777,6 @@
                                 <small>دراسة دوران الساق والزخم الزاوي</small>
                             </span>
                         </a>
-
                         <a href="disk_coupling.html">
                             <span>🌀</span>
                             <span>
@@ -448,17 +790,17 @@
                 <span class="tag">L = I · ω</span>
             </div>
 
-
-
-            <!-- قائمة قانون نيوتن الثاني في الحركة الدورانية -->
+            <!-- 5. قانون نيوتن الثاني الدوراني (قائمة منسدلة) -->
             <div class="topic-card momentum-menu-card newton-menu-card">
                 <div class="icon">⚙️</div>
-                <h2>قانون نيوتن الثاني في الحركة الدورانية</h2>
+                <h2>قانون نيوتن الثاني الدوراني</h2>
                 <p>اختر نوع المحاكاة التي تريد استكشافها.</p>
 
                 <div class="dropdown-wrap">
-                    <button class="dropdown-btn" type="button" onclick="toggleNewtonMenu()">
-                        اختر  المحاكاة
+                    <button class="dropdown-btn" type="button"
+                            data-dropdown="newtonDropdown"
+                            aria-label="فتح قائمة قانون نيوتن الثاني الدوراني">
+                        اختر المحاكاة
                         <span class="arrow">▼</span>
                     </button>
 
@@ -470,23 +812,20 @@
                                 <small>دراسة الدوران والعزم الناتج عن وزن الساق حول محور الدوران</small>
                             </span>
                         </a>
-
                         <a href="disk.html">
                             <span>💿</span>
                             <span>
                                 <strong>دوران قرص تحت تأثير عدة قوى</strong>
-                                <small>دراسة محصلة العزوم والتسارع الزاوي للقرص عند تأثير عدة قوى</small>
+                                <small>دراسة محصلة العزوم والتسارع الزاوي للقرص</small>
                             </span>
                         </a>
-
                         <a href="solid_cylinder.html">
                             <span>🥫</span>
                             <span>
                                 <strong>دوران أسطوانة تحت تأثير عدة قوى</strong>
-                                <small>دراسة محصلة العزوم والتسارع الزاوي عند تأثير عدة قوى</small>
+                                <small>دراسة محصلة العزوم والتسارع الزاوي للأسطوانة</small>
                             </span>
                         </a>
-
                         <a href="pulley.html">
                             <span>⚙️</span>
                             <span>
@@ -500,51 +839,101 @@
                 <span class="tag">Στ = I · α</span>
             </div>
 
-
         </main>
+
+        <!-- ===== الفوتر ===== -->
+        <footer class="page-footer">
+            <p>© 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong></p>
+            <p>📱 0599870176</p>
+        </footer>
     </div>
 
+    <!-- ===== زر العودة للأعلى ===== -->
+    <button class="back-to-top" id="backToTop" aria-label="العودة للأعلى">↑</button>
 
     <script>
-        function toggleCircularMenu() {
-            const menu = document.getElementById('circularDropdown');
-            const button = document.querySelector('.circular-menu-card .dropdown-btn');
-            menu.classList.toggle('show');
-            button.classList.toggle('active');
-        }
+        (function() {
+            'use strict';
 
-        function toggleInertiaMenu() {
-            const menu = document.getElementById('inertiaDropdown');
-            const button = document.querySelector('.inertia-menu-card .dropdown-btn');
-            menu.classList.toggle('show');
-            button.classList.toggle('active');
-        }
+            // ===== الوضع الليلي/النهاري =====
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (themeToggle) {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'light') {
+                    document.body.classList.add('light-mode');
+                    themeToggle.textContent = '☀️';
+                }
 
-        function toggleMomentumMenu() {
-            const menu = document.getElementById('momentumDropdown');
-            const button = document.querySelector('.momentum-menu-card .dropdown-btn');
-            menu.classList.toggle('show');
-            button.classList.toggle('active');
-        }
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('light-mode');
+                    const isLight = document.body.classList.contains('light-mode');
+                    themeToggle.textContent = isLight ? '☀️' : '🌙';
+                    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                });
+            }
 
-        function toggleNewtonMenu() {
-            const menu = document.getElementById('newtonDropdown');
-            const button = document.querySelector('.newton-menu-card .dropdown-btn');
-            menu.classList.toggle('show');
-            button.classList.toggle('active');
-        }
+            // ===== زر العودة للأعلى =====
+            const backToTop = document.getElementById('backToTop');
+            
+            if (backToTop) {
+                window.addEventListener('scroll', () => {
+                    backToTop.classList.toggle('visible', window.scrollY > 400);
+                }, { passive: true });
 
-        document.addEventListener('click', function(event) {
-            document.querySelectorAll('.dropdown-wrap').forEach(function(wrap) {
-                const menu = wrap.querySelector('.dropdown-menu');
-                const button = wrap.querySelector('.dropdown-btn');
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
 
-                if (wrap && !wrap.contains(event.target)) {
-                    menu.classList.remove('show');
-                    button.classList.remove('active');
+            // ===== القوائم المنسدلة (Dropdown) =====
+            const dropdownBtns = document.querySelectorAll('.dropdown-btn[data-dropdown]');
+
+            dropdownBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const menuId = btn.dataset.dropdown;
+                    const menu = document.getElementById(menuId);
+
+                    // إغلاق القوائم الأخرى
+                    document.querySelectorAll('.dropdown-menu.show').forEach(m => {
+                        if (m !== menu) m.classList.remove('show');
+                    });
+                    document.querySelectorAll('.dropdown-btn.active').forEach(b => {
+                        if (b !== btn) b.classList.remove('active');
+                    });
+
+                    // تبديل الحالة
+                    menu.classList.toggle('show');
+                    btn.classList.toggle('active');
+                });
+            });
+
+            // إغلاق القوائم عند النقر خارجها
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown-wrap')) {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(m => {
+                        m.classList.remove('show');
+                    });
+                    document.querySelectorAll('.dropdown-btn.active').forEach(b => {
+                        b.classList.remove('active');
+                    });
                 }
             });
-        });
+
+            // إغلاق القوائم بزر Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.dropdown-menu.show').forEach(m => {
+                        m.classList.remove('show');
+                    });
+                    document.querySelectorAll('.dropdown-btn.active').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                }
+            });
+
+        })();
     </script>
 
 </body>
