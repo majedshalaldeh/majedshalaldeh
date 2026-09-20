@@ -14,128 +14,80 @@
   }
   #scene { position: fixed; inset: 0; }
 
-  /* ============ العنوان في الوسط ============ */
   #mainTitle {
-    position: fixed;
-    top: 14px; left: 50%; transform: translateX(-50%);
-    text-align: center;
-    z-index: 15;
-    pointer-events: none;
-    background: rgba(12,19,34,0.82);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(80,130,210,0.3);
-    border-radius: 14px;
-    padding: 10px 28px;
-    box-shadow: 0 10px 36px rgba(0,0,0,0.55);
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    text-align: center; z-index: 15; pointer-events: none;
+    background: rgba(12,19,34,0.82); backdrop-filter: blur(12px);
+    border: 1px solid rgba(80,130,210,0.3); border-radius: 14px;
+    padding: 10px 28px; box-shadow: 0 10px 36px rgba(0,0,0,0.55);
     max-width: 42vw;
   }
   #mainTitle h1 {
-    font-size: 19px;
-    color: #7fd4ff;
-    letter-spacing: .2px;
-    margin-bottom: 4px;
-    white-space: nowrap;
+    font-size: 19px; color: #7fd4ff; letter-spacing: .2px;
+    margin-bottom: 4px; white-space: nowrap;
   }
   #mainTitle p {
-    font-size: 12.5px;
-    color: #ffd166;
-    font-weight: 600;
-    letter-spacing: .2px;
-    white-space: nowrap;
+    font-size: 12.5px; color: #ffd166; font-weight: 600;
+    letter-spacing: .2px; white-space: nowrap;
   }
 
-  /* ============ أزرار التنقل أعلى اليمين ============ */
   #topButtons {
-    position: fixed;
-    top: 14px; right: 14px;
-    display: flex;
-    gap: 8px;
-    z-index: 20;
+    position: fixed; top: 14px; right: 14px;
+    display: flex; gap: 8px; z-index: 20;
   }
   #topButtons button {
-    padding: 9px 16px;
-    font-size: 12.5px;
-    font-family: inherit;
-    font-weight: 600;
-    color: #dcecff;
+    padding: 9px 16px; font-size: 12.5px; font-family: inherit;
+    font-weight: 600; color: #dcecff;
     background: linear-gradient(135deg, #1d6fd4, #2aa7e8);
-    border: 1px solid #4fc3ff;
-    border-radius: 10px;
-    cursor: pointer;
+    border: 1px solid #4fc3ff; border-radius: 10px; cursor: pointer;
     box-shadow: 0 4px 14px rgba(40,140,240,.38);
     transition: transform .12s, box-shadow .16s, filter .16s;
     white-space: nowrap;
   }
-  #topButtons button:hover {
-    box-shadow: 0 6px 22px rgba(60,170,255,.55);
-    filter: brightness(1.08);
-  }
+  #topButtons button:hover { filter: brightness(1.08); }
   #topButtons button:active { transform: scale(0.96); }
-
   #currentBtn {
     background: linear-gradient(135deg, #d97706, #f59e0b);
-    border-color: #fbbf24;
-    color: #fff8e7;
+    border-color: #fbbf24; color: #fff8e7;
   }
 
-  /* ============ مربع البيانات على اليسار ============ */
   #statsBox {
-    position: fixed;
-    top: 14px; left: 14px;
-    width: 296px;
-    z-index: 10;
-    max-height: calc(100vh - 28px);
-    overflow-y: auto;
+    position: fixed; top: 14px; left: 14px; width: 296px;
+    z-index: 10; max-height: calc(100vh - 28px); overflow-y: auto;
   }
   #statsBox::-webkit-scrollbar { width: 6px; }
   #statsBox::-webkit-scrollbar-thumb { background: #2c4570; border-radius: 3px; }
 
   #statsBox .info {
     font-size: 12px; line-height: 1.75; color: #a8bcd8;
-    background: rgba(12,19,34,0.9);
-    backdrop-filter: blur(14px);
-    border-radius: 14px;
-    padding: 12px 14px;
+    background: rgba(12,19,34,0.9); backdrop-filter: blur(14px);
+    border-radius: 14px; padding: 12px 14px;
     border: 1px solid rgba(80,130,210,0.28);
     box-shadow: 0 10px 36px rgba(0,0,0,0.55);
   }
   .info .k { color: #7d90b0; }
   .info .v { color: #ffd166; font-variant-numeric: tabular-nums; }
   .info .unit { color: #6680a0; font-size: 11px; }
+  .info .ok { color: #4ade80; font-weight: 600; }
+  .info .bad { color: #f87171; font-weight: 600; }
 
-  /* ============ العمود الأيمن: الشعار + لوحة التحكم ============ */
   #rightColumn {
-    position: fixed;
-    top: 66px; right: 14px;
-    width: 320px;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 10;
-    padding-left: 4px;
+    position: fixed; top: 66px; right: 14px; width: 320px;
+    max-height: calc(100vh - 80px); overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 10; padding-left: 4px;
   }
   #rightColumn::-webkit-scrollbar { width: 6px; }
   #rightColumn::-webkit-scrollbar-thumb { background: #2c4570; border-radius: 3px; }
 
-  /* الشعار دائري — بدون خلفية بيضاء */
   #panelLogoWrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-    padding: 4px;
-    border: none;
-    box-shadow: none;
+    display: flex; justify-content: center; align-items: center;
+    background: transparent; padding: 4px;
+    border: none; box-shadow: none;
   }
   #panelLogo {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;         /* لملء الدائرة بالكامل */
-    border-radius: 50%;        /* ← جعله دائرياً */
-    display: block;
-    overflow: hidden;
+    width: 150px; height: 150px; object-fit: cover;
+    border-radius: 50%; display: block; overflow: hidden;
     border: 3px solid rgba(127, 212, 255, 0.55);
     box-shadow:
       0 0 0 4px rgba(12,19,34,0.85),
@@ -144,11 +96,9 @@
   }
 
   #panel {
-    background: rgba(12, 19, 34, 0.9);
-    backdrop-filter: blur(14px);
+    background: rgba(12, 19, 34, 0.9); backdrop-filter: blur(14px);
     border: 1px solid rgba(80, 130, 210, 0.28);
-    border-radius: 16px;
-    padding: 15px 15px 13px;
+    border-radius: 16px; padding: 15px 15px 13px;
     box-shadow: 0 12px 44px rgba(0,0,0,0.6);
   }
   #panel h1 { font-size: 15px; color: #7fd4ff; margin-bottom: 2px; letter-spacing: .2px; }
@@ -195,6 +145,21 @@
     box-shadow: 0 0 14px rgba(60,170,255,.5);
   }
 
+  #switchBtn {
+    width: 100%; padding: 11px;
+    font-size: 13px; font-family: inherit; font-weight: 700;
+    color: #fff; border: none; border-radius: 10px; cursor: pointer;
+    background: linear-gradient(135deg, #b91c1c, #ef4444);
+    box-shadow: 0 4px 16px rgba(220,50,50,.4);
+    transition: all .16s; letter-spacing: .3px;
+  }
+  #switchBtn.closed {
+    background: linear-gradient(135deg, #059669, #10b981);
+    box-shadow: 0 4px 16px rgba(20,180,120,.45);
+  }
+  #switchBtn:hover { filter: brightness(1.1); }
+  #switchBtn:active { transform: scale(0.98); }
+
   .legend {
     display: flex; flex-direction: column; gap: 5px;
     font-size: 11.5px; color: #98adc8;
@@ -234,24 +199,20 @@
 
 <div id="scene"></div>
 
-<!-- أزرار التنقل -->
 <div id="topButtons">
   <button id="homeBtn">🏠 الصفحة الرئيسية</button>
   <button id="currentBtn">⚡ التيار الكهربائي والمقاومة</button>
 </div>
 
-<!-- العنوان في الوسط -->
 <div id="mainTitle">
   <h1>⚡ الإلكترونات الحرة في موصل فلزي</h1>
   <p>اعداد وتطوير الاستاذ ماجد شلالده 0599870176</p>
 </div>
 
-<!-- مربع البيانات على اليسار -->
 <div id="statsBox">
   <div class="info" id="stats"></div>
 </div>
 
-<!-- العمود الأيمن: الشعار الدائري فوق لوحة التحكم -->
 <div id="rightColumn">
   <div id="panelLogoWrap">
     <img id="panelLogo" src="logo.png" alt="الشعار" />
@@ -262,7 +223,7 @@
     <p class="sub">Free Electron Motion in a Metal Conductor</p>
 
     <div class="sec">
-      <div class="row"><span>فرق الجهد (الجهد المطبق)</span><b id="vVal">1.50 V</b></div>
+      <div class="row"><span>فرق الجهد (البطارية)</span><b id="vVal">1.50 V</b></div>
       <input type="range" id="vRange" min="0" max="3" step="0.05" value="1.5">
     </div>
 
@@ -285,8 +246,12 @@
       <div class="row"><span>خيارات العرض</span></div>
       <div class="btns">
         <button id="latticeBtn" class="on">شبكة الأيونات</button>
-        <button id="fieldBtn" class="on">المجال الكهربائي</button>
+        <button id="fieldBtn" class="on">خطوط المجال</button>
       </div>
+    </div>
+
+    <div class="sec">
+      <button id="switchBtn">⏻ المفتاح : مفتوح (اضغط للإغلاق)</button>
     </div>
 
     <div class="sec">
@@ -299,12 +264,14 @@
     <div class="legend">
       <div><span class="dot" style="background:#ff7733;box-shadow:0 0 8px #ff7733;"></span> أيونات الشبكة البلورية</div>
       <div><span class="dot" style="background:#44ddff;box-shadow:0 0 8px #44ddff;"></span> إلكترونات حرة (متحركة)</div>
-      <div><span class="dot" style="background:#ffee44;box-shadow:0 0 8px #ffee44;"></span> المجال الكهربائي E (من + إلى −)</div>
+      <div><span class="dot" style="background:#ff3838;box-shadow:0 0 8px #ff3838;"></span> غطاء القطب الموجب (+)</div>
+      <div><span class="dot" style="background:#3a56cc;box-shadow:0 0 8px #3a56cc;"></span> غطاء القطب السالب (−)</div>
+      <div><span class="dot" style="background:#ffee44;box-shadow:0 0 8px #ffee44;"></span> خطوط المجال E مع أسهم الاتجاه</div>
     </div>
   </div>
 </div>
 
-<div id="hint">🖱️ اسحب للتدوير · عجلة الماوس للتقريب · زر الفأرة الأيمن للتحريك</div>
+<div id="hint">🖱️ اضغط على المفتاح في المشهد لفتحه/إغلاقه · اسحب للتدوير · عجلة الماوس للتقريب</div>
 
 <script type="importmap">
 {
@@ -320,7 +287,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /* ============================================================
-   مسار ملف الشعار (استبدله باسم ملفك إن اختلف)
+   مسار ملف الشعار
    ============================================================ */
 const LOGO_FILE = 'logo.png';
 
@@ -336,6 +303,21 @@ const TAU_BASE     = 0.50;
 const ACCEL_PER_V  = 2.0;
 
 /* ============================================================
+   موضع البطارية والمفتاح — فوق الموصل
+   ============================================================ */
+const BATTERY_POS = new THREE.Vector3(0, 4.5, 0);
+const SWITCH_POS  = new THREE.Vector3(-5.5, 4.5, 0);
+
+/* ============================================================
+   نقاط الاتصال: عند الطرف الخارجي للغطائين
+   ============================================================ */
+const CAP_RADIUS = WIRE_R * 1.02;
+const CAP_TIP_X  = WIRE_LEN / 2 + CAP_RADIUS;
+
+const CONDUCTOR_RIGHT_END = new THREE.Vector3( CAP_TIP_X, 0, 0);
+const CONDUCTOR_LEFT_END  = new THREE.Vector3(-CAP_TIP_X, 0, 0);
+
+/* ============================================================
    المعاملات
    ============================================================ */
 const params = {
@@ -348,6 +330,12 @@ const params = {
   paused:      false,
 };
 
+let switchClosed = false;
+
+function getAppliedVoltage() {
+  return switchClosed ? params.voltage : 0;
+}
+
 /* ============================================================
    المشهد والكاميرا والمُصيّر
    ============================================================ */
@@ -356,7 +344,7 @@ scene.background = new THREE.Color(0x04070e);
 scene.fog = new THREE.FogExp2(0x04070e, 0.016);
 
 const camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 300);
-camera.position.set(9, 7.5, 15.5);
+camera.position.set(11, 9, 19);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -369,8 +357,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.minDistance = 5;
-controls.maxDistance = 45;
-controls.target.set(0, 0, 0);
+controls.maxDistance = 50;
+controls.target.set(0, 1.2, 0);
 
 /* ============================================================
    الإضاءة
@@ -378,7 +366,7 @@ controls.target.set(0, 0, 0);
 scene.add(new THREE.AmbientLight(0x8fa5c8, 1.4));
 
 const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
-keyLight.position.set(8, 14, 10);
+keyLight.position.set(8, 16, 10);
 scene.add(keyLight);
 
 const fillLight = new THREE.DirectionalLight(0x3b6fe0, 1.0);
@@ -386,7 +374,7 @@ fillLight.position.set(-9, -6, -11);
 scene.add(fillLight);
 
 const rimLight = new THREE.PointLight(0x44aaff, 1.5, 40);
-rimLight.position.set(0, 0, -8);
+rimLight.position.set(0, 6, -10);
 scene.add(rimLight);
 
 /* ============================================================
@@ -399,44 +387,33 @@ grid.material.opacity = 0.5;
 scene.add(grid);
 
 /* ============================================================
-   الشعار الدائري على الأرضية بنسبة 0.75
-   (CircleGeometry دائري أصلاً + قصّ دائري إضافي عبر AlphaMap)
+   الشعار على الأرضية بنسبة 0.75
    ============================================================ */
 const floorLogoImg = new Image();
 floorLogoImg.crossOrigin = 'anonymous';
 floorLogoImg.onload = () => {
-  // نجهّز صورة مربعة مع قصّ دائري عبر Canvas
   const S = 512;
   const cv = document.createElement('canvas');
   cv.width = cv.height = S;
   const ctx = cv.getContext('2d');
-
-  // قصّ دائري
   ctx.beginPath();
   ctx.arc(S / 2, S / 2, S / 2, 0, Math.PI * 2);
   ctx.closePath();
   ctx.clip();
-
-  // رسم الشعار داخل الدائرة
   ctx.drawImage(floorLogoImg, 0, 0, S, S);
-
   const tex = new THREE.CanvasTexture(cv);
   tex.anisotropy = 8;
   tex.colorSpace = THREE.SRGBColorSpace;
 
-  const floorLogoGeo = new THREE.CircleGeometry(4, 64);
-  const floorLogoMat = new THREE.MeshBasicMaterial({
-    map: tex,
-    transparent: true,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-    toneMapped: false,
+  const geo = new THREE.CircleGeometry(4, 64);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, side: THREE.DoubleSide,
+    depthWrite: false, toneMapped: false,
   });
-
-  const floorLogo = new THREE.Mesh(floorLogoGeo, floorLogoMat);
+  const floorLogo = new THREE.Mesh(geo, mat);
   floorLogo.rotation.x = -Math.PI / 2;
   floorLogo.position.set(0, -4.46, 0);
-  floorLogo.scale.setScalar(0.75);   // ← النسبة المطلوبة 0.75
+  floorLogo.scale.setScalar(0.75);
   floorLogo.renderOrder = 3;
   scene.add(floorLogo);
 };
@@ -449,15 +426,9 @@ floorLogoImg.src = LOGO_FILE;
    السلك (الموصل) — غلاف شفاف
    ============================================================ */
 const wireShellMat = new THREE.MeshPhysicalMaterial({
-  color: 0x5588cc,
-  transparent: true,
-  opacity: 0.055,
-  metalness: 0.9,
-  roughness: 0.15,
-  side: THREE.DoubleSide,
-  depthWrite: false,
-  transmission: 0.9,
-  thickness: 0.6,
+  color: 0x5588cc, transparent: true, opacity: 0.055,
+  metalness: 0.9, roughness: 0.15, side: THREE.DoubleSide,
+  depthWrite: false, transmission: 0.9, thickness: 0.6,
 });
 const wireShell = new THREE.Mesh(
   new THREE.CylinderGeometry(WIRE_R, WIRE_R, WIRE_LEN, 40, 1, true),
@@ -466,29 +437,59 @@ const wireShell = new THREE.Mesh(
 wireShell.rotation.z = Math.PI / 2;
 scene.add(wireShell);
 
-// حلقات عند الأطراف
-const ringMat = new THREE.MeshStandardMaterial({
-  color: 0x6699dd,
-  emissive: 0x224488,
-  emissiveIntensity: 1.2,
-  metalness: 0.9,
-  roughness: 0.25,
+/* ============================================================
+   أغطية الأطراف
+   ============================================================ */
+const capRedMat = new THREE.MeshStandardMaterial({
+  color: 0xff3838, emissive: 0x991111, emissiveIntensity: 0.5,
+  metalness: 0.65, roughness: 0.32,
 });
-for (const x of [-WIRE_LEN / 2, WIRE_LEN / 2]) {
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(WIRE_R, 0.03, 8, 40),
-    ringMat
-  );
-  ring.rotation.y = Math.PI / 2;
-  ring.position.x = x;
-  scene.add(ring);
-}
+const capBlueMat = new THREE.MeshStandardMaterial({
+  color: 0x3a56cc, emissive: 0x112288, emissiveIntensity: 0.5,
+  metalness: 0.65, roughness: 0.32,
+});
+
+const capRed = new THREE.Mesh(
+  new THREE.SphereGeometry(CAP_RADIUS, 32, 20, 0, Math.PI * 2, 0, Math.PI / 2),
+  capRedMat
+);
+capRed.rotation.z = -Math.PI / 2;
+capRed.position.set(WIRE_LEN / 2, 0, 0);
+scene.add(capRed);
+
+const capRedRim = new THREE.Mesh(
+  new THREE.TorusGeometry(CAP_RADIUS, 0.045, 10, 40),
+  new THREE.MeshStandardMaterial({
+    color: 0xff6666, emissive: 0xaa2222, emissiveIntensity: 1.2,
+    metalness: 0.85, roughness: 0.2,
+  })
+);
+capRedRim.rotation.y = Math.PI / 2;
+capRedRim.position.set(WIRE_LEN / 2, 0, 0);
+scene.add(capRedRim);
+
+const capBlue = new THREE.Mesh(
+  new THREE.SphereGeometry(CAP_RADIUS, 32, 20, 0, Math.PI * 2, 0, Math.PI / 2),
+  capBlueMat
+);
+capBlue.rotation.z = Math.PI / 2;
+capBlue.position.set(-WIRE_LEN / 2, 0, 0);
+scene.add(capBlue);
+
+const capBlueRim = new THREE.Mesh(
+  new THREE.TorusGeometry(CAP_RADIUS, 0.045, 10, 40),
+  new THREE.MeshStandardMaterial({
+    color: 0x6688ff, emissive: 0x2244aa, emissiveIntensity: 1.2,
+    metalness: 0.85, roughness: 0.2,
+  })
+);
+capBlueRim.rotation.y = Math.PI / 2;
+capBlueRim.position.set(-WIRE_LEN / 2, 0, 0);
+scene.add(capBlueRim);
 
 // خطوط طولية خفيفة على السطح
 const surfaceLineMat = new THREE.LineBasicMaterial({
-  color: 0x3a6aaa,
-  transparent: true,
-  opacity: 0.16,
+  color: 0x3a6aaa, transparent: true, opacity: 0.16,
 });
 for (let k = 0; k < 12; k++) {
   const ang = (k / 12) * Math.PI * 2;
@@ -506,18 +507,15 @@ for (let k = 0; k < 12; k++) {
 }
 
 /* ============================================================
-   شبكة الأيونات — كثيفة باستخدام InstancedMesh
+   شبكة الأيونات الكثيفة
    ============================================================ */
 const latticeGroup = new THREE.Group();
 scene.add(latticeGroup);
 
 const ionGeo = new THREE.SphereGeometry(ION_R, 10, 8);
 const ionMat = new THREE.MeshStandardMaterial({
-  color: 0xff7733,
-  emissive: 0x662200,
-  emissiveIntensity: 0.7,
-  metalness: 0.65,
-  roughness: 0.4,
+  color: 0xff7733, emissive: 0x662200, emissiveIntensity: 0.7,
+  metalness: 0.65, roughness: 0.4,
 });
 
 const ionPositions = [];
@@ -536,8 +534,7 @@ const ionPositions = [];
         if (yy * yy + zz * zz < Rmax * Rmax) {
           ionPositions.push(
             x + (Math.random() - 0.5) * jitter,
-            yy,
-            zz
+            yy, zz
           );
         }
       }
@@ -551,7 +548,6 @@ latticeGroup.add(ionInstanced);
 
 (function placeIons() {
   const dummy = new THREE.Object3D();
-  let idx = 0;
   for (let i = 0; i < ionCount; i++) {
     dummy.position.set(
       ionPositions[i * 3],
@@ -561,7 +557,7 @@ latticeGroup.add(ionInstanced);
     const s = 0.85 + Math.random() * 0.4;
     dummy.scale.set(s, s, s);
     dummy.updateMatrix();
-    ionInstanced.setMatrixAt(idx++, dummy.matrix);
+    ionInstanced.setMatrixAt(i, dummy.matrix);
   }
   ionInstanced.instanceMatrix.needsUpdate = true;
 })();
@@ -571,11 +567,8 @@ latticeGroup.add(ionInstanced);
    ============================================================ */
 const electronGeo = new THREE.SphereGeometry(ELECTRON_R, 10, 8);
 const electronMat = new THREE.MeshStandardMaterial({
-  color: 0x44ddff,
-  emissive: 0x00aaff,
-  emissiveIntensity: 2.6,
-  metalness: 0.1,
-  roughness: 0.3,
+  color: 0x44ddff, emissive: 0x00aaff, emissiveIntensity: 2.6,
+  metalness: 0.1, roughness: 0.3,
 });
 
 const electronGroup = new THREE.Group();
@@ -634,75 +627,270 @@ function setElectronCount(n) {
 setElectronCount(params.nElectrons);
 
 /* ============================================================
-   أسهم المجال الكهربائي — داخل الموصل فقط
+   ⚡ خطوط المجال الكهربائي — عدد مخفّض (7 خطوط فقط)
+   خط مركزي واحد + 6 خطوط في حلقة واحدة حوله
    ============================================================ */
 const fieldGroup = new THREE.Group();
 scene.add(fieldGroup);
 
-const arrowMat = new THREE.MeshBasicMaterial({ color: 0xffee44 });
+const fieldLineOffsets = [];
 
-const N_FIELD_ARROWS = 10;
-const fieldStartX = -WIRE_LEN / 2 + 1.35;
-const fieldEndX   =  WIRE_LEN / 2 - 1.35;
-const fieldDx     = (fieldEndX - fieldStartX) / (N_FIELD_ARROWS - 1);
+// 1) الخط المركزي
+fieldLineOffsets.push({ y: 0, z: 0 });
 
-for (let i = 0; i < N_FIELD_ARROWS; i++) {
-  const x = fieldStartX + i * fieldDx;
-  const g = new THREE.Group();
+// 2) حلقة واحدة من 6 خطوط
+for (let i = 0; i < 6; i++) {
+  const a = (i / 6) * Math.PI * 2;
+  fieldLineOffsets.push({
+    y: WIRE_R * 0.65 * Math.cos(a),
+    z: WIRE_R * 0.65 * Math.sin(a),
+  });
+}
+// المجموع = 7 خطوط
 
+const MAX_FIELD_LINES = fieldLineOffsets.length;
+const fieldLines = [];
+
+const fieldLineMat = new THREE.MeshBasicMaterial({
+  color: 0xffee44, transparent: true, opacity: 0.72, toneMapped: false,
+});
+const arrowHeadMat = new THREE.MeshBasicMaterial({
+  color: 0xffee44, transparent: true, opacity: 0.9, toneMapped: false,
+});
+
+for (let i = 0; i < MAX_FIELD_LINES; i++) {
+  const off = fieldLineOffsets[i];
+  const lineGroup = new THREE.Group();
+
+  const shaftLen = WIRE_LEN - 0.4;
   const shaft = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.022, 0.022, 0.72, 8),
-    arrowMat
+    new THREE.CylinderGeometry(0.014, 0.014, shaftLen, 6),
+    fieldLineMat.clone()
   );
-  shaft.rotation.z = -Math.PI / 2;
-  shaft.position.x = -0.36;
+  shaft.rotation.z = Math.PI / 2;
+  lineGroup.add(shaft);
 
-  const head = new THREE.Mesh(
-    new THREE.ConeGeometry(0.07, 0.24, 10),
-    arrowMat
+  const headEnd = new THREE.Mesh(
+    new THREE.ConeGeometry(0.06, 0.18, 8),
+    arrowHeadMat.clone()
   );
-  head.rotation.z = Math.PI / 2;
-  head.position.x = -0.84;
+  headEnd.rotation.z = Math.PI / 2;
+  headEnd.position.x = -shaftLen / 2 - 0.02;
+  lineGroup.add(headEnd);
 
-  g.add(shaft, head);
-  g.position.set(x, 0, 0);
-  g.userData.baseX = x;
-  fieldGroup.add(g);
+  const headMid = new THREE.Mesh(
+    new THREE.ConeGeometry(0.075, 0.22, 10),
+    arrowHeadMat.clone()
+  );
+  headMid.rotation.z = Math.PI / 2;
+  headMid.position.x = 0;
+  lineGroup.add(headMid);
+
+  lineGroup.position.set(0, off.y, off.z);
+  lineGroup.visible = false;
+  fieldGroup.add(lineGroup);
+  fieldLines.push(lineGroup);
 }
 
 /* ============================================================
-   لافتات + و − عند طرفي السلك
+   البطارية ثلاثية الأبعاد
    ============================================================ */
-function makeSignLabel(text, color) {
+function makeBattery3D() {
+  const g = new THREE.Group();
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(3, 0.9, 1.0),
+    new THREE.MeshStandardMaterial({
+      color: 0x1a1d22, metalness: 0.75, roughness: 0.4,
+    })
+  );
+  g.add(body);
+
+  const pos = new THREE.Mesh(
+    new THREE.BoxGeometry(0.7, 0.96, 1.06),
+    new THREE.MeshStandardMaterial({
+      color: 0xff3838, emissive: 0x881111, emissiveIntensity: 0.9,
+      metalness: 0.55, roughness: 0.3,
+    })
+  );
+  pos.position.x = 1.85;
+  g.add(pos);
+
+  const neg = new THREE.Mesh(
+    new THREE.BoxGeometry(0.7, 0.96, 1.06),
+    new THREE.MeshStandardMaterial({
+      color: 0x3a56cc, emissive: 0x112288, emissiveIntensity: 0.9,
+      metalness: 0.55, roughness: 0.3,
+    })
+  );
+  neg.position.x = -1.85;
+  g.add(neg);
+
   const S = 128;
-  const c = document.createElement('canvas');
-  c.width = c.height = S;
-  const ctx = c.getContext('2d');
-  ctx.font = 'bold 110px Arial, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = color;
-  ctx.shadowBlur = 26;
-  ctx.fillStyle = color;
-  ctx.fillText(text, S / 2, S / 2 + 5);
-  const tex = new THREE.CanvasTexture(c);
-  tex.anisotropy = 4;
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: tex,
-    transparent: true,
-    depthWrite: false,
+  const cvp = document.createElement('canvas');
+  cvp.width = cvp.height = S;
+  const ctxp = cvp.getContext('2d');
+  ctxp.font = 'bold 110px Arial';
+  ctxp.textAlign = 'center';
+  ctxp.textBaseline = 'middle';
+  ctxp.shadowColor = '#ff5555';
+  ctxp.shadowBlur = 22;
+  ctxp.fillStyle = '#ff5555';
+  ctxp.fillText('+', S / 2, S / 2 + 5);
+  const texp = new THREE.CanvasTexture(cvp);
+  const sprP = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: texp, transparent: true, depthWrite: false,
   }));
-  sp.scale.set(0.85, 0.85, 1);
-  return sp;
+  sprP.scale.set(0.9, 0.9, 1);
+  sprP.position.set(1.85, 1.2, 0);
+  g.add(sprP);
+
+  const cvn = document.createElement('canvas');
+  cvn.width = cvn.height = S;
+  const ctxn = cvn.getContext('2d');
+  ctxn.font = 'bold 110px Arial';
+  ctxn.textAlign = 'center';
+  ctxn.textBaseline = 'middle';
+  ctxn.shadowColor = '#5599ff';
+  ctxn.shadowBlur = 22;
+  ctxn.fillStyle = '#5599ff';
+  ctxn.fillText('−', S / 2, S / 2);
+  const texn = new THREE.CanvasTexture(cvn);
+  const sprN = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: texn, transparent: true, depthWrite: false,
+  }));
+  sprN.scale.set(0.9, 0.9, 1);
+  sprN.position.set(-1.85, 1.2, 0);
+  g.add(sprN);
+
+  const termMat = new THREE.MeshStandardMaterial({
+    color: 0xd0d4da, metalness: 0.9, roughness: 0.25,
+  });
+  const termPos = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.07, 0.07, 0.35, 10), termMat
+  );
+  termPos.rotation.z = Math.PI / 2;
+  termPos.position.set(2.35, 0, 0);
+  g.add(termPos);
+  const termNeg = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.07, 0.07, 0.35, 10), termMat
+  );
+  termNeg.rotation.z = Math.PI / 2;
+  termNeg.position.set(-2.35, 0, 0);
+  g.add(termNeg);
+
+  return g;
 }
 
-const plusLabel  = makeSignLabel('+', '#ff5555');
-plusLabel.position.set(WIRE_LEN / 2 + 0.9, 1.6, 0);
-scene.add(plusLabel);
+/* ============================================================
+   المفتاح ثلاثي الأبعاد
+   ============================================================ */
+function makeSwitch3D() {
+  const g = new THREE.Group();
 
-const minusLabel = makeSignLabel('−', '#5599ff');
-minusLabel.position.set(-WIRE_LEN / 2 - 0.9, 1.6, 0);
-scene.add(minusLabel);
+  const base = new THREE.Mesh(
+    new THREE.BoxGeometry(1.9, 0.25, 0.9),
+    new THREE.MeshStandardMaterial({
+      color: 0x2e3440, metalness: 0.6, roughness: 0.5,
+    })
+  );
+  base.position.y = 0.12;
+  g.add(base);
+
+  const contactMat = new THREE.MeshStandardMaterial({
+    color: 0xd4a938, metalness: 0.9, roughness: 0.25,
+  });
+  const cL = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.25, 12), contactMat);
+  cL.position.set(-0.6, 0.35, 0);
+  g.add(cL);
+  const cR = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.25, 12), contactMat);
+  cR.position.set(0.6, 0.35, 0);
+  g.add(cR);
+
+  const armGeo = new THREE.BoxGeometry(1.2, 0.12, 0.14);
+  armGeo.translate(0.6, 0, 0);
+  const arm = new THREE.Mesh(
+    armGeo,
+    new THREE.MeshStandardMaterial({
+      color: 0xb08a30, metalness: 0.85, roughness: 0.3,
+      emissive: 0x442200, emissiveIntensity: 0.4,
+    })
+  );
+  arm.position.set(-0.6, 0.48, 0);
+  arm.rotation.z = -Math.PI / 3.2;
+  g.add(arm);
+  g.userData.arm = arm;
+
+  const termMat = new THREE.MeshStandardMaterial({
+    color: 0xd0d4da, metalness: 0.9, roughness: 0.25,
+  });
+  const termL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.4, 10), termMat);
+  termL.rotation.z = Math.PI / 2;
+  termL.position.set(-1.15, 0.12, 0);
+  g.add(termL);
+  const termR = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.4, 10), termMat);
+  termR.rotation.z = Math.PI / 2;
+  termR.position.set(1.15, 0.12, 0);
+  g.add(termR);
+
+  return g;
+}
+
+/* ——— إنشاء البطارية والمفتاح ——— */
+const batteryGroup = makeBattery3D();
+batteryGroup.position.copy(BATTERY_POS);
+scene.add(batteryGroup);
+
+const switchGroup = makeSwitch3D();
+switchGroup.position.copy(SWITCH_POS);
+scene.add(switchGroup);
+
+/* ============================================================
+   أسلاك التوصيل
+   ============================================================ */
+const connectingWires = [];
+
+function makeConnectingWire(p1, p2, arc = 1.4) {
+  const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+  mid.y += arc;
+  const curve = new THREE.QuadraticBezierCurve3(p1.clone(), mid, p2.clone());
+  const geo = new THREE.TubeGeometry(curve, 40, 0.065, 8, false);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0x8899aa, emissive: 0x000000, emissiveIntensity: 0,
+    metalness: 0.9, roughness: 0.3,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  scene.add(mesh);
+  connectingWires.push(mesh);
+  return mesh;
+}
+
+const batPosTermW = new THREE.Vector3(BATTERY_POS.x + 2.35, BATTERY_POS.y, BATTERY_POS.z);
+const batNegTermW = new THREE.Vector3(BATTERY_POS.x - 2.35, BATTERY_POS.y, BATTERY_POS.z);
+const swTermRightW = new THREE.Vector3(SWITCH_POS.x + 1.15, SWITCH_POS.y, SWITCH_POS.z);
+const swTermLeftW  = new THREE.Vector3(SWITCH_POS.x - 1.15, SWITCH_POS.y, SWITCH_POS.z);
+
+makeConnectingWire(batPosTermW, CONDUCTOR_RIGHT_END, 2.2);
+makeConnectingWire(batNegTermW, swTermRightW, 0.4);
+makeConnectingWire(swTermLeftW, CONDUCTOR_LEFT_END, 2.2);
+
+/* ============================================================
+   مؤشرات التوصيل
+   ============================================================ */
+function makeContactNode(color, pos) {
+  const node = new THREE.Mesh(
+    new THREE.SphereGeometry(0.13, 16, 12),
+    new THREE.MeshStandardMaterial({
+      color, emissive: color, emissiveIntensity: 1.2,
+      metalness: 0.85, roughness: 0.2,
+    })
+  );
+  node.position.copy(pos);
+  scene.add(node);
+  return node;
+}
+const contactNodeRed  = makeContactNode(0xff5555, CONDUCTOR_RIGHT_END);
+const contactNodeBlue = makeContactNode(0x5577ff, CONDUCTOR_LEFT_END);
 
 /* ============================================================
    الحالة الفيزيائية
@@ -717,7 +905,8 @@ function updatePhysics(dt) {
   const vth = VTH_BASE * Math.sqrt(T / 300);
   const tau = TAU_BASE * (300 / T);
 
-  const accelX = +params.voltage * ACCEL_PER_V;
+  const applied = getAppliedVoltage();
+  const accelX = +applied * ACCEL_PER_V;
 
   const SUB = 2;
   const h   = dt / SUB;
@@ -770,16 +959,56 @@ function updatePhysics(dt) {
 function updateVisuals() {
   latticeGroup.visible = params.showLattice;
 
-  const voltageIsZero = params.voltage <= 0.001;
-  const show = params.showField && !voltageIsZero;
+  const applied = getAppliedVoltage();
+  const voltageIsZero = applied <= 0.001;
 
-  fieldGroup.visible = show;
-  if (show) {
-    const k = 0.35 + (params.voltage / 3) * 0.65;
-    fieldGroup.children.forEach(g => {
-      g.scale.set(k, 1, 1);
-    });
+  // عدد الخطوط المعروضة يتناسب طردياً مع الفولتية الفعلية
+  // عند 3V تظهر كل الخطوط (7)، وعند 1.5V تظهر حوالي 4
+  let targetLines = 0;
+  if (!voltageIsZero) {
+    targetLines = Math.min(
+      MAX_FIELD_LINES,
+      Math.round((applied / 3) * MAX_FIELD_LINES)
+    );
+    if (targetLines < 1) targetLines = 1;   // خط واحد على الأقل عند وجود جهد
   }
+  const showAll = params.showField && !voltageIsZero;
+
+  for (let i = 0; i < MAX_FIELD_LINES; i++) {
+    const l = fieldLines[i];
+    const on = showAll && i < targetLines;
+    l.visible = on;
+    if (on) {
+      const norm = Math.min(1, applied / 3);
+      const opacity = 0.45 + norm * 0.45;
+      l.children.forEach(m => { m.material.opacity = opacity; });
+    }
+  }
+
+  capRedMat.emissiveIntensity = 0.35 + (applied / 3) * 1.6;
+  capBlueMat.emissiveIntensity = 0.35 + (applied / 3) * 1.6;
+
+  contactNodeRed.material.emissiveIntensity = 0.6 + (applied / 3) * 1.2;
+  contactNodeBlue.material.emissiveIntensity = 0.6 + (applied / 3) * 1.2;
+
+  for (const w of connectingWires) {
+    if (applied > 0.01) {
+      w.material.emissive.setHex(0xff6622);
+      w.material.emissiveIntensity = 0.25 + (applied / 3) * 0.85;
+      w.material.color.setHex(0xb0a890);
+    } else {
+      w.material.emissive.setHex(0x000000);
+      w.material.emissiveIntensity = 0;
+      w.material.color.setHex(0x8899aa);
+    }
+  }
+
+  updateSwitchVisual();
+}
+
+function updateSwitchVisual() {
+  const arm = switchGroup.userData.arm;
+  if (arm) arm.rotation.z = switchClosed ? 0 : -Math.PI / 3.2;
 }
 
 /* ============================================================
@@ -790,25 +1019,46 @@ function updateStats() {
   const vth = VTH_BASE * Math.sqrt(T / 300);
   const tau = TAU_BASE * (300 / T);
   const lambda = vth * tau;
-  const E = params.voltage / WIRE_LEN;
+
+  const applied = getAppliedVoltage();
+  const E = applied / WIRE_LEN;
 
   const density = params.nElectrons;
   const current = Math.abs(measuredDrift) * density;
-  const arrowsShown = (params.showField && params.voltage > 0.001);
+
+  let shownLines = 0;
+  if (params.showField && applied > 0.001) {
+    shownLines = Math.min(
+      MAX_FIELD_LINES,
+      Math.round((applied / 3) * MAX_FIELD_LINES)
+    );
+    if (shownLines < 1) shownLines = 1;
+  }
+
+  const switchHTML = switchClosed
+    ? '<span class="ok">مغلق ✓</span>'
+    : '<span class="bad">مفتوح ✗</span>';
 
   document.getElementById('stats').innerHTML = `
+    <div><span class="k">حالة المفتاح :</span> ${switchHTML}</div>
+    <div><span class="k">الفولتية المطبقة على الموصل :</span> <span class="v">${applied.toFixed(2)}</span> <span class="unit">V</span></div>
     <div><span class="k">عدد أيونات الشبكة :</span> <span class="v">${ionCount}</span></div>
-    <div><span class="k">أسهم المجال داخل السلك :</span> <span class="v">${arrowsShown ? N_FIELD_ARROWS : 0}</span></div>
-    <div><span class="k">اتجاه المجال E :</span> <span class="v">${arrowsShown ? '⟵ نحو اليسار (−)' : 'لا يوجد'}</span></div>
+    <div><span class="k">خطوط المجال المعروضة :</span> <span class="v">${shownLines}</span> <span class="unit">/ ${MAX_FIELD_LINES}</span></div>
+    <div><span class="k">اتجاه خطوط المجال E :</span> <span class="v">${applied > 0.001 ? '⟵ من + إلى −' : 'لا يوجد'}</span></div>
     <div><span class="k">المجال الكهربائي E :</span> <span class="v">${E.toFixed(4)}</span> <span class="unit">وحدة</span></div>
     <div><span class="k">السرعة الحرارية v<sub>th</sub> :</span> <span class="v">${vth.toFixed(2)}</span> <span class="unit">وحدة/ث</span></div>
     <div><span class="k">زمن الاسترخاء τ :</span> <span class="v">${tau.toFixed(3)}</span> <span class="unit">ث</span></div>
-    <div><span class="k">المسار الحر المتوسط λ :</span> <span class="v">${lambda.toFixed(2)}</span> <span class="unit">وحدة</span></div>
     <div style="margin-top:5px;border-top:1px solid rgba(80,130,210,0.15);padding-top:5px;">
       <span class="k">سرعة الانسياق v<sub>d</sub> :</span> <span class="v">${Math.abs(measuredDrift).toFixed(3)}</span> <span class="unit">وحدة/ث</span>
     </div>
     <div><span class="k">التيار النسبي I :</span> <span class="v">${current.toFixed(1)}</span></div>
   `;
+
+  const btn = document.getElementById('switchBtn');
+  btn.textContent = switchClosed
+    ? '⏻ المفتاح : مغلق (اضغط للفتح)'
+    : '⏻ المفتاح : مفتوح (اضغط للإغلاق)';
+  btn.classList.toggle('closed', switchClosed);
 }
 
 /* ============================================================
@@ -816,22 +1066,16 @@ function updateStats() {
    ============================================================ */
 const $ = id => document.getElementById(id);
 
-// أزرار التنقل
-$('homeBtn').addEventListener('click', () => {
-  window.location.href = '../index.html';
-});
-$('currentBtn').addEventListener('click', () => {
-  window.location.href = 'current-resistance.html';
-});
+$('homeBtn').addEventListener('click', () => { window.location.href = '../index.html'; });
+$('currentBtn').addEventListener('click', () => { window.location.href = 'current-resistance.html'; });
 
-// الجهد
 $('vRange').addEventListener('input', e => {
   params.voltage = parseFloat(e.target.value);
   $('vVal').textContent = params.voltage.toFixed(2) + ' V';
   updateVisuals();
+  updateStats();
 });
 
-// الحرارة
 $('tRange').addEventListener('input', e => {
   params.temperature = parseFloat(e.target.value);
   $('tVal').textContent = params.temperature + ' K';
@@ -842,20 +1086,17 @@ $('tRange').addEventListener('input', e => {
   }
 });
 
-// عدد الإلكترونات
 $('nRange').addEventListener('input', e => {
   params.nElectrons = parseInt(e.target.value);
   $('nVal').textContent = params.nElectrons;
   setElectronCount(params.nElectrons);
 });
 
-// سرعة العرض
 $('sRange').addEventListener('input', e => {
   params.timeScale = parseFloat(e.target.value);
   $('sVal').textContent = params.timeScale.toFixed(1) + 'x';
 });
 
-// خيارات العرض
 $('latticeBtn').addEventListener('click', () => {
   params.showLattice = !params.showLattice;
   $('latticeBtn').classList.toggle('on', params.showLattice);
@@ -865,9 +1106,9 @@ $('fieldBtn').addEventListener('click', () => {
   params.showField = !params.showField;
   $('fieldBtn').classList.toggle('on', params.showField);
   updateVisuals();
+  updateStats();
 });
 
-// إيقاف / إعادة
 $('pauseBtn').addEventListener('click', () => {
   params.paused = !params.paused;
   $('pauseBtn').textContent = params.paused ? '▶ تشغيل' : '⏸ إيقاف';
@@ -877,6 +1118,54 @@ $('pauseBtn').addEventListener('click', () => {
 $('resetBtn').addEventListener('click', () => {
   for (const e of electrons) resetElectron(e);
   measuredDrift = 0;
+});
+
+$('switchBtn').addEventListener('click', () => {
+  toggleSwitch();
+});
+
+function toggleSwitch() {
+  switchClosed = !switchClosed;
+  updateSwitchVisual();
+  updateVisuals();
+  updateStats();
+}
+
+/* ============================================================
+   النقر على المفتاح في المشهد
+   ============================================================ */
+const raycaster = new THREE.Raycaster();
+const mouseNDC = new THREE.Vector2();
+let downPos = null;
+
+function updateMouse(e) {
+  mouseNDC.x = (e.clientX / innerWidth) * 2 - 1;
+  mouseNDC.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouseNDC, camera);
+}
+
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  downPos = { x: e.clientX, y: e.clientY };
+});
+
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (!downPos) return;
+  const dx = e.clientX - downPos.x;
+  const dy = e.clientY - downPos.y;
+  downPos = null;
+  if (Math.hypot(dx, dy) > 6) return;
+
+  updateMouse(e);
+  const hits = raycaster.intersectObjects(switchGroup.children, true);
+  if (hits.length > 0) {
+    toggleSwitch();
+  }
+});
+
+renderer.domElement.addEventListener('pointermove', (e) => {
+  updateMouse(e);
+  const hits = raycaster.intersectObjects(switchGroup.children, true);
+  renderer.domElement.style.cursor = hits.length > 0 ? 'pointer' : 'default';
 });
 
 /* ============================================================
@@ -917,6 +1206,8 @@ addEventListener('resize', () => {
 /* ============================================================
    الإقلاع
    ============================================================ */
+switchClosed = false;
+updateSwitchVisual();
 updateVisuals();
 updateStats();
 animate();
