@@ -1,277 +1,728 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>المجال المغناطيسي للتيار الكهربائي | الأستاذ ماجد شلالدة</title>
-<style>
-:root{
-    --bg-color:#0b1329;
-    --main-card-bg:#1c2541;
-    --sub-card-bg:#3a506b;
-    --text-color:#fff;
-    --accent-cyan:#00b4d8;
-    --accent-orange:#f77f00;
-}
-*{box-sizing:border-box}
-body{
-    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-    background:var(--bg-color);
-    color:var(--text-color);
-    margin:0;
-    padding:20px;
-    min-height:100vh;
-    position:relative;
-}
-.watermark-overlay{
-    position:fixed;
-    inset:0;
-    background-image:url('logo.png');
-    background-size:180px;
-    background-repeat:repeat;
-    opacity:.025;
-    pointer-events:none;
-    z-index:0;
-    transform:rotate(-15deg) scale(1.2);
-}
-.container{
-    max-width:1200px;
-    margin:0 auto;
-    position:relative;
-    z-index:1;
-}
-header{
-    text-align:center;
-    margin-bottom:40px;
-    position:relative;
-}
-.back-btn{
-    position:absolute;
-    top:10px;
-    right:10px;
-    background:var(--main-card-bg);
-    color:var(--accent-cyan);
-    text-decoration:none;
-    padding:10px 20px;
-    border-radius:8px;
-    font-weight:bold;
-    border:1px solid var(--accent-cyan);
-    transition:.2s ease;
-}
-.back-btn:hover{
-    background:var(--accent-cyan);
-    color:var(--bg-color);
-    transform:translateY(-2px);
-}
-header h1{
-    font-size:2.5rem;
-    color:var(--accent-orange);
-    margin:40px 0 10px;
-}
-header p{
-    color:#a5a5a5;
-    font-size:1.1rem;
-    margin:0;
-}
-.magnetic-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:25px;
-    margin-top:30px;
-}
-.magnetic-card{
-    background:var(--main-card-bg);
-    border-radius:14px;
-    padding:25px;
-    text-decoration:none;
-    color:var(--text-color);
-    border:1px solid rgba(255,255,255,.05);
-    box-shadow:0 8px 25px rgba(0,0,0,.3);
-    transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-    min-height:265px;
-}
-.magnetic-card:hover{
-    transform:translateY(-8px);
-    border-color:var(--accent-orange);
-    box-shadow:0 12px 30px rgba(0,0,0,.5);
-}
-.icon{
-    width:105px;
-    height:75px;
-    margin-bottom:15px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-    font-size:3.4rem;
-}
-.wire{
-    width:78px;
-    height:8px;
-    background:#b9c3cc;
-    border-radius:10px;
-    position:relative;
-}
-.wire:after,.wire:before{
-    content:"";
-    position:absolute;
-    width:24px;
-    height:24px;
-    border:3px solid var(--accent-cyan);
-    border-radius:50%;
-    top:50%;
-    transform:translateY(-50%);
-}
-.wire:before{right:22px}
-.wire:after{left:22px}
-.coil{
-    width:90px;
-    height:55px;
-    border:5px solid var(--accent-cyan);
-    border-left-color:transparent;
-    border-right-color:transparent;
-    border-radius:50%;
-    position:relative;
-}
-.coil:after{
-    content:"";
-    position:absolute;
-    inset:7px 12px;
-    border:4px solid var(--accent-orange);
-    border-left-color:transparent;
-    border-right-color:transparent;
-    border-radius:50%;
-}
-.magnet{
-    font-size:3.2rem;
-    filter:drop-shadow(0 4px 5px rgba(0,0,0,.35));
-}
-.compass{
-    font-size:3.5rem;
-}
-.right-hand{
-    font-size:3.6rem;
-}
-.field-lines{
-    width:105px;
-    height:70px;
-    position:relative;
-}
-.field-lines span{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    border:2px solid var(--accent-cyan);
-    border-radius:50%;
-}
-.field-lines span:nth-child(1){width:30px;height:30px}
-.field-lines span:nth-child(2){width:55px;height:55px}
-.field-lines span:nth-child(3){width:82px;height:82px}
-.magnetic-card h2{
-    margin:0 0 12px;
-    font-size:1.55rem;
-    color:var(--accent-cyan);
-}
-.magnetic-card p{
-    margin:0;
-    font-size:1rem;
-    color:#cdcdcd;
-    line-height:1.65;
-}
-.tag{
-    background:rgba(247,127,0,.2);
-    color:var(--accent-orange);
-    padding:4px 12px;
-    border-radius:20px;
-    font-size:.85rem;
-    margin-top:15px;
-    font-weight:bold;
-}
-.topic-select{width:100%;margin-top:14px;padding:12px 14px;border-radius:10px;border:1px solid var(--accent-cyan);background:#101a35;color:#fff;font-size:.95rem;font-family:inherit;cursor:pointer;outline:none;}
-.topic-select:focus{box-shadow:0 0 0 3px rgba(0,180,216,.18)}
-.topic-select option{background:#101a35;color:#fff}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المجال المغناطيسي للتيار الكهربائي | الأستاذ ماجد شلالدة</title>
+    <style>
+        /* ============================================
+           المتغيرات الأساسية
+           ============================================ */
+        :root {
+            --bg-color: #0b1329;
+            --bg-secondary: #0f1a35;
+            --main-card-bg: #1c2541;
+            --sub-card-bg: #3a506b;
+            --sub-card-hover: #465f7e;
+            --text-color: #ffffff;
+            --text-muted: #c0c8d8;
+            --accent-cyan: #00b4d8;
+            --accent-blue: #4cc9f0;
+            --accent-green: #06d6a0;
+            --accent-gold: #ffd166;
+            --accent-purple: #b185ff;
+            --accent-red: #ef476f;
+            --accent-orange: #f77f00;
+            --border-soft: rgba(255, 255, 255, 0.08);
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 12px 30px rgba(247, 127, 0, 0.2);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-pill: 50px;
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+        }
 
-.properties-card{background:linear-gradient(135deg,#24345c,#1c2541);border:2px solid var(--accent-cyan);border-radius:14px;padding:24px;text-decoration:none;color:var(--text-color);box-shadow:0 8px 25px rgba(0,0,0,.3);transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:265px;}
-.properties-card:hover{transform:translateY(-8px);border-color:var(--accent-orange);box-shadow:0 12px 30px rgba(0,0,0,.5);}
-.properties-icon{font-size:3.6rem;margin-bottom:15px;}
+        /* ============================================
+           الوضع النهاري
+           ============================================ */
+        body.light-mode {
+            --bg-color: #f0f4f8;
+            --bg-secondary: #e2e8f0;
+            --main-card-bg: #ffffff;
+            --sub-card-bg: #e8eef5;
+            --sub-card-hover: #d8e2ec;
+            --text-color: #1a202c;
+            --text-muted: #4a5568;
+            --border-soft: rgba(0, 0, 0, 0.08);
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 12px 30px rgba(247, 127, 0, 0.2);
+        }
 
-@media(max-width:600px){
-    body{padding:12px}
-    header h1{font-size:2rem;margin-top:70px}
-    .back-btn{position:relative;top:auto;right:auto;display:inline-block}
-    .magnetic-grid{grid-template-columns:1fr}
-}
-</style>
+        /* ============================================
+           Reset وإعدادات عامة
+           ============================================ */
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: background-color var(--transition-normal),
+                        color var(--transition-normal);
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb {
+            background: var(--sub-card-bg);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-orange); }
+
+        /* ============================================
+           العلامة المائية
+           ============================================ */
+        .watermark-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: url('../../logo.png');
+            background-size: 180px;
+            background-repeat: repeat;
+            opacity: 0.025;
+            pointer-events: none;
+            z-index: 0;
+            transform: rotate(-15deg) scale(1.2);
+        }
+
+        /* ============================================
+           شريط التنقل
+           ============================================ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background: rgba(28, 37, 65, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-soft);
+            transition: background var(--transition-normal);
+        }
+
+        body.light-mode .navbar {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .nav-brand {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-orange);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            transition: background var(--transition-fast),
+                        color var(--transition-fast);
+        }
+
+        .nav-links a:hover {
+            background: var(--accent-orange);
+            color: #000;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-soft);
+            color: var(--text-color);
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform var(--transition-fast),
+                        background var(--transition-fast);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+            background: var(--sub-card-bg);
+        }
+
+        /* ============================================
+           الحاوية
+           ============================================ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           Breadcrumb
+           ============================================ */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a {
+            color: var(--accent-orange);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .breadcrumb a:hover { color: var(--accent-cyan); }
+
+        .breadcrumb .separator { opacity: 0.5; }
+
+        .breadcrumb .current {
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        /* ============================================
+           الهيدر
+           ============================================ */
+        header.page-header {
+            text-align: center;
+            padding: 20px 20px 30px;
+        }
+
+        header.page-header h1 {
+            font-size: 2.4rem;
+            color: var(--accent-orange);
+            margin: 0 0 12px 0;
+            line-height: 1.3;
+        }
+
+        header.page-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin: 0 auto;
+            max-width: 700px;
+        }
+
+        /* ============================================
+           شبكة البطاقات
+           ============================================ */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 22px;
+            margin: 20px 0 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           البطاقة الأساسية
+           ============================================ */
+        .topic-card {
+            background-color: var(--main-card-bg);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            text-decoration: none;
+            color: var(--text-color);
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-soft);
+            transition: transform var(--transition-normal),
+                        border-color var(--transition-normal),
+                        box-shadow var(--transition-normal);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 265px;
+        }
+
+        .topic-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-cyan));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform var(--transition-normal);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .topic-card:hover::before { transform: scaleX(1); }
+
+        .topic-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-orange);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .topic-card.clickable { cursor: pointer; }
+
+        .topic-card.clickable::after {
+            content: "↗";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.1rem;
+            color: var(--accent-orange);
+            opacity: 0;
+            transform: translate(-5px, 5px);
+            transition: opacity var(--transition-normal),
+                        transform var(--transition-normal);
+        }
+
+        .topic-card.clickable:hover::after {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+
+        .topic-card .icon {
+            width: 105px;
+            height: 75px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 3.4rem;
+            transition: transform var(--transition-normal);
+        }
+
+        .topic-card:hover .icon {
+            transform: scale(1.12) rotate(-5deg);
+        }
+
+        .topic-card h2 {
+            margin: 0 0 12px 0;
+            font-size: 1.35rem;
+            color: var(--accent-cyan);
+            line-height: 1.4;
+        }
+
+        .topic-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            flex-grow: 1;
+        }
+
+        /* ============================================
+           بطاقة خاصة (خصائص خطوط المجال)
+           ============================================ */
+        .properties-card {
+            background: linear-gradient(135deg, #24345c, #1c2541);
+            border: 2px solid var(--accent-cyan);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            text-decoration: none;
+            color: var(--text-color);
+            box-shadow: var(--shadow-soft);
+            transition: transform var(--transition-normal),
+                        border-color var(--transition-normal),
+                        box-shadow var(--transition-normal);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-height: 265px;
+            position: relative;
+        }
+
+        body.light-mode .properties-card {
+            background: linear-gradient(135deg, #e0e8f5, #ffffff);
+        }
+
+        .properties-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-orange);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .properties-card .properties-icon {
+            font-size: 3.6rem;
+            margin-bottom: 15px;
+            transition: transform var(--transition-normal);
+        }
+
+        .properties-card:hover .properties-icon {
+            transform: scale(1.12) rotate(-5deg);
+        }
+
+        /* ============================================
+           Tag المعادلة
+           ============================================ */
+        .tag {
+            background-color: rgba(247, 127, 0, 0.15);
+            color: var(--accent-orange);
+            padding: 5px 14px;
+            border-radius: var(--radius-pill);
+            font-size: 0.82rem;
+            margin-top: 16px;
+            font-weight: bold;
+            border: 1px solid rgba(247, 127, 0, 0.25);
+        }
+
+        /* ============================================
+           القائمة المنسدلة
+           ============================================ */
+        .topic-select {
+            width: 100%;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--accent-cyan);
+            background-color: var(--bg-secondary);
+            color: var(--text-color);
+            font-size: 0.92rem;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            text-align: right;
+            transition: border-color var(--transition-fast),
+                        box-shadow var(--transition-fast);
+        }
+
+        .topic-select:hover,
+        .topic-select:focus {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 3px rgba(247, 127, 0, 0.15);
+        }
+
+        .topic-select option {
+            background-color: var(--main-card-bg);
+            color: var(--text-color);
+            padding: 8px;
+        }
+
+        body.light-mode .topic-select {
+            background-color: #ffffff;
+            color: #1a202c;
+        }
+
+        body.light-mode .topic-select option {
+            background-color: #ffffff;
+            color: #1a202c;
+        }
+
+        /* ============================================
+           أيقونات CSS المخصصة
+           ============================================ */
+        /* السلك المستقيم */
+        .wire {
+            width: 78px;
+            height: 8px;
+            background: #b9c3cc;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .wire:after,
+        .wire:before {
+            content: "";
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .wire:before { right: 22px; }
+        .wire:after { left: 22px; }
+
+        /* الملف الدائري */
+        .coil {
+            width: 90px;
+            height: 55px;
+            border: 5px solid var(--accent-cyan);
+            border-left-color: transparent;
+            border-right-color: transparent;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .coil:after {
+            content: "";
+            position: absolute;
+            inset: 7px 12px;
+            border: 4px solid var(--accent-orange);
+            border-left-color: transparent;
+            border-right-color: transparent;
+            border-radius: 50%;
+        }
+
+        /* المغناطيس */
+        .magnet {
+            font-size: 3.2rem;
+            filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.35));
+        }
+
+        /* خطوط المجال */
+        .field-lines {
+            width: 105px;
+            height: 70px;
+            position: relative;
+        }
+
+        .field-lines span {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+        }
+
+        .field-lines span:nth-child(1) { width: 30px; height: 30px; }
+        .field-lines span:nth-child(2) { width: 55px; height: 55px; }
+        .field-lines span:nth-child(3) { width: 82px; height: 82px; }
+
+        /* ============================================
+           الفوتر
+           ============================================ */
+        footer.page-footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            border-top: 1px solid var(--border-soft);
+            margin-top: 20px;
+        }
+
+        footer.page-footer strong { color: var(--accent-orange); }
+
+        /* ============================================
+           زر العودة للأعلى
+           ============================================ */
+        .back-to-top {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            color: #000;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(247, 127, 0, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            transition: opacity var(--transition-normal),
+                        transform var(--transition-normal);
+            z-index: 99;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover { transform: translateY(-3px); }
+
+        /* ============================================
+           التجاوب
+           ============================================ */
+        @media (max-width: 768px) {
+            header.page-header h1 { font-size: 1.7rem; }
+            header.page-header p { font-size: 0.95rem; }
+
+            .navbar {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: 0.82rem;
+            }
+
+            .grid-layout { grid-template-columns: 1fr; }
+            .topic-card { padding: 20px; }
+            .topic-card h2 { font-size: 1.2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .nav-brand span { display: none; }
+            header.page-header h1 { font-size: 1.4rem; }
+        }
+    </style>
 </head>
-
 <body>
-<div class="watermark-overlay"></div>
 
-<div class="container">
-<header>
-    <a href="../../index.html" class="back-btn">⬅ العودة للرئيسية</a>
-    <h1>🧲 المجال المغناطيسي للتيار الكهربائي</h1>
-    <p>إعداد وتطوير الأستاذ ماجد شلالدة (0599870176) - اختر الموضوع لبدء التجربة</p>
-</header>
+    <div class="watermark-overlay"></div>
 
-<main class="magnetic-grid">
-    <a href="field_line.html" class="properties-card">
-        <div class="properties-icon">🧲〰️</div>
-        <h2>خصائص خطوط المجال المغناطيسي</h2>
-        <p>التعرف على خصائص خطوط المجال المغناطيسي واتجاهها وشكلها وتوزيعها حول المغناطيس.</p>
-        <span class="tag">خصائص المجال</span>
-    </a>
-
-
-    <div class="magnetic-card" style="cursor:default;">
-        <div class="icon field-lines">
-            <span></span><span></span><span></span>
+    <!-- ===== شريط التنقل ===== -->
+    <nav class="navbar">
+        <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+        <div class="nav-links">
+            <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+            <a href="../../index.html#electricity">⚡ الكهرباء</a>
+            <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+            <a href="../../index.html#modern">🔬 الحديثة</a>
         </div>
-        <h2>المجال المغناطيسي للسلك المستقيم اللانهئي</h2>
-        <p>اختر من القائمة الموضوع الذي تريد استكشافه.</p>
-        <select class="topic-select" onchange="if(this.value) window.location.href=this.value;">
-            <option value="">اختر الموضوع ▼</option>
-            <option value="straight_wire_magnetic_field.html">خطوط المجال المغناطيسي في محيط السلك المستقيم اللانهائي</option>
-            <option value="open_hand_rule_1.html">قاعدة الكف المفتوح – نموذج 1</option>
-            <option value="open_hand_rule_2.html">قاعدة الكف المفتوح – نموذج 2</option>
-        </select>
-        <span class="tag">سلك مستقيم</span>
+        <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+    </nav>
+
+    <div class="container">
+
+        <!-- ===== Breadcrumb ===== -->
+        <div class="breadcrumb">
+            <a href="../../index.html">🏠 الرئيسية</a>
+            <span class="separator">›</span>
+            <a href="../../index.html#magnetism">🧲 الكهرباء والمغناطيسية</a>
+            <span class="separator">›</span>
+            <span class="current">🧲 المجال المغناطيسي للتيار</span>
+        </div>
+
+        <!-- ===== الهيدر ===== -->
+        <header class="page-header">
+            <h1>🧲 المجال المغناطيسي للتيار الكهربائي</h1>
+            <p>إعداد الأستاذ ماجد شلالدة — اختر الموضوع لبدء التجربة التفاعلية</p>
+        </header>
+
+        <!-- ===== البطاقات ===== -->
+        <main class="grid-layout">
+
+            <!-- 1. خصائص خطوط المجال المغناطيسي -->
+            <a href="field_line.html" class="properties-card clickable">
+                <div class="properties-icon">🧲〰️</div>
+                <h2>خصائص خطوط المجال المغناطيسي</h2>
+                <p>التعرف على خصائص خطوط المجال المغناطيسي واتجاهها وشكلها وتوزيعها حول المغناطيس.</p>
+                <span class="tag">خصائص المجال</span>
+            </a>
+
+            <!-- 2. المجال المغناطيسي للسلك المستقيم اللانهائي -->
+            <div class="topic-card">
+                <div class="icon field-lines" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                </div>
+                <h2>المجال المغناطيسي للسلك المستقيم</h2>
+                <p>اختر من القائمة الموضوع الذي تريد استكشافه حول السلك المستقيم اللانهائي.</p>
+                <select class="topic-select" data-navigate
+                        aria-label="اختر موضوع السلك المستقيم">
+                    <option value="">-- اختر الموضوع --</option>
+                    <option value="straight_wire_magnetic_field.html">🧲 خطوط المجال في محيط السلك اللانهائي</option>
+                    <option value="open_hand_rule_1.html">✋ قاعدة الكف المفتوح — نموذج 1</option>
+                    <option value="open_hand_rule_2.html">✋ قاعدة الكف المفتوح — نموذج 2</option>
+                </select>
+                <span class="tag">سلك مستقيم</span>
+            </div>
+
+            <!-- 3. المجال المغناطيسي لملف دائري -->
+            <a href="circular_loop_magnetic_field.html" class="topic-card clickable">
+                <div class="icon"><div class="coil"></div></div>
+                <h2>المجال المغناطيسي لملف دائري</h2>
+                <p>دراسة المجال المغناطيسي الناتج عن مرور تيار في ملف دائري وتأثير اتجاه التيار في اتجاه المجال.</p>
+                <span class="tag">ملف دائري</span>
+            </a>
+
+            <!-- 4. المجال المغناطيسي للملف الحلزوني -->
+            <a href="solenoid_magnetic_field.html" class="topic-card clickable">
+                <div class="icon magnet">🧲</div>
+                <h2>المجال المغناطيسي للملف الحلزوني</h2>
+                <p>محاكاة المجال داخل وحول الملف الحلزوني مع توضيح اتجاه خطوط المجال والقطبين المغناطيسيين.</p>
+                <span class="tag">ملف لولبي</span>
+            </a>
+
+        </main>
+
+        <!-- ===== الفوتر ===== -->
+        <footer class="page-footer">
+            <p>© 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong></p>
+            <p>📱 0599870176</p>
+        </footer>
     </div>
 
-    <a href="circular_loop_magnetic_field.html" class="magnetic-card">
-        <div class="icon coil"></div>
-        <h2>المجال المغناطيسي لملف دائري</h2>
-        <p>دراسة المجال المغناطيسي الناتج عن مرور تيار في ملف دائري وتأثير اتجاه التيار في اتجاه المجال.</p>
-        <span class="tag">ملف دائري</span>
-    </a>
+    <!-- ===== زر العودة للأعلى ===== -->
+    <button class="back-to-top" id="backToTop" aria-label="العودة للأعلى">↑</button>
 
-    <a href="solenoid_magnetic_field.html" class="magnetic-card">
-        <div class="icon magnet">🧲</div>
-        <h2>المجال المغناطيسي للملف الحلزوني</h2>
-        <p>محاكاة المجال داخل وحول الملف  الحلزوني مع توضيح اتجاه خطوط المجال والقطبين المغناطيسيين.</p>
-        <span class="tag">ملف لولبي</span>
-    </a>
+    <script>
+        (function() {
+            'use strict';
 
-    <a href="current_distance_field.html" class="magnetic-card">
-        <div class="icon">⚡📏</div>
-        <h2>تأثير شدة التيار والمسافة</h2>
-        <p>محاكاة تفاعلية لدراسة تغير شدة المجال المغناطيسي عند تغيير شدة التيار والمسافة عن الموصل.</p>
-        <span class="tag">عوامل مؤثرة</span>
-    </a>
+            // ===== الوضع الليلي/النهاري =====
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (themeToggle) {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'light') {
+                    document.body.classList.add('light-mode');
+                    themeToggle.textContent = '☀️';
+                }
 
-    <a href="magnetic_field_lines.html" class="magnetic-card">
-        <div class="icon">🧲〰️</div>
-        <h2>خطوط المجال المغناطيسي</h2>
-        <p>استكشاف شكل خطوط المجال المغناطيسي واتجاهها حول الموصلات والملفات التي يمر فيها تيار كهربائي.</p>
-        <span class="tag">خطوط المجال</span>
-    </a>
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('light-mode');
+                    const isLight = document.body.classList.contains('light-mode');
+                    themeToggle.textContent = isLight ? '☀️' : '🌙';
+                    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                });
+            }
 
-</main>
-</div>
+            // ===== زر العودة للأعلى =====
+            const backToTop = document.getElementById('backToTop');
+            
+            if (backToTop) {
+                window.addEventListener('scroll', () => {
+                    backToTop.classList.toggle('visible', window.scrollY > 400);
+                }, { passive: true });
+
+                backToTop.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            // ===== القوائم المنسدلة للتنقل =====
+            document.querySelectorAll('select[data-navigate]').forEach(select => {
+                select.addEventListener('change', function() {
+                    if (this.value) {
+                        window.location.href = this.value;
+                    }
+                });
+            });
+
+        })();
+    </script>
+
 </body>
 </html>
