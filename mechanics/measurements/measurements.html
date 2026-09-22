@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>القياس بأدوات دقيقة | الأستاذ ماجد شلالدة</title>
+<style>
+  :root{
+    --bg-color:#0b1329;
+    --bg-secondary:#0f1a35;
+    --main-card-bg:#1c2541;
+    --sub-card-bg:#3a506b;
+    --text-color:#ffffff;
+    --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8;
+    --accent-green:#06d6a0;
+    --accent-gold:#ffd166;
+    --accent-purple:#b185ff;
+    --accent-red:#ef476f;
+    --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.3);
+    --shadow-hover:0 12px 30px rgba(247,127,0,0.2);
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --transition-fast:0.2s ease;
+    --transition-normal:0.3s ease;
+
+    /* ألوان المحاكاة */
+    --instrument-bg:#0c141c;
+    --steel:#c7d0da;
+    --steel-dark:#8b96a3;
+    --read-accent:#e0913a;
+    --read-accent2:#4fb3a9;
+  }
+
+  body.light-mode{
+    --bg-color:#f0f4f8;
+    --bg-secondary:#e2e8f0;
+    --main-card-bg:#ffffff;
+    --sub-card-bg:#e8eef5;
+    --text-color:#1a202c;
+    --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    color:var(--text-color);
+    background-color:var(--bg-color);
+    font-family:'Segoe UI',system-ui,-apple-system,'Tahoma',sans-serif;
+    line-height:1.6;
+    transition:background-color var(--transition-normal),color var(--transition-normal);
+    position:relative;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+
+  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg-color);}
+  ::-webkit-scrollbar-thumb{background:var(--sub-card-bg);border-radius:5px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--accent-orange);}
+
+  /* ============ العلامة المائية ============ */
+  .watermark-overlay{
+    position:fixed;inset:0;
+    background-image:url('../../logo.png');
+    background-size:180px;
+    background-repeat:repeat;
+    opacity:0.025;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ============ شريط التنقل ============ */
+  .navbar{
+    position:sticky;top:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);
+    transition:background var(--transition-normal);
+  }
+  body.light-mode .navbar{background:rgba(255,255,255,0.92);}
+
+  .nav-brand{
+    font-size:1.1rem;font-weight:bold;
+    color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;
+  }
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{
+    color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:var(--radius-sm);
+    font-size:0.9rem;
+    transition:background var(--transition-fast),color var(--transition-fast);
+  }
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+
+  .theme-toggle{
+    background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.2rem;
+    width:40px;height:40px;border-radius:50%;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform var(--transition-fast),background var(--transition-fast);
+  }
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  /* ============ الحاوية ============ */
+  .container{
+    max-width:1250px;margin:0 auto;padding:20px;
+    position:relative;z-index:1;
+  }
+
+  /* ============ Breadcrumb ============ */
+  .breadcrumb{
+    display:flex;align-items:center;gap:8px;
+    padding:12px 0;font-size:0.9rem;
+    color:var(--text-muted);flex-wrap:wrap;
+  }
+  .breadcrumb a{
+    color:var(--accent-orange);text-decoration:none;
+    transition:color var(--transition-fast);
+  }
+  .breadcrumb a:hover{color:var(--accent-cyan);}
+  .breadcrumb .separator{opacity:0.5;}
+  .breadcrumb .current{color:var(--text-color);font-weight:bold;}
+
+  /* ============ الهيدر + الشعار الدائري ============ */
+  header.page-header{
+    text-align:center;padding:20px 20px 30px;
+  }
+  header.page-header h1{
+    font-size:2.3rem;color:var(--accent-orange);
+    margin:0 0 10px 0;line-height:1.3;
+  }
+  header.page-header .subtitle{
+    color:var(--text-muted);font-size:1.05rem;
+    margin:0 auto 26px;max-width:720px;
+  }
+
+  .logo-circle{
+    width:110px;height:110px;
+    margin:0 auto 16px;
+    border-radius:50%;
+    padding:4px;
+    background:linear-gradient(135deg,var(--accent-orange),var(--accent-cyan));
+    box-shadow:
+      0 0 0 3px var(--main-card-bg),
+      0 0 30px rgba(247,127,0,0.35),
+      0 10px 30px rgba(0,0,0,0.4);
+    position:relative;
+    transition:transform 0.3s ease,box-shadow 0.3s ease;
+    z-index:1;
+  }
+  .logo-circle::before{
+    content:'';
+    position:absolute;inset:-8px;border-radius:50%;
+    background:conic-gradient(
+      from 0deg,
+      var(--accent-orange),
+      var(--accent-cyan),
+      var(--accent-gold),
+      var(--accent-orange)
+    );
+    z-index:-1;
+    animation:rotateRing 10s linear infinite;
+    opacity:0.75;
+    filter:blur(2px);
+  }
+  @keyframes rotateRing{to{transform:rotate(360deg);}}
+  .logo-circle img{
+    width:100%;height:100%;border-radius:50%;
+    object-fit:cover;background:#fff;display:block;
+    position:relative;z-index:1;
+  }
+  .logo-circle:hover{
+    transform:scale(1.06);
+    box-shadow:
+      0 0 0 3px var(--main-card-bg),
+      0 0 45px rgba(247,127,0,0.6),
+      0 15px 40px rgba(0,0,0,0.5);
+  }
+
+  .teacher-info{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    margin-top:14px;
+  }
+  .teacher-name{
+    color:var(--accent-gold);font-weight:700;font-size:1.1rem;
+  }
+  .teacher-phone{
+    color:var(--text-muted);font-size:0.95rem;
+    font-family:'Courier New',monospace;direction:ltr;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:5px 16px;border-radius:20px;
+    background:var(--sub-card-bg);
+    border:1px solid var(--border-soft);
+    transition:background var(--transition-fast);
+  }
+  .teacher-phone:hover{background:var(--accent-orange);color:#000;}
+
+  /* ============ مفتاح التبديل بين الأداتين ============ */
+  .tool-toggle{
+    display:flex;
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-md);
+    padding:6px;gap:6px;
+    margin:0 auto 20px;
+    max-width:640px;
+    box-shadow:var(--shadow-soft);
+  }
+  .tool-toggle button{
+    flex:1;
+    font:inherit;font-weight:700;font-size:0.95rem;
+    padding:12px 20px;border-radius:9px;
+    border:none;background:transparent;
+    color:var(--text-muted);cursor:pointer;
+    transition:all .2s;white-space:nowrap;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .tool-toggle button:hover{color:var(--text-color);background:var(--sub-card-bg);}
+  .tool-toggle button.active{
+    background:linear-gradient(180deg,var(--accent-orange),#c96400);
+    color:#fff;
+    box-shadow:0 4px 14px rgba(247,127,0,0.4);
+  }
+
+  /* ============ لوحة المحاكاة الرئيسية ============ */
+  .simulation-panel{
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    padding:22px 20px 26px;
+    box-shadow:var(--shadow-soft);
+    margin-bottom:20px;
+    transition:background var(--transition-normal);
+  }
+
+  .panel-header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  .panel-header h2{
+    font-size:1.35rem;
+    color:var(--accent-cyan);
+    margin:0 0 6px;
+  }
+  .panel-header p{
+    font-size:0.92rem;
+    color:var(--text-muted);
+    margin:0;
+    max-width:560px;
+    margin-inline:auto;
+  }
+
+  /* ============ منطقة الأداتين ============ */
+  .tool-view{display:none;}
+  .tool-view.active{display:block;}
+
+  svg{
+    display:block;width:100%;height:auto;
+    cursor:grab;touch-action:none;
+    background:var(--instrument-bg);
+    border-radius:var(--radius-md);
+    padding:8px;
+    transition:background var(--transition-normal);
+  }
+  svg:active{cursor:grabbing;}
+
+  /* ============ لوحة القراءات ============ */
+  .reading{
+    display:flex;justify-content:center;gap:16px;
+    margin:18px 0 10px;flex-wrap:wrap;
+  }
+  .card{
+    background:var(--instrument-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-md);
+    padding:12px 22px;text-align:center;
+    min-width:140px;
+    transition:border-color .25s,transform .25s;
+  }
+  .card:hover{border-color:var(--read-accent);}
+  .card .val{
+    font-size:26px;font-weight:800;
+    color:var(--read-accent);
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-.5px;
+  }
+  .card .val.secondary{color:var(--read-accent2);}
+  .card .val.main{color:var(--accent-gold);font-size:28px;}
+  .card .lbl{
+    font-size:11px;color:var(--text-muted);
+    margin-top:2px;font-weight:600;
+  }
+
+  /* ============ شريط التمرير ============ */
+  .slider-row{
+    display:flex;align-items:center;gap:14px;
+    margin-top:14px;padding:0 8px;
+  }
+  .slider-row span{
+    font-size:12px;color:var(--text-muted);
+    font-weight:600;white-space:nowrap;
+  }
+  input[type=range]{
+    flex:1;
+    -webkit-appearance:none;appearance:none;
+    height:6px;border-radius:99px;
+    background:var(--sub-card-bg);
+    outline:none;direction:ltr;
+    accent-color:var(--read-accent);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px;height:20px;border-radius:50%;
+    background:var(--read-accent);
+    border:3px solid var(--main-card-bg);
+    cursor:grab;
+    box-shadow:0 0 0 1px var(--read-accent),0 0 12px var(--read-accent);
+    transition:background .25s;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--read-accent);
+    border:3px solid var(--main-card-bg);cursor:grab;
+  }
+
+  /* ============ أزرار القطع الجاهزة ============ */
+  .obj-select{
+    display:flex;gap:8px;margin-top:16px;
+    flex-wrap:wrap;justify-content:center;
+  }
+  .obj-select button{
+    background:var(--instrument-bg);
+    color:var(--text-color);
+    border:1px solid var(--border-soft);
+    border-radius:9px;
+    padding:8px 16px;font-size:13px;
+    cursor:pointer;font-family:inherit;
+    font-weight:600;
+    transition:all .18s;
+  }
+  .obj-select button:hover{
+    border-color:var(--read-accent);
+    background:var(--sub-card-bg);
+  }
+  .obj-select button.active{
+    border-color:var(--read-accent);
+    color:var(--read-accent);
+    background:rgba(224,145,58,0.1);
+  }
+
+  /* ============ التلميح ============ */
+  .hint{
+    font-size:12px;color:var(--text-muted);
+    margin-top:12px;text-align:center;
+    padding:10px;background:var(--sub-card-bg);
+    border-radius:var(--radius-sm);
+    border-right:3px solid var(--accent-cyan);
+    max-width:640px;margin-inline:auto;
+  }
+
+  /* ============ المفاتيح ============ */
+  .legend{
+    font-size:11.5px;color:var(--text-muted);
+    margin-top:16px;
+    display:flex;gap:20px;flex-wrap:wrap;
+    justify-content:center;
+  }
+  .legend span{
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .dot{
+    width:11px;height:11px;border-radius:3px;
+    display:inline-block;
+    box-shadow:0 0 6px currentColor;
+  }
+
+  /* ============ بطاقة الصيغة ============ */
+  .formula-card{
+    margin-top:20px;
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    padding:16px 20px;
+    box-shadow:var(--shadow-soft);
+  }
+  .formula-card h3{
+    margin:0 0 12px;
+    color:var(--accent-gold);
+    font-size:1rem;
+    display:flex;align-items:center;gap:8px;
+  }
+  .formula-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+  }
+  .formula-item{
+    background:var(--sub-card-bg);
+    padding:10px 14px;
+    border-radius:var(--radius-sm);
+    border-right:3px solid var(--accent-cyan);
+    font-size:13px;
+    color:var(--text-color);
+  }
+  .formula-item code{
+    font-family:'Courier New',monospace;
+    color:var(--accent-gold);
+    background:var(--instrument-bg);
+    padding:2px 8px;border-radius:6px;
+    direction:ltr;display:inline-block;
+    font-size:12.5px;
+    margin-bottom:4px;
+  }
+
+  /* ============ الفوتر ============ */
+  footer.page-footer{
+    text-align:center;padding:30px 20px;
+    color:var(--text-muted);font-size:0.88rem;
+    border-top:1px solid var(--border-soft);
+    margin-top:20px;
+  }
+  footer.page-footer strong{color:var(--accent-orange);}
+
+  /* ============ التجاوب ============ */
+  @media (max-width:768px){
+    header.page-header h1{font-size:1.7rem;}
+    header.page-header .subtitle{font-size:0.95rem;}
+    .logo-circle{width:90px;height:90px;}
+    .navbar{padding:10px 15px;flex-wrap:wrap;gap:10px;}
+    .nav-links{order:3;width:100%;justify-content:center;}
+    .nav-links a{padding:6px 10px;font-size:0.82rem;}
+    .container{padding:14px;}
+    .simulation-panel{padding:16px 14px 18px;}
+    .tool-toggle{flex-direction:column;}
+    .reading{gap:10px;}
+    .card{min-width:110px;padding:10px 14px;}
+    .card .val{font-size:20px;}
+    .card .val.main{font-size:22px;}
+    .card .lbl{font-size:10px;}
+  }
+
+  @media (max-width:480px){
+    .nav-brand span{display:none;}
+    header.page-header h1{font-size:1.4rem;}
+    .logo-circle{width:80px;height:80px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="watermark-overlay"></div>
+
+<!-- ===== شريط التنقل ===== -->
+<nav class="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+</nav>
+
+<div class="container">
+
+  <!-- ===== Breadcrumb ===== -->
+  <div class="breadcrumb">
+    <a href="../../index.html">🏠 الرئيسية</a>
+    <span class="separator">›</span>
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <span class="separator">›</span>
+    <span class="current">📏 أدوات القياس الدقيقة</span>
+  </div>
+
+  <!-- ===== الهيدر ===== -->
+  <header class="page-header">
+    <h1>📏 القياس بالأدوات الدقيقة</h1>
+    <p class="subtitle">محاكاة تفاعلية للفرجار (الورنية) والميكرومتر — اسحب مباشرة على الرسم لتغيير القياس وقراءة النتيجة</p>
+
+    <div class="logo-circle">
+      <img src="../../logo.png" alt="شعار الأستاذ ماجد شلالدة"
+           onerror="this.parentElement.style.display='none'">
+    </div>
+
+    <div class="teacher-info">
+      <span class="teacher-name">إعداد الأستاذ: ماجد شلالدة</span>
+      <span class="teacher-phone">📱 0599870176</span>
+    </div>
+  </header>
+
+  <!-- ===== مفتاح التبديل ===== -->
+  <div class="tool-toggle" id="toolToggle">
+    <button data-tool="vernier" class="active">📐 الفرجار (الورنية)</button>
+    <button data-tool="micrometer">🔬 الميكرومتر</button>
+  </div>
+
+  <!-- ===== لوحة المحاكاة ===== -->
+  <div class="simulation-panel">
+
+    <!-- ================= الفرجار ================= -->
+    <div class="tool-view active" id="view-vernier">
+      <div class="panel-header">
+        <h2>📐 الفرجار (الورنية)</h2>
+        <p>اسحب بالماوس مباشرة على الرسم، أو استخدم الشريط أدناه، لإغلاق الفكّين على الجسم ومشاهدة القراءة.</p>
+      </div>
+
+      <svg id="svgVernier" viewBox="0 0 1050 210" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <div class="reading">
+        <div class="card">
+          <div class="val secondary" id="vMainVal">0</div>
+          <div class="lbl">القراءة الرئيسية (mm)</div>
+        </div>
+        <div class="card">
+          <div class="val secondary" id="vVernVal">0</div>
+          <div class="lbl">تدريج الورنية</div>
+        </div>
+        <div class="card">
+          <div class="val main" id="vTotalVal">0.0</div>
+          <div class="lbl">القياس الكلي (mm)</div>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <span>0</span>
+        <input type="range" id="sliderVernier" min="0" max="60" step="0.1" value="23.4">
+        <span>60 mm</span>
+      </div>
+
+      <div class="obj-select" data-group="vernier">
+        <button data-w="12.3">قطعة صغيرة 12.3 mm</button>
+        <button data-w="23.4" class="active">قطعة متوسطة 23.4 mm</button>
+        <button data-w="41.7">قطعة كبيرة 41.7 mm</button>
+      </div>
+
+      <div class="hint">💡 اضغط واسحب على الجسم أو أي مكان في الرسم لتحريك الفك مباشرة</div>
+
+      <div class="legend">
+        <span><span class="dot" style="background:#c98a3f;color:#c98a3f"></span> الفك المتحرك</span>
+        <span><span class="dot" style="background:#ffb347;color:#ffb347"></span> خط الورنية المنطبق</span>
+        <span><span class="dot" style="background:#2f6f8f;color:#2f6f8f"></span> الجسم المقاس</span>
+      </div>
+    </div>
+
+    <!-- ================= الميكرومتر ================= -->
+    <div class="tool-view" id="view-micrometer">
+      <div class="panel-header">
+        <h2>🔬 الميكرومتر</h2>
+        <p>اسحب بالماوس على الرسم أو استخدم الشريط لإدارة الأسطوانة، وتابع كيف يتحدد القياس من قراءة الجلبة الرئيسية + قراءة الجلبة الدوارة عند خط الفهرس.</p>
+      </div>
+
+      <svg id="svgMicrometer" viewBox="0 0 840 430" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <div class="reading">
+        <div class="card">
+          <div class="val secondary" id="mSleeveVal">0.0</div>
+          <div class="lbl">قراءة الجلبة الرئيسية (mm)</div>
+        </div>
+        <div class="card">
+          <div class="val secondary" id="mThimbleVal">0</div>
+          <div class="lbl">قراءة الجلبة الدوارة</div>
+        </div>
+        <div class="card">
+          <div class="val main" id="mTotalVal">0.00</div>
+          <div class="lbl">القياس الكلي (mm)</div>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <span>0</span>
+        <input type="range" id="sliderMicrometer" min="0" max="25" step="0.01" value="12.57">
+        <span>25 mm</span>
+      </div>
+
+      <div class="obj-select" data-group="micrometer">
+        <button data-w="3.24">قطعة رفيعة 3.24 mm</button>
+        <button data-w="12.57" class="active">قطعة متوسطة 12.57 mm</button>
+        <button data-w="21.08">قطعة سميكة 21.08 mm</button>
+      </div>
+
+      <div class="hint">💡 اضغط واسحب في أي مكان على الرسم لتحريك السبّابة (spindle) مباشرة</div>
+
+      <div class="legend">
+        <span><span class="dot" style="background:#4fb3a9;color:#4fb3a9"></span> السبّابة المتحركة</span>
+        <span><span class="dot" style="background:#e0913a;color:#e0913a"></span> خط الفهرس / التطابق</span>
+        <span><span class="dot" style="background:#2f6f8f;color:#2f6f8f"></span> الجسم المقاس</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== بطاقة الصيغ ===== -->
+  <div class="formula-card">
+    <h3>📖 كيف تُقرأ الأداة؟</h3>
+    <div class="formula-list">
+      <div class="formula-item">
+        <code>الفرجار = MSR + (VC × LC)</code>
+        <div>القراءة الرئيسية + (رقم خط الورنية المنطبق × دقة الجهاز 0.1 مم)</div>
+      </div>
+      <div class="formula-item">
+        <code>الميكرومتر = Sleeve + (Thimble × 0.01)</code>
+        <div>قراءة الجلبة الرئيسية + (قراءة الجلبة الدوارة × 0.01 مم)</div>
+      </div>
+      <div class="formula-item">
+        <code>دقة الميكرومتر = 0.01 mm</code>
+        <div>لأن أسطوانة الميكرومتر مقسّمة إلى 50 قسمًا</div>
+      </div>
+      <div class="formula-item">
+        <code>دقة الفرجار = 0.1 mm</code>
+        <div>لأن ورنية الفرجار مقسّمة إلى 10 أقسام</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== الفوتر ===== -->
+  <footer class="page-footer">
+    <p>© 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong></p>
+    <p>📱 0599870176</p>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   0) الوضع الليلي/النهاري
+   ============================================================ */
+(function(){
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    themeToggle.textContent = '☀️';
+  }
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    themeToggle.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+})();
+
+/* ============================================================
+   1) مفتاح التبديل بين الأداتين
+   ============================================================ */
+(function(){
+  const toggle = document.getElementById('toolToggle');
+  const views = {
+    vernier: document.getElementById('view-vernier'),
+    micrometer: document.getElementById('view-micrometer')
+  };
+
+  toggle.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-tool]');
+    if (!btn) return;
+    const tool = btn.dataset.tool;
+
+    [...toggle.children].forEach(b => b.classList.toggle('active', b === btn));
+    Object.entries(views).forEach(([key, el]) => {
+      el.classList.toggle('active', key === tool);
+    });
+  });
+})();
+
+/* ============================================================
+   2) الفرجار (Vernier Caliper)
+   ============================================================ */
+(function(){
+  const PX_PER_MM = 15;
+  const RULER_LEN_MM = 65;
+  const originX = 55, rulerY = 150;
+  const VB_W = 1050, VB_H = 210;
+
+  const svg = document.getElementById('svgVernier');
+  const slider = document.getElementById('sliderVernier');
+  const mainVal = document.getElementById('vMainVal');
+  const vernVal = document.getElementById('vVernVal');
+  const totalVal = document.getElementById('vTotalVal');
+
+  function buildStatic(){
+    let s = '';
+    s += `<line x1="${originX}" y1="${rulerY}" x2="${originX + RULER_LEN_MM * PX_PER_MM}" y2="${rulerY}" stroke="var(--steel-dark)" stroke-width="2.5"/>`;
+    for (let mm = 0; mm <= RULER_LEN_MM; mm++) {
+      const x = originX + mm * PX_PER_MM;
+      const isCm = mm % 10 === 0;
+      const h = isCm ? 26 : (mm % 5 === 0 ? 18 : 11);
+      s += `<line x1="${x}" y1="${rulerY}" x2="${x}" y2="${rulerY - h}" stroke="#c7d0da" stroke-width="${isCm ? 1.6 : 0.9}"/>`;
+      if (isCm) {
+        s += `<text x="${x}" y="${rulerY - 34}" font-size="14" fill="#c7d0da" text-anchor="middle">${mm}</text>`;
+      }
+    }
+    return s;
+  }
+  const staticScale = buildStatic();
+
+  function render(valMM){
+    const vernZeroX = originX + valMM * PX_PER_MM;
+    const mainReading = Math.floor(valMM);
+    const fraction = +(valMM - mainReading).toFixed(2);
+    const vernDiv = Math.round(fraction * 10);
+    const carry = vernDiv === 10 ? 1 : 0;
+    const mainR = mainReading + carry;
+    const vd = carry ? 0 : vernDiv;
+    const total = (mainR + vd * 0.1).toFixed(1);
+
+    mainVal.textContent = mainR;
+    vernVal.textContent = vd;
+    totalVal.textContent = total;
+
+    let s = '';
+
+    // الجسم المقاس — مرفوع فوق المسطرة
+    const objTop = 15, objH = 42, objBottom = objTop + objH;
+    s += `<rect x="${originX + 3}" y="${objTop}" width="${Math.max(valMM * PX_PER_MM - 6, 0)}" height="${objH}"
+             fill="#2f6f8f" stroke="#5fb3d9" stroke-width="1.8" rx="4" opacity="0.9"/>`;
+
+    // ذراعا الفكين
+    const armTop = objBottom - 4;
+    s += `<rect x="${originX - 4}" y="${armTop}" width="8" height="${rulerY - armTop}" fill="#465469"/>`;
+    s += `<rect x="${vernZeroX - 4}" y="${armTop}" width="8" height="${rulerY - armTop}" fill="#c98a3f"/>`;
+
+    // المسطرة الرئيسية
+    s += staticScale;
+
+    // لوحة الورنية
+    s += `<rect x="${vernZeroX - 6}" y="${rulerY + 6}" width="${9 * PX_PER_MM + 12}" height="38" rx="4" fill="#20303f" stroke="#33475a"/>`;
+    for (let i = 0; i <= 10; i++) {
+      const x = vernZeroX + i * (0.9 * PX_PER_MM);
+      const highlight = (i === vd);
+      s += `<line x1="${x}" y1="${rulerY + 9}" x2="${x}" y2="${rulerY + 23}" stroke="${highlight ? '#ffb347' : '#8fa3b8'}" stroke-width="${highlight ? 2.6 : 1.1}"/>`;
+      s += `<text x="${x}" y="${rulerY + 39}" font-size="12" fill="${highlight ? '#ffb347' : '#8fa3b8'}" text-anchor="middle">${i}</text>`;
+    }
+
+    svg.innerHTML = s;
+  }
+
+  function valueFromClientX(clientX){
+    const rect = svg.getBoundingClientRect();
+    const scaleX = VB_W / rect.width;
+    const svgX = (clientX - rect.left) * scaleX;
+    let mm = (svgX - originX) / PX_PER_MM;
+    mm = Math.max(0, Math.min(60, mm));
+    return Math.round(mm * 10) / 10;
+  }
+
+  let dragging = false;
+  svg.addEventListener('pointerdown', e => {
+    dragging = true;
+    svg.setPointerCapture(e.pointerId);
+    const mm = valueFromClientX(e.clientX);
+    slider.value = mm;
+    render(mm);
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const mm = valueFromClientX(e.clientX);
+    slider.value = mm;
+    render(mm);
+  });
+  svg.addEventListener('pointerup', () => dragging = false);
+  svg.addEventListener('pointercancel', () => dragging = false);
+
+  slider.addEventListener('input', () => render(+slider.value));
+
+  document.querySelectorAll('[data-group="vernier"] button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-group="vernier"] button')
+        .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      slider.value = btn.dataset.w;
+      render(+btn.dataset.w);
+    });
+  });
+
+  render(+slider.value);
+})();
+
+/* ============================================================
+   3) الميكرومتر (Micrometer)
+   ============================================================ */
+(function(){
+  const PX_PER_MM = 28;
+  const SLEEVE_LEN_MM = 25;
+  const originX = 55, rulerY = 140;
+  const VB_W = 840, VB_H = 430;
+
+  const svg = document.getElementById('svgMicrometer');
+  const slider = document.getElementById('sliderMicrometer');
+  const sleeveVal = document.getElementById('mSleeveVal');
+  const thimbleVal = document.getElementById('mThimbleVal');
+  const totalVal = document.getElementById('mTotalVal');
+
+  function decompose(value){
+    let v = Math.round(value * 100) / 100;
+    let half = Math.floor(v * 2 + 1e-6) / 2;
+    let frac = Math.round((v - half) * 100);
+    if (frac >= 50) { half += 0.5; frac -= 50; }
+    return { half, frac, total: +(half + frac * 0.01).toFixed(2) };
+  }
+
+  function buildSleeve(thimbleEdgeX){
+    let s = '';
+    const sleeveEndX = originX + SLEEVE_LEN_MM * PX_PER_MM;
+    s += `<line x1="${originX}" y1="${rulerY}" x2="${sleeveEndX}" y2="${rulerY}" stroke="var(--steel-dark)" stroke-width="2.5"/>`;
+
+    for (let mm = 0; mm <= SLEEVE_LEN_MM; mm++) {
+      const x = originX + mm * PX_PER_MM;
+      const isMajor = mm % 5 === 0;
+      const h = isMajor ? 28 : 18;
+      s += `<line x1="${x}" y1="${rulerY}" x2="${x}" y2="${rulerY - h}" stroke="#c7d0da" stroke-width="${isMajor ? 1.6 : 1}"/>`;
+      if (isMajor) {
+        s += `<text x="${x}" y="${rulerY - 34}" font-size="14" fill="#c7d0da" text-anchor="middle">${mm}</text>`;
+      }
+      if (mm < SLEEVE_LEN_MM) {
+        const xh = x + PX_PER_MM / 2;
+        s += `<line x1="${xh}" y1="${rulerY}" x2="${xh}" y2="${rulerY + 12}" stroke="#8fa3b8" stroke-width="1"/>`;
+      }
+    }
+
+    // ظل الأسطوانة الدوارة
+    s += `<rect x="${thimbleEdgeX}" y="${rulerY - 30}" width="${sleeveEndX - thimbleEdgeX + 30}" height="52" rx="10"
+             fill="#3a4756" opacity="0.55"/>`;
+
+    // خط الفهرس
+    s += `<line x1="${thimbleEdgeX}" y1="${rulerY - 36}" x2="${thimbleEdgeX}" y2="${rulerY + 22}" stroke="#4fb3a9" stroke-width="3"/>`;
+
+    return s;
+  }
+
+  function buildThimbleWindow(fracHundredths){
+    const winX = originX + (SLEEVE_LEN_MM * PX_PER_MM) / 2;
+    const winCenterY = rulerY + 150;
+    const winW = 210, winH = 230;
+    const rowSpacing = 19;
+    let s = '';
+
+    s += `<rect x="${winX - winW / 2}" y="${winCenterY - winH / 2}" width="${winW}" height="${winH}" rx="10" fill="#0c141c" stroke="#253141"/>`;
+    s += `<clipPath id="thimbleClip"><rect x="${winX - winW / 2 + 4}" y="${winCenterY - winH / 2 + 4}" width="${winW - 8}" height="${winH - 8}"/></clipPath>`;
+    s += `<g clip-path="url(#thimbleClip)">`;
+
+    for (let i = -6; i <= 6; i++) {
+      const divIndex = ((fracHundredths + i) % 50 + 50) % 50;
+      const y = winCenterY + i * rowSpacing;
+      const highlight = i === 0;
+      const major = divIndex % 5 === 0;
+      const lineLen = major ? 70 : 40;
+      s += `<line x1="${winX - lineLen / 2}" y1="${y}" x2="${winX + lineLen / 2}" y2="${y}" stroke="${highlight ? '#e0913a' : '#8fa3b8'}" stroke-width="${highlight ? 2.8 : 1.3}"/>`;
+      if (major || highlight) {
+        s += `<text x="${winX + lineLen / 2 + 16}" y="${y + 4}" font-size="13" fill="${highlight ? '#e0913a' : '#8fa3b8'}" text-anchor="start">${divIndex}</text>`;
+      }
+    }
+    s += `</g>`;
+
+    // سهم الفهرس
+    s += `<polygon points="${winX - winW / 2 - 14},${winCenterY - 7} ${winX - winW / 2 - 14},${winCenterY + 7} ${winX - winW / 2 - 2},${winCenterY}" fill="#e0913a"/>`;
+
+    return s;
+  }
+
+  function render(valMM){
+    const d = decompose(valMM);
+    sleeveVal.textContent = d.half.toFixed(1);
+    thimbleVal.textContent = d.frac;
+    totalVal.textContent = d.total.toFixed(2);
+
+    const thimbleEdgeX = originX + d.total * PX_PER_MM;
+
+    let s = '';
+
+    // الجسم المقاس
+    const objTop = 15, objH = 40, objBottom = objTop + objH;
+    s += `<rect x="${originX + 3}" y="${objTop}" width="${Math.max(d.total * PX_PER_MM - 6, 0)}" height="${objH}"
+             fill="#2f6f8f" stroke="#5fb3d9" stroke-width="1.8" rx="4" opacity="0.9"/>`;
+
+    // الأذرع
+    const armTop = objBottom - 4;
+    s += `<rect x="${originX - 4}" y="${armTop}" width="8" height="${rulerY - 38 - armTop}" fill="#465469"/>`;
+    s += `<rect x="${thimbleEdgeX - 4}" y="${armTop}" width="8" height="${rulerY - 38 - armTop}" fill="#4fb3a9"/>`;
+
+    s += buildSleeve(thimbleEdgeX);
+    s += buildThimbleWindow(d.frac);
+
+    svg.innerHTML = s;
+  }
+
+  function valueFromClientX(clientX){
+    const rect = svg.getBoundingClientRect();
+    const scaleX = VB_W / rect.width;
+    const svgX = (clientX - rect.left) * scaleX;
+    let mm = (svgX - originX) / PX_PER_MM;
+    mm = Math.max(0, Math.min(SLEEVE_LEN_MM, mm));
+    return Math.round(mm * 100) / 100;
+  }
+
+  let dragging = false;
+  svg.addEventListener('pointerdown', e => {
+    dragging = true;
+    svg.setPointerCapture(e.pointerId);
+    const mm = valueFromClientX(e.clientX);
+    slider.value = mm;
+    render(mm);
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const mm = valueFromClientX(e.clientX);
+    slider.value = mm;
+    render(mm);
+  });
+  svg.addEventListener('pointerup', () => dragging = false);
+  svg.addEventListener('pointercancel', () => dragging = false);
+
+  slider.addEventListener('input', () => render(+slider.value));
+
+  document.querySelectorAll('[data-group="micrometer"] button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-group="micrometer"] button')
+        .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      slider.value = btn.dataset.w;
+      render(+btn.dataset.w);
+    });
+  });
+
+  render(+slider.value);
+})();
+</script>
+</body>
+</html>
