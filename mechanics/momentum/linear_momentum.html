@@ -1,506 +1,1529 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محاكاة الزخم الخطي</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>محاكاة الزخم الخطي والدفع | الأستاذ ماجد شلالدة</title>
 <style>
-:root{
-  --bg:#050505;
-  --panel:#111;
-  --panel2:#171717;
-  --text:#f4f4f4;
-  --muted:#aaa;
-  --accent:#00d9ff;
-  --accent2:#ffcf33;
-  --red:#ff5f6d;
-  --green:#58e68b;
-  --line:#2b2b2b;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  min-height:100vh;
-  font-family:"Segoe UI",Tahoma,Arial,sans-serif;
-  background:radial-gradient(circle at top,#171717 0%,#070707 48%,#000 100%);
-  color:var(--text);
-}
-.wrapper{max-width:1450px;margin:auto;padding:22px}
-header{text-align:center;margin-bottom:18px;padding-top:34px}
-h1{margin:0;font-size:clamp(28px,4vw,46px);font-weight:800}
-.subtitle{color:#bbb;margin:7px 0 0;font-size:clamp(14px,2vw,18px)}
-.author{
-  margin-top:10px;font-size:15px;font-weight:700;color:#ddd;
-}
-.grid{
-  display:grid;
-  grid-template-columns: minmax(300px,390px) 1fr;
-  gap:18px;
-}
-@media(max-width:950px){.grid{grid-template-columns:1fr}}
-.panel{
-  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
-  border:1px solid #292929;border-radius:20px;padding:18px;
-  box-shadow:0 12px 40px rgba(0,0,0,.35);
-}
-.controls h2,.compare h2,.quiz h2{margin:0 0 14px;font-size:20px}
-.sectionTitle{
-  font-weight:800;margin:18px 0 10px;color:#eee;
-  border-right:4px solid var(--accent);padding-right:9px;
-}
-.controlRow{margin:14px 0}
-.labelLine{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px}
-.value{font-weight:800;color:var(--accent)}
-input[type=range]{width:100%;accent-color:var(--accent);cursor:pointer}
-.buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
-button{
-  border:1px solid #333;background:#1a1a1a;color:white;border-radius:12px;
-  padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;
-  transition:.2s;
-}
-button:hover{transform:translateY(-1px);background:#222;border-color:#555}
-.primary{background:#00586b;border-color:#008da8}
-.primary:hover{background:#007089}
-.warn{background:#514100;border-color:#8f7700}
-.modeBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.modeBtns button.active{outline:2px solid var(--accent);background:#0d3138}
-.direction{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.direction button.active{background:#173942;border-color:var(--accent);color:var(--accent)}
-.formula{
-  background:#090909;border:1px solid #282828;border-radius:14px;
-  text-align:center;font-size:29px;font-weight:800;padding:12px;margin-top:14px;
-  letter-spacing:1px
-}
-.formula small{display:block;font-size:12px;color:#999;margin-top:5px;font-weight:400}
-.stats{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:13px
-}
-@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
-.stat{
-  background:#0a0a0a;border:1px solid #292929;border-radius:13px;padding:10px;text-align:center
-}
-.stat span{display:block;color:#999;font-size:12px;margin-bottom:4px}
-.stat strong{font-size:19px}
-.stage{
-  min-height:610px;display:flex;flex-direction:column
-}
-.stageTop{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
-.legend{font-size:12px;color:#aaa}
-canvas{
-  width:100%;height:390px;display:block;border-radius:18px;
-  background:#030303;border:1px solid #232323;
-}
-.bottomInfo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-@media(max-width:800px){.bottomInfo{grid-template-columns:1fr}}
-.infoBox{background:#0a0a0a;border:1px solid #262626;border-radius:14px;padding:14px}
-.infoBox h3{margin:0 0 8px;font-size:16px}
-.infoBox p{margin:4px 0;color:#ccc;line-height:1.65}
-.arrowText{color:var(--accent);font-weight:800}
-.compare{margin-top:18px}
-.compareTable{width:100%;border-collapse:collapse}
-.compareTable th,.compareTable td{border-bottom:1px solid #292929;padding:10px;text-align:center}
-.compareTable th{color:#aaa;font-size:13px}
-.compareTable td{font-weight:700}
-.quiz{margin-top:18px}
-.quizBox{background:#0a0a0a;border:1px solid #292929;border-radius:14px;padding:16px}
-.question{font-size:17px;font-weight:700;line-height:1.6}
-.options{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}
-@media(max-width:650px){.options{grid-template-columns:1fr}}
-.option.correct{border-color:var(--green);background:#0d3b22}
-.option.wrong{border-color:var(--red);background:#40171b}
-.feedback{min-height:26px;margin-top:10px;font-weight:700}
-.tip{
-  margin-top:10px;padding:10px 12px;border-right:4px solid var(--accent2);
-  background:#191500;color:#ddd;border-radius:10px;line-height:1.55;font-size:13px
-}
-.badge{
-  padding:6px 10px;border:1px solid #333;border-radius:999px;background:#0e0e0e;color:#bbb;font-size:12px
-}
-.rangeNote{font-size:12px;color:#888;margin-top:3px}
+  /* ============================================
+     متغيرات المنصة الموحّدة
+     ============================================ */
+  :root{
+    --bg-color:#0b1329;
+    --bg-secondary:#0f1a35;
+    --main-card-bg:#1c2541;
+    --sub-card-bg:#3a506b;
+    --text-color:#ffffff;
+    --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8;
+    --accent-green:#06d6a0;
+    --accent-gold:#ffd166;
+    --accent-purple:#b185ff;
+    --accent-red:#ef476f;
+    --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.3);
+    --shadow-hover:0 12px 30px rgba(247,127,0,0.2);
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --radius-pill:50px;
+    --transition-fast:0.2s ease;
+    --transition-normal:0.3s ease;
 
-/* الهوية البصرية والتنقل */
-.topLogo{position:fixed;top:16px;left:16px;width:88px;height:88px;border-radius:50%;overflow:hidden;z-index:20;background:#fff;border:3px solid #c9a962;box-shadow:0 8px 28px rgba(0,0,0,.45)}
-.topLogo img{width:100%;height:100%;object-fit:cover;display:block}
-.navButtons{position:fixed;top:16px;right:16px;z-index:30;display:flex;gap:8px;direction:rtl}
-.navButtons a{display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;color:#fff;background:rgba(17,17,17,.94);border:1px solid #3b3b3b;border-radius:12px;padding:10px 13px;font-size:13px;font-weight:800;box-shadow:0 8px 25px rgba(0,0,0,.32);transition:.2s}
-.navButtons a:hover{transform:translateY(-1px);background:#222;border-color:#c9a962}
-.navButtons .homeBtn{border-color:#c9a962}
-.phoneTag{display:inline-flex;align-items:center;gap:7px;margin-top:8px;color:#ddd;font-size:15px;font-weight:800}
-.phoneTag span{direction:ltr;unicode-bidi:embed;color:#c9a962}
-@media(max-width:700px){
-  .topLogo{width:66px;height:66px;top:10px;left:10px}
-  .navButtons{top:10px;right:10px;gap:5px}
-  .navButtons a{padding:8px 9px;font-size:11px}
-  header{padding-top:65px}
-  .phoneTag{font-size:12px;flex-direction:column;gap:2px}
-}
+    --car-a:#38bdf8;
+    --car-b:#fb7185;
+  }
+
+  body.light-mode{
+    --bg-color:#f0f4f8;
+    --bg-secondary:#e2e8f0;
+    --main-card-bg:#ffffff;
+    --sub-card-bg:#e8eef5;
+    --text-color:#1a202c;
+    --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+    --shadow-hover:0 12px 30px rgba(247,127,0,0.2);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    color:var(--text-color);
+    background-color:var(--bg-color);
+    font-family:'Segoe UI',system-ui,-apple-system,'Tahoma',sans-serif;
+    line-height:1.6;
+    transition:background-color var(--transition-normal), color var(--transition-normal);
+    position:relative;
+  }
+
+  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg-color);}
+  ::-webkit-scrollbar-thumb{background:var(--sub-card-bg);border-radius:5px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--accent-orange);}
+
+  /* ============ العلامة المائية ============ */
+  .watermark-overlay{
+    position:fixed;inset:0;
+    background-image:url('../../logo.png');
+    background-size:180px;
+    background-repeat:repeat;
+    opacity:0.025;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ============ شريط التنقل ============ */
+  .navbar{
+    position:sticky;top:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);
+    transition:background var(--transition-normal);
+  }
+  body.light-mode .navbar{background:rgba(255,255,255,0.92);}
+
+  .nav-brand{
+    font-size:1.1rem;font-weight:bold;
+    color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;
+  }
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{
+    color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:var(--radius-sm);
+    font-size:0.9rem;
+    transition:background var(--transition-fast),color var(--transition-fast);
+  }
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+
+  .theme-toggle{
+    background:transparent;
+    border:1px solid var(--border-soft);
+    color:var(--text-color);
+    font-size:1.2rem;
+    width:40px;height:40px;border-radius:50%;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform var(--transition-fast),background var(--transition-fast);
+  }
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  /* ============ الحاوية ============ */
+  .container{
+    max-width:1400px;margin:0 auto;padding:20px;
+    position:relative;z-index:1;
+  }
+
+  /* ============ Breadcrumb ============ */
+  .breadcrumb{
+    display:flex;align-items:center;gap:8px;
+    padding:12px 0;font-size:0.9rem;
+    color:var(--text-muted);flex-wrap:wrap;
+  }
+  .breadcrumb a{
+    color:var(--accent-orange);text-decoration:none;
+    transition:color var(--transition-fast);
+  }
+  .breadcrumb a:hover{color:var(--accent-cyan);}
+  .breadcrumb .separator{opacity:0.5;}
+  .breadcrumb .current{color:var(--text-color);font-weight:bold;}
+
+  /* ============================================
+     الهيدر + الشعار الدائري
+     ============================================ */
+  header.page-header{
+    text-align:center;
+    padding:30px 20px 40px;
+  }
+
+  header.page-header h1{
+    font-size:2.4rem;
+    color:var(--accent-orange);
+    margin:0 0 10px 0;
+    line-height:1.3;
+  }
+
+  header.page-header .subtitle{
+    color:var(--text-muted);
+    font-size:1.05rem;
+    margin:0 auto 28px;
+    max-width:680px;
+  }
+
+  /* ---- الشعار الدائري ---- */
+  .logo-circle{
+    width:130px;
+    height:130px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    padding:4px;
+    background:linear-gradient(135deg, var(--accent-orange), var(--accent-cyan));
+    box-shadow:
+      0 0 0 3px var(--main-card-bg),
+      0 0 30px rgba(247,127,0,0.35),
+      0 10px 30px rgba(0,0,0,0.4);
+    position:relative;
+    transition:transform 0.3s ease, box-shadow 0.3s ease;
+    z-index:1;
+  }
+
+  /* حلقة متوهجة تدور ببطء */
+  .logo-circle::before{
+    content:'';
+    position:absolute;
+    inset:-8px;
+    border-radius:50%;
+    background:conic-gradient(
+      from 0deg,
+      var(--accent-orange),
+      var(--accent-cyan),
+      var(--accent-gold),
+      var(--accent-orange)
+    );
+    z-index:-1;
+    animation:rotateRing 10s linear infinite;
+    opacity:0.75;
+    filter:blur(2px);
+  }
+
+  @keyframes rotateRing{
+    to { transform: rotate(360deg); }
+  }
+
+  .logo-circle img{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    object-fit:cover;
+    background:#fff;
+    display:block;
+    position:relative;
+    z-index:1;
+  }
+
+  .logo-circle:hover{
+    transform:scale(1.06);
+    box-shadow:
+      0 0 0 3px var(--main-card-bg),
+      0 0 45px rgba(247,127,0,0.6),
+      0 15px 40px rgba(0,0,0,0.5);
+  }
+
+  /* ---- معلومات الأستاذ أسفل الشعار ---- */
+  .teacher-info{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    margin-top:16px;
+  }
+
+  .teacher-name{
+    color:var(--accent-gold);
+    font-weight:700;
+    font-size:1.15rem;
+    letter-spacing:0.2px;
+  }
+
+  .teacher-phone{
+    color:var(--text-muted);
+    font-size:0.95rem;
+    font-family:'Courier New', monospace;
+    direction:ltr;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 16px;
+    border-radius:20px;
+    background:var(--sub-card-bg);
+    border:1px solid var(--border-soft);
+    transition:background var(--transition-fast);
+  }
+
+  .teacher-phone:hover{
+    background:var(--accent-orange);
+    color:#000;
+  }
+
+  /* ============ شريط المعادلة ============ */
+  .banner{
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    padding:14px 18px;margin-bottom:14px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    font-size:14px;transition:border-color .3s,box-shadow .3s;
+  }
+  .banner.gold{
+    border-color:var(--accent-gold);
+    box-shadow:0 0 24px rgba(255,209,102,0.15);
+  }
+  .banner .tag{
+    background:rgba(0,180,216,0.15);
+    color:var(--accent-cyan);
+    border:1px solid rgba(0,180,216,0.35);
+    padding:5px 12px;border-radius:var(--radius-pill);
+    font-size:12px;font-weight:700;
+  }
+  .banner.gold .tag{
+    background:rgba(255,209,102,0.15);
+    color:var(--accent-gold);
+    border-color:rgba(255,209,102,0.4);
+  }
+  .banner .eq{
+    font-family:'Courier New',monospace;
+    color:var(--text-color);font-size:14px;font-weight:600;
+  }
+  .banner .eq b{color:var(--accent-cyan);}
+  .banner.gold .eq b{color:var(--accent-gold);}
+
+  /* ============ مفتاح الوضع ============ */
+  .mode-toggle{
+    display:inline-flex;
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-md);
+    padding:5px;gap:4px;margin:0 0 14px;
+  }
+  .mode-toggle button{
+    font:inherit;font-weight:700;font-size:0.9rem;
+    padding:10px 22px;border-radius:9px;
+    border:none;background:transparent;
+    color:var(--text-muted);cursor:pointer;
+    transition:all .2s;white-space:nowrap;
+  }
+  .mode-toggle button:hover{color:var(--text-color);background:var(--sub-card-bg);}
+  .mode-toggle button.active[data-mode="force"]{
+    background:linear-gradient(180deg,var(--accent-cyan),#0284c7);
+    color:#fff;
+    box-shadow:0 4px 14px rgba(0,180,216,0.4);
+  }
+  .mode-toggle button.active[data-mode="time"]{
+    background:linear-gradient(180deg,var(--accent-gold),#eab308);
+    color:#000;
+    box-shadow:0 4px 14px rgba(255,209,102,0.45);
+  }
+
+  /* ============ المسرح (الكانفس) ============ */
+  .stage{
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    height:clamp(340px,55vh,520px);
+    box-shadow:var(--shadow-soft);
+  }
+  canvas{display:block;width:100%;height:100%;}
+
+  /* ============ لوحة الزمن ============ */
+  .time-panel{
+    margin-top:14px;
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    padding:16px 18px;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:16px;align-items:center;
+    box-shadow:var(--shadow-soft);
+    transition:box-shadow .3s,border-color .3s;
+  }
+  .time-panel.frozen{
+    border-color:var(--accent-gold);
+    box-shadow:0 0 0 1px rgba(255,209,102,0.35),
+               0 0 34px rgba(255,209,102,0.1) inset;
+  }
+  .time-display{
+    display:flex;align-items:baseline;gap:7px;
+    font-variant-numeric:tabular-nums;
+  }
+  .time-display .lbl{font-size:12px;color:var(--text-muted);font-weight:600;}
+  .time-display .val{
+    font-size:30px;font-weight:800;color:var(--accent-cyan);
+    min-width:86px;text-align:center;letter-spacing:-1px;
+    transition:color .25s,text-shadow .25s;
+  }
+  .time-display.frozen .val{
+    color:var(--accent-gold);
+    text-shadow:0 0 18px rgba(255,209,102,0.45);
+  }
+  .time-display .unit{
+    font-size:13px;color:var(--text-muted);
+    direction:ltr;font-family:'Courier New',monospace;
+  }
+  .time-slider{position:relative;width:100%;}
+  .time-slider input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    width:100%;height:8px;border-radius:99px;
+    background:var(--sub-card-bg);outline:none;
+    direction:ltr;cursor:pointer;
+  }
+  .time-slider input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+    background:var(--accent-cyan);border:3px solid var(--main-card-bg);
+    cursor:grab;
+    box-shadow:0 0 0 1px var(--accent-cyan),0 0 14px var(--accent-cyan);
+    transition:background .25s,box-shadow .25s;
+  }
+  .time-slider input[type=range]::-moz-range-thumb{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--accent-cyan);
+    border:3px solid var(--main-card-bg);cursor:grab;
+  }
+  .time-slider.frozen input[type=range]::-webkit-slider-thumb{
+    background:var(--accent-gold);
+    box-shadow:0 0 0 1px var(--accent-gold),0 0 18px var(--accent-gold);
+  }
+  .time-slider.frozen input[type=range]::-moz-range-thumb{
+    background:var(--accent-gold);
+  }
+  .time-markers{position:absolute;inset:0;pointer-events:none;}
+  .time-markers i{
+    position:absolute;top:50%;transform:translate(-50%,-50%);
+    width:3px;height:16px;border-radius:2px;
+    box-shadow:0 0 8px currentColor;
+  }
+  .time-buttons{display:flex;gap:6px;flex-wrap:wrap;}
+  .time-buttons button{
+    font:inherit;font-weight:700;font-size:12px;
+    padding:8px 13px;border-radius:9px;
+    border:1px solid var(--border-soft);
+    background:var(--sub-card-bg);
+    color:var(--text-color);cursor:pointer;
+    transition:.15s;white-space:nowrap;
+  }
+  .time-buttons button:hover{
+    background:var(--accent-orange);color:#000;
+  }
+  #btnFreeze{
+    border-color:var(--accent-cyan);
+    color:var(--accent-cyan);
+    min-width:118px;
+  }
+  #btnFreeze.active{
+    background:linear-gradient(180deg,var(--accent-gold),#eab308);
+    color:#000;border-color:var(--accent-gold);
+    box-shadow:0 0 16px rgba(255,209,102,0.4);
+  }
+
+  /* ============ شبكة التحكم ============ */
+  .controls{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:12px;margin-top:14px;
+  }
+  .ctrl{
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-md);
+    padding:12px 14px 16px;
+    transition:border-color .25s,background .25s;
+    box-shadow:var(--shadow-soft);
+  }
+  .ctrl label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:13px;color:var(--text-muted);
+    margin-bottom:8px;gap:8px;
+  }
+  .ctrl output{
+    color:var(--text-color);font-weight:700;font-size:14px;
+    direction:ltr;display:inline-block;
+  }
+  .ctrl .unit{
+    font-size:11.5px;color:var(--text-muted);
+    direction:ltr;display:inline-block;
+    font-family:'Courier New',monospace;
+  }
+  .ctrl.highlight{
+    border-color:var(--accent-gold);
+    box-shadow:0 0 22px rgba(255,209,102,0.08) inset;
+  }
+  .ctrl.highlight label{color:var(--accent-gold);}
+  .ctrl.highlight output{color:var(--accent-gold);font-size:15px;}
+  .ctrl.highlight input[type=range]::-webkit-slider-thumb{
+    background:var(--accent-gold);
+    box-shadow:0 0 0 1px var(--accent-gold),0 0 12px var(--accent-gold);
+  }
+  .ctrl.highlight input[type=range]::-moz-range-thumb{background:var(--accent-gold);}
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    width:100%;height:6px;border-radius:99px;
+    background:var(--sub-card-bg);outline:none;direction:ltr;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--c,var(--accent-orange));
+    border:3px solid var(--main-card-bg);
+    cursor:pointer;
+    box-shadow:0 0 0 1px var(--c,var(--accent-orange));
+  }
+  input[type=range]::-moz-range-thumb{
+    width:14px;height:14px;border-radius:50%;
+    background:var(--c,var(--accent-orange));
+    border:3px solid var(--main-card-bg);
+    cursor:pointer;
+  }
+
+  .buttons{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .buttons button{
+    font:inherit;font-weight:700;font-size:0.95rem;
+    padding:12px 26px;border-radius:var(--radius-md);
+    border:1px solid var(--border-soft);
+    background:var(--sub-card-bg);
+    color:var(--text-color);cursor:pointer;
+    transition:.15s;
+  }
+  .buttons button:hover{
+    background:var(--accent-orange);color:#000;
+  }
+  .buttons button.primary{
+    background:linear-gradient(180deg,var(--accent-green),#059669);
+    border-color:var(--accent-green);
+    color:#000;
+  }
+  .buttons button.primary:hover{filter:brightness(1.1);}
+
+  /* ============ البطاقات ============ */
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:12px;margin-top:16px;
+  }
+  .card{
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    padding:14px 16px;
+    border-top:3px solid var(--c);
+    position:relative;overflow:hidden;
+    box-shadow:var(--shadow-soft);
+  }
+  .card-head{
+    display:flex;align-items:center;gap:8px;
+    font-weight:700;margin-bottom:10px;
+  }
+  .card-head .letter{
+    width:26px;height:26px;border-radius:8px;
+    background:var(--c);color:#000;font-weight:800;font-size:14px;
+    display:inline-flex;align-items:center;justify-content:center;
+    box-shadow:0 0 12px var(--c);
+  }
+  .card .grid{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:8px 12px;position:relative;z-index:1;
+  }
+  .kv{
+    display:flex;flex-direction:column;gap:2px;
+    font-size:12px;color:var(--text-muted);
+    padding:6px 8px;border-radius:9px;
+    transition:background .25s,box-shadow .25s;
+  }
+  .kv b{
+    font-size:14px;color:var(--text-color);
+    font-variant-numeric:tabular-nums;
+    direction:ltr;text-align:left;
+  }
+  .kv .k{
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .kv.hl{
+    background:rgba(255,209,102,0.1);
+    box-shadow:inset 0 0 0 1px rgba(255,209,102,0.3);
+  }
+  .kv.hl b{color:var(--accent-gold);font-weight:800;}
+  .kv.hl .badge{
+    display:inline-block;font-size:9.5px;font-weight:800;
+    background:var(--accent-gold);color:#000;
+    padding:1px 6px;border-radius:99px;
+    margin-inline-start:5px;vertical-align:middle;
+  }
+  .kv.fixed b{color:var(--accent-gold);}
+  .bar-row{margin-top:11px;position:relative;z-index:1;}
+  .bar-lbl{
+    font-size:11px;color:var(--text-muted);margin-bottom:4px;
+    display:flex;justify-content:space-between;
+  }
+  .bar-lbl span:last-child{
+    direction:ltr;font-family:'Courier New',monospace;
+  }
+  .bar{
+    height:9px;border-radius:99px;
+    background:var(--sub-card-bg);overflow:hidden;
+  }
+  .bar i{
+    display:block;height:100%;width:0;
+    background:var(--c);border-radius:99px;
+    transition:width .22s;
+  }
+
+  /* ============ جدول الملخص ============ */
+  .summary{
+    margin-top:16px;
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    padding:6px 0;overflow:hidden;
+    box-shadow:var(--shadow-soft);
+  }
+  .summary table{
+    width:100%;border-collapse:collapse;font-size:13.5px;
+  }
+  .summary th,.summary td{
+    padding:11px 16px;text-align:center;
+    font-variant-numeric:tabular-nums;direction:ltr;
+    color:var(--text-color);
+  }
+  .summary td:first-child,.summary th:first-child{
+    text-align:right;padding-right:18px;direction:rtl;
+  }
+  .summary thead th{
+    color:var(--text-muted);font-weight:600;font-size:12px;
+    border-bottom:1px solid var(--border-soft);
+    background:var(--sub-card-bg);
+  }
+  .summary tbody tr+tr{border-top:1px solid var(--border-soft);}
+  .summary .a{color:var(--car-a);font-weight:800;font-size:15px;}
+  .summary .b{color:var(--car-b);font-weight:800;font-size:15px;}
+  .summary th.hl{
+    color:var(--accent-gold);background:rgba(255,209,102,0.1);
+  }
+  .summary td.hl{
+    color:var(--accent-gold);font-weight:800;
+    background:rgba(255,209,102,0.05);
+  }
+  .summary .verdict{
+    background:rgba(255,209,102,0.08);
+    border-top:1px solid rgba(255,209,102,0.25) !important;
+    color:var(--accent-gold);font-weight:600;font-size:13px;
+    text-align:right !important;direction:rtl !important;
+    padding:14px 18px !important;line-height:1.9;
+  }
+
+  /* ============ صيغ المعادلات ============ */
+  .formulas{
+    margin-top:16px;
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-lg);
+    padding:14px 18px;
+    font-size:13.5px;color:var(--text-muted);
+    line-height:2.1;display:flex;
+    flex-wrap:wrap;gap:8px 26px;
+  }
+  .formulas b{color:var(--accent-cyan);font-weight:600;}
+  .formulas code{
+    font-family:'Courier New',monospace;
+    color:var(--text-color);
+    background:var(--sub-card-bg);
+    padding:2px 7px;border-radius:6px;
+    direction:ltr;display:inline-block;font-size:12.5px;
+  }
+
+  /* ============ الفوتر ============ */
+  footer.page-footer{
+    text-align:center;padding:30px 20px;
+    color:var(--text-muted);font-size:0.88rem;
+    border-top:1px solid var(--border-soft);
+    margin-top:30px;
+  }
+  footer.page-footer strong{color:var(--accent-orange);}
+
+  /* ============ التجاوب ============ */
+  @media (max-width:960px){
+    .time-panel{grid-template-columns:1fr;gap:12px;}
+    .time-buttons{justify-content:center;}
+    .time-display{justify-content:center;}
+  }
+  @media (max-width:768px){
+    header.page-header{padding:20px 15px 30px;}
+    header.page-header h1{font-size:1.7rem;}
+    header.page-header .subtitle{font-size:0.95rem;}
+    .logo-circle{width:105px;height:105px;}
+    .teacher-name{font-size:1rem;}
+    .navbar{padding:10px 15px;flex-wrap:wrap;gap:10px;}
+    .nav-links{order:3;width:100%;justify-content:center;}
+    .nav-links a{padding:6px 10px;font-size:0.82rem;}
+    .container{padding:14px;}
+    .mode-toggle{width:100%;justify-content:center;}
+    .mode-toggle button{padding:8px 14px;font-size:0.82rem;}
+  }
+  @media (max-width:480px){
+    .nav-brand span{display:none;}
+    header.page-header h1{font-size:1.4rem;}
+    .logo-circle{width:90px;height:90px;}
+    .summary th,.summary td{padding:8px 6px;font-size:11px;}
+    .summary td:first-child,.summary th:first-child{padding-right:10px;}
+  }
 </style>
 </head>
 <body>
-<div class="topLogo" title="شعار الإبداع في الفيزياء">
-  <img src="logo.png" alt="شعار الإبداع في الفيزياء">
-</div>
-<div class="navButtons">
-  <a class="homeBtn" href="../../index.html" title="العودة إلى الصفحة الرئيسية">⌂ الصفحة الرئيسية</a>
-  <a href="momentum.html" title="العودة إلى صفحة الزخم الخطي">↩ الزخم الخطي</a>
-</div>
-<div class="wrapper">
-<header>
-  <h1>محاكاة الزخم الخطي</h1>
-  <div class="subtitle">اكتشف كيف تؤثر الكتلة والسرعة واتجاه الحركة في الزخم</div>
-  <div class="author">إعداد وتطوير الأستاذ ماجد شلالده <span class="phoneTag">📱 <span>0599870176</span></span></div>
-</header>
 
-<div class="grid">
-  <aside class="panel controls">
-    <h2>لوحة التحكم</h2>
+<!-- ===== العلامة المائية ===== -->
+<div class="watermark-overlay"></div>
 
-    <div class="sectionTitle">اختيار التجربة</div>
-    <div class="modeBtns">
-      <button id="singleMode" class="active">جسم واحد</button>
-      <button id="compareMode">مقارنة جسمين</button>
-    </div>
-
-    <div class="sectionTitle">الجسم A</div>
-
-    <div class="controlRow">
-      <div class="labelLine"><span>الكتلة m</span><span id="mAVal" class="value">2.0 kg</span></div>
-      <input id="mA" type="range" min="0.5" max="10" step="0.5" value="2">
-      <div class="rangeNote">من 0.5 إلى 10 kg</div>
-    </div>
-
-    <div class="controlRow">
-      <div class="labelLine"><span>مقدار السرعة |v|</span><span id="vAVal" class="value">4.0 m/s</span></div>
-      <input id="vA" type="range" min="0" max="10" step="0.5" value="4">
-      <div class="rangeNote">من 0 إلى 10 m/s</div>
-    </div>
-
-    <div class="controlRow">
-      <div class="labelLine"><span>اتجاه الحركة</span><span id="dirAVal" class="value">يمين →</span></div>
-      <div class="direction">
-        <button id="rightA" class="active">يمين →</button>
-        <button id="leftA">← يسار</button>
-      </div>
-    </div>
-
-    <div id="bControls" style="display:none">
-      <div class="sectionTitle">الجسم B</div>
-      <div class="controlRow">
-        <div class="labelLine"><span>الكتلة m</span><span id="mBVal" class="value">4.0 kg</span></div>
-        <input id="mB" type="range" min="0.5" max="10" step="0.5" value="4">
-      </div>
-      <div class="controlRow">
-        <div class="labelLine"><span>مقدار السرعة |v|</span><span id="vBVal" class="value">2.0 m/s</span></div>
-        <input id="vB" type="range" min="0" max="10" step="0.5" value="2">
-      </div>
-      <div class="controlRow">
-        <div class="labelLine"><span>اتجاه الحركة</span><span id="dirBVal" class="value">← يسار</span></div>
-        <div class="direction">
-          <button id="rightB">يمين →</button>
-          <button id="leftB" class="active">← يسار</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="buttons">
-      <button id="play" class="primary">▶ تشغيل الحركة</button>
-      <button id="reset">↻ إعادة الضبط</button>
-      <button id="reverse" class="warn">⇄ عكس الاتجاه</button>
-    </div>
-
-    <div class="formula">
-      p = mv
-      <small>الزخم الخطي = الكتلة × السرعة المتجهة</small>
-    </div>
-
-    <div class="stats" id="singleStats">
-      <div class="stat"><span>الكتلة</span><strong id="sMass">2 kg</strong></div>
-      <div class="stat"><span>السرعة</span><strong id="sVel">+4 m/s</strong></div>
-      <div class="stat"><span>الزخم</span><strong id="sMomentum">+8 kg·m/s</strong></div>
-      <div class="stat"><span>الاتجاه</span><strong id="sDir">→</strong></div>
-    </div>
-
-    <div id="compareStats" class="stats" style="display:none">
-      <div class="stat"><span>pA</span><strong id="pA">+8</strong></div>
-      <div class="stat"><span>pB</span><strong id="pB">−8</strong></div>
-      <div class="stat"><span>Σp</span><strong id="pTotal">0</strong></div>
-      <div class="stat"><span>وحدة الزخم</span><strong>kg·m/s</strong></div>
-    </div>
-
-    <div class="tip">
-      <b>فكرة تعليمية:</b> غيّر المتغير واحدًا في كل مرة. لاحظ أن مضاعفة الكتلة أو السرعة تؤدي إلى مضاعفة مقدار الزخم مع ثبات المتغير الآخر.
-    </div>
-  </aside>
-
-  <main class="panel stage">
-    <div class="stageTop">
-      <span class="badge" id="modeBadge">تجربة جسم واحد</span>
-      <span class="legend">السهم الأزرق يمثل متجه الزخم</span>
-    </div>
-    <canvas id="scene" width="1100" height="390"></canvas>
-
-    <div class="bottomInfo">
-      <div class="infoBox">
-        <h3>ماذا نلاحظ؟</h3>
-        <p id="observation">كلما زادت الكتلة أو السرعة زاد مقدار الزخم.</p>
-      </div>
-      <div class="infoBox">
-        <h3>قاعدة أساسية</h3>
-        <p>الزخم <b>كمية متجهة</b>، لذلك يتبع اتجاهه اتجاه سرعة الجسم.</p>
-        <p>عند اختيار اليمين تكون الإشارة <span class="arrowText">موجبة</span>، وعند اختيار اليسار تكون <span class="arrowText">سالبة</span>.</p>
-      </div>
-    </div>
-  </main>
-</div>
-
-<section class="panel compare" id="compareSection" style="display:none">
-  <h2>مقارنة مباشرة بين الجسمين</h2>
-  <table class="compareTable">
-    <thead><tr><th>الكمية</th><th>الجسم A</th><th>الجسم B</th><th>الملاحظة</th></tr></thead>
-    <tbody>
-      <tr><td>الكتلة</td><td id="tMA">2 kg</td><td id="tMB">4 kg</td><td id="tMassNote">—</td></tr>
-      <tr><td>السرعة المتجهة</td><td id="tVA">+4 m/s</td><td id="tVB">−2 m/s</td><td>الاتجاهان مختلفان</td></tr>
-      <tr><td>الزخم</td><td id="tPA">+8</td><td id="tPB">−8</td><td id="tPNote">متساويان في المقدار</td></tr>
-    </tbody>
-  </table>
-</section>
-
-<section class="panel quiz">
-  <h2>اختبر فهمك</h2>
-  <div class="quizBox">
-    <div class="question" id="question"></div>
-    <div class="options" id="options"></div>
-    <div class="feedback" id="feedback"></div>
-    <button id="newQuestion">سؤال جديد</button>
+<!-- ===== شريط التنقل ===== -->
+<nav class="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
   </div>
-</section>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+</nav>
+
+<div class="container">
+
+  <!-- ===== Breadcrumb ===== -->
+  <div class="breadcrumb">
+    <a href="../../index.html">🏠 الرئيسية</a>
+    <span class="separator">›</span>
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <span class="separator">›</span>
+    <a href="momentum.html">🎯 الزخم الخطي والدفع</a>
+    <span class="separator">›</span>
+    <span class="current">📊 محاكاة الزخم الخطي</span>
+  </div>
+
+  <!-- ===== الهيدر + الشعار الدائري ===== -->
+  <header class="page-header">
+    <h1>📊 محاكاة الزخم الخطي</h1>
+    <p class="subtitle">ممانعة الجسم المتحرك للإيقاف — قارن بين عربتين بزخمين مختلفين</p>
+
+    <div class="logo-circle">
+      <img src="../../logo.png" alt="شعار الأستاذ ماجد شلالدة"
+           onerror="this.parentElement.style.display='none'">
+    </div>
+
+    <div class="teacher-info">
+      <span class="teacher-name">إعداد الأستاذ: ماجد شلالدة</span>
+      <span class="teacher-phone">📱 0599870176</span>
+    </div>
+  </header>
+
+  <!-- مفتاح الوضع -->
+  <div class="mode-toggle" id="modeToggle">
+    <button data-mode="force" class="active">🎯 تثبيت القوة F</button>
+    <button data-mode="time">⏱ تثبيت الزمن T</button>
+  </div>
+
+  <!-- شريط المعادلة -->
+  <div class="banner" id="banner">
+    <span class="tag" id="bannerTag">الوضع الحالي</span>
+    <span class="eq" id="bannerEq"></span>
+  </div>
+
+  <!-- المسرح -->
+  <div class="stage"><canvas id="cv"></canvas></div>
+
+  <!-- لوحة الزمن -->
+  <div class="time-panel" id="timePanel">
+    <div class="time-display" id="tDisplay">
+      <span class="lbl">الزمن</span>
+      <span class="val" id="tVal">0.00</span>
+      <span class="unit">s</span>
+    </div>
+    <div class="time-slider" id="tSliderWrap">
+      <input type="range" id="sTime" min="0" max="10" step="0.01" value="0">
+      <div class="time-markers" id="tMarkers"></div>
+    </div>
+    <div class="time-buttons">
+      <button id="btnStepBack" title="خطوة للخلف (←)">◀ −0.1</button>
+      <button id="btnFreeze" title="تثبيت الزمن (F)">❄ تثبيت الزمن</button>
+      <button id="btnStepFwd" title="خطوة للأمام (→)">+0.1 ▶</button>
+    </div>
+  </div>
+
+  <!-- شبكة التحكم -->
+  <div class="controls">
+    <div class="ctrl highlight" id="ctrlFixed">
+      <label>
+        <span id="lblFixed">قوة الإيقاف F</span>
+        <span><output id="oFixed">6</output> <span class="unit" id="unitFixed">N</span></span>
+      </label>
+      <input type="range" id="sFixed">
+    </div>
+    <div class="ctrl" style="--c:var(--car-a)">
+      <label>كتلة العربة A <span><output id="oAm">2</output> <span class="unit">kg</span></span></label>
+      <input type="range" id="sAm" min="1" max="6" step="0.5" value="2">
+    </div>
+    <div class="ctrl" style="--c:var(--car-a)">
+      <label>سرعة العربة A <span><output id="oAv">4</output> <span class="unit">m/s</span></span></label>
+      <input type="range" id="sAv" min="1" max="6" step="0.5" value="4">
+    </div>
+    <div class="ctrl" style="--c:var(--car-b)">
+      <label>كتلة العربة B <span><output id="oBm">4</output> <span class="unit">kg</span></span></label>
+      <input type="range" id="sBm" min="1" max="6" step="0.5" value="4">
+    </div>
+    <div class="ctrl" style="--c:var(--car-b)">
+      <label>سرعة العربة B <span><output id="oBv">4</output> <span class="unit">m/s</span></span></label>
+      <input type="range" id="sBv" min="1" max="6" step="0.5" value="4">
+    </div>
+    <div class="ctrl" style="--c:var(--accent-purple)">
+      <label>سرعة العرض <span><output id="oTs">1</output> <span class="unit">×</span></span></label>
+      <input type="range" id="sTs" min="0.25" max="4" step="0.25" value="1">
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button id="btnPlay" class="primary">▶ تشغيل</button>
+    <button id="btnReset">↺ إعادة</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+  <div class="summary" id="summary"></div>
+
+  <div class="formulas">
+    <span><b>p = m·v</b> <code>kg·m/s</code></span>
+    <span><b>F·T = Δp</b> <code>N·s = kg·m/s</code></span>
+    <span><b>وضع القوة الثابتة:</b> <code>t = p / F</code></span>
+    <span><b>وضع الزمن الثابت:</b> <code>F = p / T</code></span>
+  </div>
+
+  <!-- ===== الفوتر ===== -->
+  <footer class="page-footer">
+    <p>© 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong></p>
+    <p>📱 0599870176</p>
+  </footer>
 </div>
 
 <script>
-const canvas = document.getElementById("scene");
-const ctx = canvas.getContext("2d");
-
-const els = {
-  mA:document.getElementById("mA"), vA:document.getElementById("vA"),
-  mB:document.getElementById("mB"), vB:document.getElementById("vB"),
-  mAVal:document.getElementById("mAVal"), vAVal:document.getElementById("vAVal"),
-  mBVal:document.getElementById("mBVal"), vBVal:document.getElementById("vBVal"),
-  dirAVal:document.getElementById("dirAVal"), dirBVal:document.getElementById("dirBVal"),
-  sMass:document.getElementById("sMass"), sVel:document.getElementById("sVel"),
-  sMomentum:document.getElementById("sMomentum"), sDir:document.getElementById("sDir"),
-  pA:document.getElementById("pA"), pB:document.getElementById("pB"), pTotal:document.getElementById("pTotal"),
-  observation:document.getElementById("observation")
-};
-
-let mode = "single";
-let dirA = 1, dirB = -1;
-let running = false;
-let lastTime = 0;
-let xA = 300, xB = 800;
-
-function n(id){ return parseFloat(els[id].value); }
-function signed(v){ return (v>=0?"+":"−") + Math.abs(v).toFixed(1); }
-
-function momentumA(){ return n("mA") * n("vA") * dirA; }
-function momentumB(){ return n("mB") * n("vB") * dirB; }
-
-function updateUI(){
-  const mA=n("mA"), vA=n("vA"), mB=n("mB"), vB=n("vB");
-  els.mAVal.textContent=mA.toFixed(1)+" kg";
-  els.vAVal.textContent=vA.toFixed(1)+" m/s";
-  els.mBVal.textContent=mB.toFixed(1)+" kg";
-  els.vBVal.textContent=vB.toFixed(1)+" m/s";
-  els.dirAVal.textContent=dirA===1?"يمين →":"← يسار";
-  els.dirBVal.textContent=dirB===1?"يمين →":"← يسار";
-  const pA=momentumA(), pB=momentumB();
-  els.sMass.textContent=mA.toFixed(1)+" kg";
-  els.sVel.textContent=signed(vA*dirA)+" m/s";
-  els.sMomentum.textContent=signed(pA)+" kg·m/s";
-  els.sDir.textContent=dirA===1?"→":"←";
-  els.pA.textContent=signed(pA);
-  els.pB.textContent=signed(pB);
-  els.pTotal.textContent=signed(pA+pB);
-
-  document.getElementById("tMA").textContent=mA.toFixed(1)+" kg";
-  document.getElementById("tMB").textContent=mB.toFixed(1)+" kg";
-  document.getElementById("tVA").textContent=signed(vA*dirA)+" m/s";
-  document.getElementById("tVB").textContent=signed(vB*dirB)+" m/s";
-  document.getElementById("tPA").textContent=signed(pA)+" kg·m/s";
-  document.getElementById("tPB").textContent=signed(pB)+" kg·m/s";
-
-  const totalA=Math.abs(pA), totalB=Math.abs(pB);
-  let note="متساويان في المقدار";
-  if(Math.abs(totalA-totalB)<0.001) note="متساويان في المقدار";
-  else note=totalA>totalB?"A أكبر":"B أكبر";
-  document.getElementById("tPNote").textContent=note;
-
-  if(Math.abs(mA*n("vA")-mB*n("vB"))<0.001){
-    document.getElementById("tMassNote").textContent="كتلة وسرعة مختلفتان لكن الزخم متساوٍ بالمقدار";
-  }else{
-    document.getElementById("tMassNote").textContent= mA>mB ? "A كتلته أكبر" : "B كتلته أكبر";
+/* ============================================================
+   0) الوضع الليلي/النهاري
+   ============================================================ */
+(function(){
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    themeToggle.textContent = '☀️';
   }
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    themeToggle.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+})();
 
-  if(mode==="single"){
-    if(vA===0) els.observation.textContent="السرعة تساوي صفرًا؛ لذلك الزخم يساوي صفرًا مهما كانت الكتلة.";
-    else if(mA===2 && vA===4) els.observation.textContent="القيمة الحالية مثال مباشر: p = 2 × 4 = 8 kg·m/s.";
-    else els.observation.textContent="غيّر الكتلة أو السرعة ولاحظ تغير مقدار الزخم لحظيًا.";
-  }else{
-    els.observation.textContent="قارن طولي السهمين واتجاهيهما. الجسم ذو حاصل m×|v| الأكبر يمتلك زخمًا أكبر مقدارًا.";
+/* ============================================================
+   1) الحالة
+   ============================================================ */
+const state = {
+  mode: 'force',
+  F: 6,
+  T: 2,
+  timeScale: 1,
+  running: false,
+  frozen: false,
+  t: 0,
+  lastTs: null
+};
+
+const cars = [
+  { name:'A', color:'#38bdf8', m:2, v0:4 },
+  { name:'B', color:'#fb7185', m:4, v0:4 }
+];
+
+/* ============================================================
+   2) الكميات المشتقة
+   ============================================================ */
+const getP     = c => c.m * c.v0;
+const getTStop = c => state.mode === 'force' ? getP(c) / state.F : state.T;
+const getFNeed = c => state.mode === 'force' ? state.F : getP(c) / state.T;
+const getDStop = c => state.mode === 'force'
+  ? (getP(c) * c.v0) / (2 * state.F)
+  : (c.v0 * state.T) / 2;
+
+const timelineEnd = () => {
+  if (state.mode === 'force'){
+    const tmax = Math.max(...cars.map(getTStop));
+    return Math.max(tmax * 1.15, 0.3);
   }
-}
-["mA","vA","mB","vB"].forEach(id=>els[id].addEventListener("input",updateUI));
-
-function setDir(which,dir){
-  if(which==="A") dirA=dir; else dirB=dir;
-  document.getElementById((dir===1?"right":"left")+which).classList.add("active");
-  document.getElementById((dir===1?"left":"right")+which).classList.remove("active");
-  updateUI();
-}
-document.getElementById("rightA").onclick=()=>setDir("A",1);
-document.getElementById("leftA").onclick=()=>setDir("A",-1);
-document.getElementById("rightB").onclick=()=>setDir("B",1);
-document.getElementById("leftB").onclick=()=>setDir("B",-1);
-
-document.getElementById("singleMode").onclick=()=>{
-  mode="single";
-  document.getElementById("singleMode").classList.add("active");
-  document.getElementById("compareMode").classList.remove("active");
-  document.getElementById("bControls").style.display="none";
-  document.getElementById("singleStats").style.display="grid";
-  document.getElementById("compareStats").style.display="none";
-  document.getElementById("compareSection").style.display="none";
-  document.getElementById("modeBadge").textContent="تجربة جسم واحد";
-  resetPositions(); updateUI();
-};
-document.getElementById("compareMode").onclick=()=>{
-  mode="compare";
-  document.getElementById("compareMode").classList.add("active");
-  document.getElementById("singleMode").classList.remove("active");
-  document.getElementById("bControls").style.display="block";
-  document.getElementById("singleStats").style.display="none";
-  document.getElementById("compareStats").style.display="grid";
-  document.getElementById("compareSection").style.display="block";
-  document.getElementById("modeBadge").textContent="مقارنة جسمين";
-  resetPositions(); updateUI();
+  return Math.max(state.T * 1.25, 0.3);
 };
 
-document.getElementById("play").onclick=()=>{
-  running=!running;
-  document.getElementById("play").textContent=running?"⏸ إيقاف الحركة":"▶ تشغيل الحركة";
-  if(running){lastTime=performance.now();requestAnimationFrame(animate);}
-};
-document.getElementById("reset").onclick=()=>{running=false;document.getElementById("play").textContent="▶ تشغيل الحركة";resetPositions();};
-document.getElementById("reverse").onclick=()=>{
-  dirA*=-1; if(mode==="compare") dirB*=-1;
-  ["A","B"].forEach(w=>{const d=w==="A"?dirA:dirB; document.getElementById((d===1?"right":"left")+w).click();});
-};
-function resetPositions(){xA=290;xB=810;draw();}
-function animate(t){
-  if(!running)return;
-  const dt=Math.min(.035,(t-lastTime)/1000); lastTime=t;
-  const factor=34;
-  xA += dirA*n("vA")*factor*dt;
-  if(mode==="compare") xB += dirB*n("vB")*factor*dt;
-  const margin=65;
-  if(xA>canvas.width-margin)xA=margin;
-  if(xA<margin)xA=canvas.width-margin;
-  if(xB>canvas.width-margin)xB=margin;
-  if(xB<margin)xB=canvas.width-margin;
-  draw(); requestAnimationFrame(animate);
+function stateAtTime(c, time){
+  const ts = getTStop(c);
+  const F  = getFNeed(c);
+  if (time >= ts){
+    return { v: 0, x: getDStop(c), stopped: true, F, tStop: ts };
+  }
+  const a = c.v0 / ts;
+  return {
+    v: c.v0 - a * time,
+    x: c.v0 * time - 0.5 * a * time * time,
+    stopped: false,
+    F, tStop: ts
+  };
 }
 
-function roundedRect(c,x,y,w,h,r){
-  c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
-  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); c.fill();
+/* ============================================================
+   3) الكانفس
+   ============================================================ */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W = 0, H = 0;
+
+function resize(){
+  const r = cv.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  cv.width  = Math.round(r.width  * dpr);
+  cv.height = Math.round(r.height * dpr);
+  W = r.width; H = r.height;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  updateTimeMarkers();
 }
-function drawArrow(x,y,len,up=true){
-  const dir=len>=0?1:-1, L=Math.abs(len);
-  ctx.strokeStyle="#00d9ff";ctx.fillStyle="#00d9ff";ctx.lineWidth=5;
-  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len,y);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(x+len,y);ctx.lineTo(x+len-dir*15,y-9);ctx.lineTo(x+len-dir*15,y+9);ctx.closePath();ctx.fill();
+new ResizeObserver(resize).observe(cv);
+resize();
+
+/* ============================================================
+   4) أدوات رسم
+   ============================================================ */
+function rr(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x,     y + h, r);
+  ctx.arcTo(x,     y + h, x,     y,     r);
+  ctx.arcTo(x,     y,     x + w, y,     r);
+  ctx.closePath();
 }
-function drawCar(x,y,m,label,dir,p,colorIndex){
-  const w=72+Math.min(m,10)*5, h=42+Math.min(m,10)*2;
+const fmt = (x, d = 1) => x.toFixed(d);
+
+function niceStep(range, ticks){
+  const raw = range / ticks;
+  const p = Math.pow(10, Math.floor(Math.log10(raw)));
+  const n = raw / p;
+  const m = n > 5 ? 10 : n > 2 ? 5 : n > 1 ? 2 : 1;
+  return m * p;
+}
+
+function drawArrow(x, y, len, color, lw = 3){
+  const dir = Math.sign(len) || 1;
+  len = Math.abs(len);
+  if (len < 3) return;
+  const head = Math.min(10, len * 0.4);
   ctx.save();
-  ctx.shadowBlur=22; ctx.shadowColor=colorIndex===0?"#00d9ff":"#ffcf33";
-  ctx.fillStyle=colorIndex===0?"#0b7182":"#7a6510";
-  roundedRect(ctx,x-w/2,y-h/2,w,h,10);
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = lw;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + dir * (len - head), y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x + dir * len, y);
+  ctx.lineTo(x + dir * (len - head), y - head * 0.6);
+  ctx.lineTo(x + dir * (len - head), y + head * 0.6);
+  ctx.closePath();
+  ctx.fill();
   ctx.restore();
-  ctx.fillStyle="#111"; ctx.beginPath();ctx.arc(x-w*.27,y+h*.5,9,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(x+w*.27,y+h*.5,9,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#fff";ctx.font="700 15px Segoe UI";ctx.textAlign="center";ctx.fillText(label,x,y+5);
-  const arrowLen=Math.max(35,Math.min(130,Math.abs(p)*7));
-  drawArrow(x,y-h/2-30,dir*arrowLen);
-  ctx.fillStyle="#ddd";ctx.font="600 13px Segoe UI";
-  ctx.fillText("p = "+signed(p)+" kg·m/s",x,y-h/2-45);
 }
+
+/* ============================================================
+   5) الرسم
+   ============================================================ */
+function getThemeColors(){
+  const lightMode = document.body.classList.contains('light-mode');
+  return {
+    gridLine:   lightMode ? 'rgba(100,116,139,0.35)' : 'rgba(148,163,184,.45)',
+    gridBg:     lightMode ? 'rgba(226,232,240,.7)' : 'rgba(30,45,71,.55)',
+    trackLabel: lightMode ? '#475569' : '#94a3b8',
+    textDim:    lightMode ? '#64748b' : '#cbd5e1',
+    textBright: lightMode ? '#0f172a' : '#e2e8f0',
+  };
+}
+
 function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // background grid
-  ctx.strokeStyle="#121212";ctx.lineWidth=1;
-  for(let i=0;i<canvas.width;i+=55){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,canvas.height);ctx.stroke();}
-  for(let j=0;j<canvas.height;j+=45){ctx.beginPath();ctx.moveTo(0,j);ctx.lineTo(canvas.width,j);ctx.stroke();}
-  // ground
-  const gy=290;
-  ctx.fillStyle="#0d0d0d";ctx.fillRect(0,gy,canvas.width,70);
-  ctx.strokeStyle="#454545";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(30,gy);ctx.lineTo(canvas.width-30,gy);ctx.stroke();
-  for(let i=40;i<canvas.width;i+=70){
-    ctx.strokeStyle="#222";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(i,gy+12);ctx.lineTo(i+35,gy+12);ctx.stroke();
-  }
-  ctx.fillStyle="#888";ctx.font="600 14px Segoe UI";ctx.textAlign="center";
-  ctx.fillText("المسار الأفقي",canvas.width/2,gy+48);
+  const C = getThemeColors();
+  ctx.clearRect(0, 0, W, H);
 
-  if(mode==="single"){
-    drawCar(xA,gy-48,n("mA"),"A",dirA,momentumA(),0);
-    ctx.fillStyle="#aaa";ctx.font="14px Segoe UI";ctx.fillText("غيّر الكتلة والسرعة ولاحظ تغير طول السهم",canvas.width/2,70);
-  }else{
-    drawCar(xA,gy-48,n("mA"),"A",dirA,momentumA(),0);
-    drawCar(xB,gy-48,n("mB"),"B",dirB,momentumB(),1);
-    ctx.fillStyle="#aaa";ctx.font="14px Segoe UI";ctx.fillText("المسافة بين العربتين تساعدك على مقارنة اتجاه الزخم ومقداره",canvas.width/2,70);
+  const padL = 74, padR = 46, padT = 50, padB = 72;
+  const plotW = Math.max(60, W - padL - padR);
+
+  const dMax  = Math.max(...cars.map(getDStop), 0.3);
+  const worldW = dMax * 1.16;
+  const pxPerM = plotW / worldW;
+
+  const trackTop = padT;
+  const trackBot = H - padB;
+  const laneH = (trackBot - trackTop) / 2;
+
+  ctx.save();
+  ctx.setLineDash([6, 6]);
+  ctx.strokeStyle = C.gridLine;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(padL, trackTop - 12);
+  ctx.lineTo(padL, trackBot + 10);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle = C.trackLabel;
+  ctx.font = '11px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('خط البداية', padL, trackTop - 20);
+
+  const fMax = Math.max(...cars.map(getFNeed), 1);
+
+  cars.forEach((c, i) => {
+    const cy = trackTop + laneH * (i + 0.5);
+    const st = stateAtTime(c, state.t);
+
+    ctx.fillStyle = C.gridBg;
+    rr(padL, cy - 17, plotW + 6, 34, 17);
+    ctx.fill();
+
+    const carX = padL + Math.min(st.x, worldW) * pxPerM;
+    ctx.strokeStyle = c.color + '55';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(padL, cy + 13);
+    ctx.lineTo(Math.max(padL + 2, carX), cy + 13);
+    ctx.stroke();
+
+    const fx = padL + getDStop(c) * pxPerM;
+    ctx.save();
+    ctx.setLineDash([4, 5]);
+    ctx.strokeStyle = c.color + '88';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(fx, cy - 22);
+    ctx.lineTo(fx, cy + 22);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = c.color + 'cc';
+    ctx.beginPath();
+    ctx.moveTo(fx, cy - 22);
+    ctx.lineTo(fx + 13, cy - 17);
+    ctx.lineTo(fx, cy - 12);
+    ctx.closePath();
+    ctx.fill();
+
+    drawCar(carX, cy, c.color, 'Car ' + c.name, st.stopped, C);
+
+    const arrowLen = 26 + 60 * (st.F / fMax);
+    drawArrow(carX, cy + 30, -arrowLen, c.color + 'cc', 3);
+
+    ctx.fillStyle = c.color;
+    ctx.font = '700 12px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('F = ' + fmt(st.F, 2) + ' N', carX, cy - 34);
+
+    ctx.fillStyle = C.textDim;
+    ctx.font = '600 12px system-ui, sans-serif';
+    ctx.fillText('x = ' + fmt(st.x) + ' m', carX, cy + 52);
+
+    ctx.fillStyle = c.color;
+    ctx.font = '700 12px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('p = ' + fmt(c.m * st.v) + ' kg·m/s', W - 8, cy + 4);
+
+    ctx.fillStyle = c.color + 'cc';
+    ctx.font = '600 11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('t = ' + fmt(st.tStop, 2) + ' s', carX, cy - 20);
+  });
+
+  const rulerY = H - 34;
+  ctx.strokeStyle = C.gridLine;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, rulerY);
+  ctx.lineTo(W - padR, rulerY);
+  ctx.stroke();
+
+  const stp = niceStep(worldW, 6);
+  ctx.textAlign = 'center';
+  for (let d = 0; d <= worldW + 1e-9; d += stp){
+    const x = padL + d * pxPerM;
+    if (x > W - padR + 1) break;
+    ctx.strokeStyle = C.gridLine;
+    ctx.beginPath();
+    ctx.moveTo(x, rulerY);
+    ctx.lineTo(x, rulerY + 6);
+    ctx.stroke();
+    ctx.fillStyle = C.trackLabel;
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.fillText((stp < 1 ? d.toFixed(1) : d.toFixed(0)) + ' m', x, rulerY + 20);
+  }
+
+  const isForceMode = state.mode === 'force';
+  ctx.fillStyle = isForceMode ? '#0ea5e9' : '#d97706';
+  ctx.font = '700 13px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  const modeTxt = isForceMode
+    ? `🎯 F = ${fmt(state.F,1)} N ثابتة ← نقارن الزمن`
+    : `⏱ T = ${fmt(state.T,2)} s ثابت ← نقارن القوة`;
+  ctx.fillText(modeTxt, padL, padT - 22);
+
+  if (state.frozen){
+    ctx.fillStyle = '#d97706';
+    ctx.textAlign = 'right';
+    ctx.fillText('❄ الزمن مثبّت', W - padR, padT - 22);
   }
 }
-window.addEventListener("resize",draw);
 
-// Quiz
-let current={q:"",answer:0};
-function makeQuestion(){
-  const m=[1,2,3,4,5][Math.floor(Math.random()*5)];
-  const v=[2,3,4,5][Math.floor(Math.random()*4)];
-  const p=m*v;
-  const kind=Math.floor(Math.random()*3);
-  let q, opts, answer;
-  if(kind===0){
-    q=`جسم كتلته ${m} kg يتحرك بسرعة ${v} m/s نحو اليمين. ما مقدار زخمه؟`;
-    opts=[p,p+2,Math.max(0,p-2)];
-    answer=0;
-  }else if(kind===1){
-    q=`إذا تضاعفت كتلة جسم مع ثبات سرعته، ماذا يحدث لمقدار زخمه؟`;
-    opts=["يتضاعف","ينخفض إلى النصف","لا يتغير"];
-    answer=0;
-  }else{
-    q=`إذا تحرك جسم كتلته ${m} kg بسرعة ${v} m/s نحو اليسار، فما إشارة زخمه باختيار اليمين موجبًا؟`;
-    opts=["موجبة","سالبة","صفر"];
-    answer=1;
+function drawCar(x, y, color, label, stopped, C){
+  const w = 50, h = 24;
+  ctx.save();
+  ctx.translate(x, y);
+
+  ctx.fillStyle = 'rgba(0,0,0,.35)';
+  rr(-w/2 + 2, -h/2 + 4, w, h, 8);
+  ctx.fill();
+
+  ctx.fillStyle = color;
+  rr(-w/2, -h/2, w, h, 8);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  rr(-w/2 + 11, -h/2 + 4, 17, 9, 3);
+  ctx.fill();
+
+  ctx.fillStyle = '#0b1220';
+  [-w/2 + 13, w/2 - 13].forEach(wx => {
+    ctx.beginPath();
+    ctx.arc(wx, h/2 - 1, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  ctx.fillStyle = C.textBright;
+  ctx.font = '700 13px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, 0, -h/2 - 9);
+
+  if (stopped){
+    ctx.fillStyle = '#10b981';
+    ctx.font = '700 11px system-ui, sans-serif';
+    ctx.fillText('توقفت', 0, h/2 + 4);
   }
-  current={q,opts,answer};
-  document.getElementById("question").textContent=q;
-  const box=document.getElementById("options");box.innerHTML="";
-  document.getElementById("feedback").textContent="";
-  opts.forEach((o,i)=>{
-    const b=document.createElement("button");
-    b.className="option";
-    b.textContent= typeof o==="number" ? `${o} kg·m/s` : o;
-    b.onclick=()=>{
-      [...box.children].forEach(x=>x.disabled=true);
-      if(i===answer){b.classList.add("correct");document.getElementById("feedback").textContent="✅ إجابة صحيحة!";}
-      else{b.classList.add("wrong");box.children[answer].classList.add("correct");document.getElementById("feedback").textContent="❌ ليست الصحيحة. راجع العلاقة p = mv واتجاه السرعة.";}
-    };
-    box.appendChild(b);
+  ctx.restore();
+}
+
+/* ============================================================
+   6) البطاقات
+   ============================================================ */
+const cardsEl = document.getElementById('cards');
+const refs = [];
+
+function buildCards(){
+  cardsEl.innerHTML = '';
+  refs.length = 0;
+  cars.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.style.setProperty('--c', c.color);
+    el.innerHTML = `
+      <div class="card-head">
+        <span class="letter">${c.name}</span>
+        <span>العربة ${c.name}</span>
+      </div>
+      <div class="grid">
+        <div class="kv"><span class="k">الكتلة m</span><b data-f="m"></b></div>
+        <div class="kv"><span class="k">السرعة v₀</span><b data-f="v0"></b></div>
+        <div class="kv"><span class="k">الزخم p = m·v₀</span><b data-f="p"></b></div>
+        <div class="kv"><span class="k">المسافة d</span><b data-f="d"></b></div>
+        <div class="kv" data-f="rowT"><span class="k" data-f="lblT">زمن الإيقاف t</span><b data-f="t"></b></div>
+        <div class="kv" data-f="rowF"><span class="k" data-f="lblF">القوة اللازمة F</span><b data-f="F"></b></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-lbl"><span>الزخم</span><span data-f="pV"></span></div>
+        <div class="bar"><i data-f="barP"></i></div>
+      </div>
+    `;
+    cardsEl.appendChild(el);
+    const q = s => el.querySelector(`[data-f="${s}"]`);
+    refs.push({
+      m:q('m'), v0:q('v0'), p:q('p'), d:q('d'), t:q('t'), F:q('F'),
+      rowT:q('rowT'), rowF:q('rowF'),
+      lblT:q('lblT'), lblF:q('lblF'),
+      pV:q('pV'), barP:q('barP')
+    });
   });
 }
-document.getElementById("newQuestion").onclick=makeQuestion;
 
-updateUI();resetPositions();makeQuestion();
+function updateCards(){
+  const pMax = Math.max(...cars.map(getP), 0.001);
+  const isForceMode = state.mode === 'force';
+
+  cars.forEach((c, i) => {
+    const r  = refs[i];
+    const p  = getP(c);
+    const ts = getTStop(c);
+    const F  = getFNeed(c);
+    const d  = getDStop(c);
+
+    r.m.textContent  = fmt(c.m) + ' kg';
+    r.v0.textContent = fmt(c.v0) + ' m/s';
+    r.p.textContent  = fmt(p) + ' kg·m/s';
+    r.d.textContent  = fmt(d) + ' m';
+    r.t.textContent  = fmt(ts, 2) + ' s';
+    r.F.textContent  = fmt(F, 2) + ' N';
+    r.pV.textContent = fmt(p) + ' kg·m/s';
+    r.barP.style.width = (p / pMax * 100) + '%';
+
+    r.rowT.classList.toggle('hl',  isForceMode);
+    r.rowF.classList.toggle('hl', !isForceMode);
+    r.rowT.classList.toggle('fixed', !isForceMode);
+    r.rowF.classList.toggle('fixed', isForceMode);
+
+    r.lblT.innerHTML = 'زمن الإيقاف t'
+      + (!isForceMode ? ' <span class="badge">ثابت</span>' : '');
+    r.lblF.innerHTML = 'القوة اللازمة F'
+      + ( isForceMode ? ' <span class="badge">ثابتة</span>' : '');
+  });
+}
+
+/* ============================================================
+   7) جدول الملخص
+   ============================================================ */
+function updateSummary(){
+  const [A, B] = cars;
+  const isForceMode = state.mode === 'force';
+  const pA = getP(A), pB = getP(B);
+  const tA = getTStop(A), tB = getTStop(B);
+  const fA = getFNeed(A), fB = getFNeed(B);
+  const dA = getDStop(A), dB = getDStop(B);
+
+  let verdict;
+  const eqP = Math.abs(pB - pA) < 0.01;
+
+  if (isForceMode){
+    if (eqP){
+      verdict = `الزخمان متساويان ⇒ زمن الإيقاف متساوٍ (${fmt(tA,2)} s) بنفس القوة F = ${fmt(state.F,1)} N.`;
+    } else {
+      const heavier = pB > pA ? 'B' : 'A';
+      const ratio   = Math.max(tA, tB) / Math.min(tA, tB);
+      verdict = `زخم العربة ${heavier} أكبر بـ ${fmt(ratio,2)}× ⇒ تحتاج زمنًا أطول بنفس النسبة `
+              + `(${fmt(Math.max(tA,tB),2)} s مقابل ${fmt(Math.min(tA,tB),2)} s) `
+              + `للتوقف عند نفس القوة F = ${fmt(state.F,1)} N.`;
+    }
+  } else {
+    if (eqP){
+      verdict = `الزخمان متساويان ⇒ القوتان متساويتان (${fmt(fA,2)} N) عند نفس زمن الإيقاف T = ${fmt(state.T,2)} s.`;
+    } else {
+      const heavier = pB > pA ? 'B' : 'A';
+      const ratio   = Math.max(fA, fB) / Math.min(fA, fB);
+      verdict = `زخم العربة ${heavier} أكبر بـ ${fmt(ratio,2)}× ⇒ تحتاج قوة أكبر بنفس النسبة `
+              + `(${fmt(Math.max(fA,fB),2)} N مقابل ${fmt(Math.min(fA,fB),2)} N) `
+              + `لإيقافها في نفس الزمن T = ${fmt(state.T,2)} s.`;
+    }
+  }
+
+  const thT = isForceMode ? 'class="hl"' : '';
+  const thF = isForceMode ? '' : 'class="hl"';
+  const tdT = isForceMode ? 'class="hl"' : '';
+  const tdF = isForceMode ? '' : 'class="hl"';
+
+  document.getElementById('summary').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>العربة</th><th>m (kg)</th><th>v₀ (m/s)</th>
+          <th>p (kg·m/s)</th>
+          <th ${thT}>t (s)</th>
+          <th ${thF}>F (N)</th>
+          <th>d (m)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="a">A</td>
+          <td>${fmt(A.m)}</td><td>${fmt(A.v0)}</td>
+          <td>${fmt(pA)}</td>
+          <td ${tdT}>${fmt(tA,2)}</td>
+          <td ${tdF}>${fmt(fA,2)}</td>
+          <td>${fmt(dA)}</td>
+        </tr>
+        <tr>
+          <td class="b">B</td>
+          <td>${fmt(B.m)}</td><td>${fmt(B.v0)}</td>
+          <td>${fmt(pB)}</td>
+          <td ${tdT}>${fmt(tB,2)}</td>
+          <td ${tdF}>${fmt(fB,2)}</td>
+          <td>${fmt(dB)}</td>
+        </tr>
+        <tr>
+          <td colspan="7" class="verdict">💡 ${verdict}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
+
+/* ============================================================
+   8) إدارة الزمن
+   ============================================================ */
+const sTime    = document.getElementById('sTime');
+const tVal     = document.getElementById('tVal');
+const tDisplay = document.getElementById('tDisplay');
+const tSliderWrap = document.getElementById('tSliderWrap');
+const tMarkers = document.getElementById('tMarkers');
+const timePanel= document.getElementById('timePanel');
+
+function updateTimeSliderRange(){
+  const end = timelineEnd();
+  sTime.max  = end;
+  sTime.step = Math.max(0.005, end / 500);
+  updateTimeMarkers();
+}
+
+function updateTimeMarkers(){
+  requestAnimationFrame(() => {
+    const w = sTime.getBoundingClientRect().width;
+    if (w < 30) return;
+    const thumbW = 20;
+    const usableW = Math.max(1, w - thumbW);
+    const end = timelineEnd();
+    tMarkers.innerHTML = '';
+
+    if (state.mode === 'time'){
+      const x = thumbW/2 + (state.T / end) * usableW;
+      const i = document.createElement('i');
+      i.style.left = x + 'px';
+      i.style.background = '#ffd166';
+      i.style.color = '#ffd166';
+      i.title = 'توقف مشترك عند T = ' + fmt(state.T, 2) + ' s';
+      tMarkers.appendChild(i);
+    } else {
+      cars.forEach(c => {
+        const ts = getTStop(c);
+        const x = thumbW/2 + (ts / end) * usableW;
+        const i = document.createElement('i');
+        i.style.left = x + 'px';
+        i.style.background = c.color;
+        i.style.color = c.color;
+        i.title = `توقف العربة ${c.name} عند ${fmt(ts,2)} s`;
+        tMarkers.appendChild(i);
+      });
+    }
+  });
+}
+
+function setTime(newT, updateSlider = true){
+  state.t = Math.max(0, Math.min(newT, timelineEnd()));
+  if (updateSlider) sTime.value = state.t;
+  tVal.textContent = fmt(state.t, 2);
+  updateCards();
+  updateSummary();
+}
+
+/* ============================================================
+   9) التحكم
+   ============================================================ */
+const sAm = document.getElementById('sAm'), sAv = document.getElementById('sAv');
+const sBm = document.getElementById('sBm'), sBv = document.getElementById('sBv');
+const sTs = document.getElementById('sTs');
+const sFixed = document.getElementById('sFixed');
+const oAm = document.getElementById('oAm'), oAv = document.getElementById('oAv');
+const oBm = document.getElementById('oBm'), oBv = document.getElementById('oBv');
+const oTs = document.getElementById('oTs');
+const oFixed = document.getElementById('oFixed');
+const lblFixed = document.getElementById('lblFixed');
+const unitFixed = document.getElementById('unitFixed');
+const banner = document.getElementById('banner');
+const bannerEq = document.getElementById('bannerEq');
+const bannerTag = document.getElementById('bannerTag');
+const modeToggle = document.getElementById('modeToggle');
+const btnPlay  = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btnFreeze   = document.getElementById('btnFreeze');
+const btnStepBack = document.getElementById('btnStepBack');
+const btnStepFwd  = document.getElementById('btnStepFwd');
+
+function updatePlayButton(){
+  const end = timelineEnd();
+  const allStopped = cars.every(c => stateAtTime(c, state.t).stopped);
+  btnPlay.textContent = state.running
+    ? '⏸ إيقاف مؤقت'
+    : (state.t >= end ? '▶ تشغيل من جديد' : (allStopped ? '▶ متابعة' : '▶ تشغيل'));
+}
+
+function updateFreezeUI(){
+  btnFreeze.classList.toggle('active', state.frozen);
+  btnFreeze.textContent = state.frozen ? '❄ إلغاء التثبيت' : '❄ تثبيت الزمن';
+  tDisplay.classList.toggle('frozen', state.frozen);
+  tSliderWrap.classList.toggle('frozen', state.frozen);
+  timePanel.classList.toggle('frozen', state.frozen);
+}
+
+function applyModeUI(){
+  const isForce = state.mode === 'force';
+
+  [...modeToggle.children].forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === state.mode));
+
+  banner.classList.toggle('gold', !isForce);
+  if (isForce){
+    bannerTag.textContent = 'الوضع الحالي: تثبيت القوة';
+    bannerEq.innerHTML = 'F ثابت للعربتين ← نقارن <b>t = p / F</b> بينهما';
+  } else {
+    bannerTag.textContent = 'الوضع الحالي: تثبيت الزمن';
+    bannerEq.innerHTML = 'T ثابت للعربتين ← نقارن <b>F = p / T</b> بينهما';
+  }
+
+  if (isForce){
+    lblFixed.textContent = '🎯 قوة الإيقاف F';
+    unitFixed.textContent = 'N';
+    sFixed.min = 2; sFixed.max = 20; sFixed.step = 0.5;
+    sFixed.value = state.F;
+    oFixed.textContent = state.F;
+  } else {
+    lblFixed.textContent = '⏱ زمن الإيقاف T';
+    unitFixed.textContent = 's';
+    sFixed.min = 0.5; sFixed.max = 5; sFixed.step = 0.1;
+    sFixed.value = state.T;
+    oFixed.textContent = state.T;
+  }
+}
+
+function resetSim(){
+  state.running = false;
+  state.frozen = false;
+  state.lastTs = null;
+  updateTimeSliderRange();
+  setTime(0);
+  updateFreezeUI();
+  updatePlayButton();
+}
+
+function onParamChange(){
+  applyModeUI();
+  resetSim();
+}
+
+function togglePlay(){
+  if (state.frozen) return;
+  const end = timelineEnd();
+  if (state.t >= end - 1e-6){
+    resetSim();
+    state.running = true;
+  } else {
+    state.running = !state.running;
+  }
+  state.lastTs = null;
+  updatePlayButton();
+}
+
+function toggleFreeze(){
+  state.frozen = !state.frozen;
+  if (state.frozen){
+    state.running = false;
+    updatePlayButton();
+  }
+  updateFreezeUI();
+}
+
+function stepTime(delta){
+  state.frozen = true;
+  state.running = false;
+  updateFreezeUI();
+  updatePlayButton();
+  setTime(state.t + delta);
+}
+
+modeToggle.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-mode]');
+  if (!btn || btn.dataset.mode === state.mode) return;
+  state.mode = btn.dataset.mode;
+  onParamChange();
+});
+
+sFixed.addEventListener('input', () => {
+  const val = +sFixed.value;
+  if (state.mode === 'force') state.F = val;
+  else                        state.T = val;
+  oFixed.textContent = val;
+  resetSim();
+});
+
+function onSlide(){
+  cars[0].m  = +sAm.value; cars[0].v0 = +sAv.value;
+  cars[1].m  = +sBm.value; cars[1].v0 = +sBv.value;
+  oAm.textContent = sAm.value; oAv.textContent = sAv.value;
+  oBm.textContent = sBm.value; oBv.textContent = sBv.value;
+  resetSim();
+}
+[sAm, sAv, sBm, sBv].forEach(el => el.addEventListener('input', onSlide));
+
+sTs.addEventListener('input', () => {
+  state.timeScale = +sTs.value;
+  oTs.textContent = state.timeScale;
+  state.lastTs = null;
+});
+
+sTime.addEventListener('input', () => {
+  state.frozen = true;
+  state.running = false;
+  updateFreezeUI();
+  updatePlayButton();
+  setTime(+sTime.value, false);
+});
+
+btnPlay.addEventListener('click', togglePlay);
+btnReset.addEventListener('click', resetSim);
+btnFreeze.addEventListener('click', toggleFreeze);
+btnStepBack.addEventListener('click', () => stepTime(-0.1));
+btnStepFwd.addEventListener('click', () => stepTime(0.1));
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space'){ e.preventDefault(); togglePlay(); }
+  if (e.key === 'f' || e.key === 'F'){ toggleFreeze(); }
+  if (e.key === 'r' || e.key === 'R'){ resetSim(); }
+  if (e.key === 'ArrowLeft'){ e.preventDefault(); stepTime(-0.1); }
+  if (e.key === 'ArrowRight'){ e.preventDefault(); stepTime(0.1); }
+});
+
+window.addEventListener('resize', updateTimeMarkers);
+
+/* ============================================================
+   10) الحلقة الرئيسية
+   ============================================================ */
+function loop(ts){
+  if (state.lastTs === null) state.lastTs = ts;
+  let dt = (ts - state.lastTs) / 1000;
+  state.lastTs = ts;
+  if (dt > 0.05) dt = 0.05;
+  dt *= state.timeScale;
+
+  if (state.running && !state.frozen){
+    let newT = state.t + dt;
+    const end = timelineEnd();
+    if (newT >= end){
+      newT = end;
+      state.running = false;
+      updatePlayButton();
+    }
+    setTime(newT, true);
+  }
+
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ============================================================
+   11) الإقلاع
+   ============================================================ */
+buildCards();
+applyModeUI();
+resetSim();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
