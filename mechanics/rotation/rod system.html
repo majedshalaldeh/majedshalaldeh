@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>القصور الذاتي الدوراني | الأستاذ ماجد شلالدة</title>
 <style>
+/* ============ متغيرات المنصة الموحّدة ============ */
 :root{
   --bg-color:#0b1329;
   --bg-secondary:#0f1a35;
@@ -48,7 +49,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:'Segoe UI'
   opacity:0.025;
 }
 
-/* ============ شريط التنقل ============ */
 #navbar{
   position:sticky;top:0;z-index:100;
   display:flex;justify-content:space-between;align-items:center;
@@ -87,7 +87,6 @@ body.light-mode #navbar{background:rgba(255,255,255,0.92);}
 }
 .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
 
-/* ============ الهيدر العائم ============ */
 #header{
   position:fixed;top:70px;left:50%;transform:translateX(-50%);
   text-align:center;z-index:4;pointer-events:none;
@@ -109,10 +108,13 @@ body.light-mode #header{background:rgba(255,255,255,0.85);}
 #header .sub{color:var(--text-muted);font-size:11.5px;}
 #header .author{color:var(--accent-gold);font-size:11px;margin-top:3px;font-weight:700;}
 
-#scene{position:fixed;inset:56px 0 0 0;z-index:1;}
+#scene{
+  position:fixed;
+  inset:56px 0 0 0;
+  z-index:1;
+}
 #scene canvas{display:block;touch-action:none;}
 
-/* ============ الأزرار السريعة ============ */
 #quickBtns{
   position:fixed;top:70px;right:18px;z-index:6;
   display:flex;gap:8px;
@@ -133,7 +135,6 @@ body.light-mode #header{background:rgba(255,255,255,0.85);}
 body.light-mode #quickBtns button{background:rgba(255,255,255,0.9);}
 #quickBtns button:hover{background:var(--accent-orange);color:#000;border-color:var(--accent-orange);}
 
-/* ============ لوحة التحكم ============ */
 #panel{
   position:fixed;
   right:18px;top:118px;
@@ -238,15 +239,6 @@ input[type=number]:focus{
   background:var(--sub-card-bg);
   border-radius:7px;padding:5px 8px;font-size:11.5px;
   color:var(--text-color);
-  border-right:3px solid var(--dot-color,var(--accent-red));
-}
-.massItem .mass-dot{
-  display:inline-block;
-  width:10px;height:10px;border-radius:50%;
-  background:var(--dot-color,var(--accent-red));
-  margin-inline-end:5px;
-  vertical-align:middle;
-  box-shadow:0 0 6px var(--dot-color,var(--accent-red));
 }
 .massItem button{
   background:var(--accent-red);color:#fff;border:0;
@@ -273,7 +265,6 @@ input[type=number]:focus{
 .note{font-size:10.5px;color:var(--text-muted);line-height:1.6;margin-top:9px;}
 .note b{color:var(--accent-gold);}
 
-/* ============ لوحة القراءات ============ */
 #readout{
   position:fixed;
   left:18px;top:118px;
@@ -479,7 +470,7 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
       <button id="addMassBtn">+</button>
     </div>
     <div class="note">
-      البعد من محور الدوران (وليس من طرف الساق). صفر = عند المحور.
+      البعد من محور الدوران (وليس من طرف الساق). صفر = عند المحور. سالب لأحد الجانبين، موجب للآخر.
     </div>
     <div class="masslist" id="massList"></div>
   </div>
@@ -511,7 +502,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
 (function(){
   "use strict";
 
-  /* ============ الوضع الليلي/النهاري ============ */
+  /* ============================================================
+     0) الوضع الليلي/النهاري
+     ============================================================ */
   const themeToggle = document.getElementById('themeToggle');
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'light') {
@@ -525,14 +518,14 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
   });
 
-  /* ============ المتغيرات الأساسية ============ */
+  /* ============================================================
+     1) المتغيرات الأساسية
+     ============================================================ */
   const $ = id => document.getElementById(id);
   const N = id => parseFloat($(id).value) || 0;
 
   let scene, camera, renderer;
   let rodGroup, rodMesh;
-  let axisLine;                     // ✅ خط محور الدوران
-  let rotArrow;                     // ✅ سهم اتجاه الدوران
   let masses = [];
   let nextId = 1;
   let axisMode = 'center';
@@ -542,7 +535,7 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
   const AXIS_Y = 2.0;
   const LOGO_PATH = '../../logo.png';
 
-  /* ✅ ألوان مميزة للكتل */
+  /* ✅ الألوان المتنوعة للكرات */
   const MASS_COLORS = [
     0xef476f,  // أحمر
     0x06d6a0,  // أخضر
@@ -553,8 +546,11 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     0xff8fab,  // وردي
     0x4ade80   // أخضر فاتح
   ];
+  let colorIndex = 0;
 
-  /* ============ الكاميرا ============ */
+  /* ============================================================
+     2) كاميرا مدارية
+     ============================================================ */
   const camTargetPoint = new THREE.Vector3(0, 1.4, 0);
   let camTheta = 0.65, camPhi = 1.05, camDist = 8.5;
 
@@ -588,7 +584,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     }, { passive: false });
   }
 
-  /* ============ التهيئة ============ */
+  /* ============================================================
+     3) التهيئة
+     ============================================================ */
   function init(){
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000814);
@@ -606,7 +604,6 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     updateCameraOrbit();
     bindCameraDrag(renderer.domElement);
 
-    /* الإضاءة */
     scene.add(new THREE.HemisphereLight(0xffffff, 0x697781, 1.8));
 
     const dl = new THREE.DirectionalLight(0xffffff, 2.2);
@@ -619,12 +616,10 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     warm.position.set(-6, 4, -5);
     scene.add(warm);
 
-    /* الشبكة الأرضية */
     const grid = new THREE.GridHelper(16, 16, 0x4a5a6e, 0x2a3548);
     grid.position.y = -1.55;
     scene.add(grid);
 
-    /* الحامل */
     const standMat = new THREE.MeshStandardMaterial({ color: 0x53636d, metalness: .65, roughness: .28 });
     const darkMat = new THREE.MeshStandardMaterial({ color: 0x26343c, metalness: .9, roughness: .18 });
 
@@ -637,16 +632,6 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     pole.castShadow = true;
     standGroup.add(pole);
 
-    /* قاعدة الحامل */
-    const base = new THREE.Mesh(
-      new THREE.CylinderGeometry(.5, .6, .12, 32),
-      standMat
-    );
-    base.position.y = -1.49;
-    base.receiveShadow = true;
-    base.castShadow = true;
-    standGroup.add(base);
-
     const hub = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .14, 32), darkMat);
     hub.position.y = AXIS_Y;
     hub.castShadow = true;
@@ -654,58 +639,6 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
 
     scene.add(standGroup);
 
-    /* ✅ خط محور الدوران (رأسي متقطع) */
-    const axisPoints = [
-      new THREE.Vector3(0, -1.5, 0),
-      new THREE.Vector3(0, AXIS_Y + 0.8, 0)
-    ];
-    const axisGeo = new THREE.BufferGeometry().setFromPoints(axisPoints);
-    const axisMat = new THREE.LineDashedMaterial({
-      color: 0xffd166,
-      dashSize: 0.12,
-      gapSize: 0.08,
-      transparent: true,
-      opacity: 0.85
-    });
-    axisLine = new THREE.Line(axisGeo, axisMat);
-    axisLine.computeLineDistances();
-    scene.add(axisLine);
-
-    /* ✅ سهم اتجاه الدوران (منحنى حول المحور) */
-    const rotArcPoints = [];
-    const arcRadius = 1.6;
-    for (let i = 0; i <= 20; i++){
-      const a = (i / 20) * Math.PI * 1.4;
-      rotArcPoints.push(new THREE.Vector3(
-        arcRadius * Math.cos(a),
-        AXIS_Y + 0.9,
-        arcRadius * Math.sin(a)
-      ));
-    }
-    const rotArcGeo = new THREE.BufferGeometry().setFromPoints(rotArcPoints);
-    const rotArc = new THREE.Line(rotArcGeo, new THREE.LineBasicMaterial({
-      color: 0x06d6a0,
-      transparent: true,
-      opacity: 0.7
-    }));
-    scene.add(rotArc);
-
-    /* رأس السهم لاتجاه الدوران */
-    const arrowTip = rotArcPoints[rotArcPoints.length - 1];
-    const arrowHead = new THREE.Mesh(
-      new THREE.ConeGeometry(0.1, 0.25, 8),
-      new THREE.MeshStandardMaterial({ color: 0x06d6a0, emissive: 0x06d6a0, emissiveIntensity: 0.5 })
-    );
-    arrowHead.position.copy(arrowTip);
-    /* توجيه رأس السهم */
-    const prevPoint = rotArcPoints[rotArcPoints.length - 3];
-    const dirVec = arrowTip.clone().sub(prevPoint).normalize();
-    arrowHead.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirVec);
-    scene.add(arrowHead);
-
-    rotArrow = arrowHead;
-
-    /* الشعار */
     const logoTex = new THREE.TextureLoader().load(
       LOGO_PATH,
       undefined,
@@ -728,14 +661,12 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     animate();
   }
 
-  /* ============ بناء الساق ============ */
+  /* ============================================================
+     4) بناء الساق
+     ============================================================ */
   function buildRod(){
     const dark = new THREE.MeshStandardMaterial({ color: 0x26343c, metalness: .9, roughness: .18 });
-    const rodMat = new THREE.MeshStandardMaterial({
-      color: 0x9aa3b0,
-      metalness: 0.85,
-      roughness: 0.25
-    });
+    const rodMat = new THREE.MeshStandardMaterial({ color: 0x8a929a, metalness: .75, roughness: .3 });
 
     rodGroup = new THREE.Group();
     rodGroup.position.set(0, AXIS_Y, 0);
@@ -780,22 +711,18 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
       : Math.min(Math.max(-L / 2, dist), L / 2);
   }
 
-  /* ============ رسم الكتلة (مع رقم) ============ */
+  /* ✅ يستخدم لون الكرة المخزّن */
   function layoutMass(mo){
     const baseR = .14, baseM = 1;
     const scl = Math.min(2, Math.max(.45, Math.cbrt(mo.m / baseM)));
 
-    /* إزالة العناصر القديمة */
     if (mo.mesh) rodGroup.remove(mo.mesh);
-    if (mo.label) rodGroup.remove(mo.label);
-
-    const color = MASS_COLORS[mo.id % MASS_COLORS.length];
 
     const mat = new THREE.MeshStandardMaterial({
-      color: color,
-      metalness: 0.4,
-      roughness: 0.3,
-      emissive: color,
+      color: mo.color,
+      metalness: .35,
+      roughness: .3,
+      emissive: mo.color,
       emissiveIntensity: 0.25
     });
 
@@ -803,43 +730,11 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     mo.mesh.castShadow = true;
     mo.mesh.position.set(mo.dist, 0, 0);
     rodGroup.add(mo.mesh);
-
-    /* ✅ رقم الكتلة فوقها */
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'rgba(0,0,0,0.75)';
-    ctx.beginPath();
-    ctx.arc(64, 64, 50, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#' + color.toString(16).padStart(6, '0');
-    ctx.lineWidth = 6;
-    ctx.stroke();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 70px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(String(mo.id), 64, 68);
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.anisotropy = 4;
-
-    const spriteMat = new THREE.SpriteMaterial({
-      map: tex,
-      transparent: true,
-      depthTest: false,
-      depthWrite: false
-    });
-    mo.label = new THREE.Sprite(spriteMat);
-    mo.label.scale.set(0.4, 0.4, 1);
-    mo.label.position.set(mo.dist, baseR * scl + 0.25, 0);
-    rodGroup.add(mo.label);
-
-    mo.color = color;
   }
 
-  /* ============ الفيزياء ============ */
+  /* ============================================================
+     5) الفيزياء
+     ============================================================ */
   function computeI(){
     const L = N('L'), M = N('M');
     const Irod = axisMode === 'center'
@@ -855,11 +750,16 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     return { Irod, Imass, Itot: Irod + Imass };
   }
 
-  /* ============ إضافة / إزالة الكتل ============ */
+  /* ============================================================
+     6) إضافة / إزالة الكتل
+     ============================================================ */
   function addMass(){
     const m = Math.max(.01, N('newMass'));
     const dist = clampDist(N('newPos'));
-    const mo = { id: nextId++, m, dist, mesh: null, label: null, color: null };
+    /* ✅ اختيار اللون التالي */
+    const color = MASS_COLORS[colorIndex % MASS_COLORS.length];
+    colorIndex++;
+    const mo = { id: nextId++, m, dist, color, mesh: null };
     masses.push(mo);
     layoutMass(mo);
     renderMassList();
@@ -869,8 +769,7 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
   function removeMass(id){
     const idx = masses.findIndex(x => x.id === id);
     if (idx < 0) return;
-    if (masses[idx].mesh) rodGroup.remove(masses[idx].mesh);
-    if (masses[idx].label) rodGroup.remove(masses[idx].label);
+    rodGroup.remove(masses[idx].mesh);
     masses.splice(idx, 1);
     renderMassList();
     refreshData();
@@ -887,9 +786,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
       const row = document.createElement('div');
       row.className = 'massItem';
       const sign = mo.dist > 0 ? '+' : (mo.dist < 0 ? '' : '');
-      const colorHex = '#' + (mo.color || MASS_COLORS[mo.id % MASS_COLORS.length]).toString(16).padStart(6, '0');
-      row.style.setProperty('--dot-color', colorHex);
-      row.innerHTML = `<span><span class="mass-dot"></span>كتلة #${mo.id} — ${mo.m.toFixed(2)} kg @ ${sign}${mo.dist.toFixed(2)} m</span>`;
+      /* ✅ نقطة بلون الكرة */
+      const colorHex = '#' + mo.color.toString(16).padStart(6, '0');
+      row.innerHTML = `<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colorHex};margin-inline-end:6px;box-shadow:0 0 6px ${colorHex};vertical-align:middle;"></span>${mo.m.toFixed(2)} kg @ ${sign}${mo.dist.toFixed(2)} m</span>`;
       const btn = document.createElement('button');
       btn.textContent = '×';
       btn.onclick = () => removeMass(mo.id);
@@ -898,7 +797,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     });
   }
 
-  /* ============ المحور ============ */
+  /* ============================================================
+     7) المحور
+     ============================================================ */
   function setAxis(mode){
     axisMode = mode;
     $('axCenterLbl').classList.toggle('sel', mode === 'center');
@@ -909,7 +810,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     reset();
   }
 
-  /* ============ ربط الأحداث ============ */
+  /* ============================================================
+     8) ربط الأحداث
+     ============================================================ */
   function bind(){
     ['L', 'M'].forEach(id => $(id).addEventListener('change', () => {
       masses.forEach(mo => mo.dist = clampDist(mo.dist));
@@ -943,7 +846,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     addEventListener('resize', resize);
   }
 
-  /* ============ إعادة الضبط ============ */
+  /* ============================================================
+     9) إعادة الضبط
+     ============================================================ */
   function reset(){
     running = false;
     theta = 0;
@@ -953,7 +858,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     refreshData();
   }
 
-  /* ============ الخطوة الزمنية ============ */
+  /* ============================================================
+     10) الخطوة الزمنية
+     ============================================================ */
   function step(dt){
     const { Itot } = computeI();
     if (Itot <= 0) return;
@@ -963,7 +870,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     rodGroup.rotation.y = theta;
   }
 
-  /* ============ تحديث القراءات ============ */
+  /* ============================================================
+     11) تحديث القراءات
+     ============================================================ */
   function refreshData(){
     const { Irod, Imass, Itot } = computeI();
     const Lset = N('LangInput');
@@ -980,19 +889,15 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     $('KE').textContent = (.5 * Itot * omega * omega).toFixed(3) + ' J';
   }
 
-  /* ============ حلقة الرسم ============ */
+  /* ============================================================
+     12) حلقة الرسم
+     ============================================================ */
   function animate(now){
     requestAnimationFrame(animate);
     const dt = Math.min(((now || performance.now()) - last) / 1000, .03);
     last = now || performance.now();
 
     if (running) step(dt);
-
-    /* ✅ إخفاء سهم الدوران عند الوقوف */
-    if (rotArrow) {
-      rotArrow.visible = running;
-      rotArrow.material.opacity = running ? 1 : 0;
-    }
 
     renderer.render(scene, camera);
   }
@@ -1003,7 +908,9 @@ body.light-mode #hint{background:rgba(255,255,255,0.92);}
     renderer.setSize(innerWidth, innerHeight);
   }
 
-  /* ============ الإقلاع ============ */
+  /* ============================================================
+     13) الإقلاع
+     ============================================================ */
   init();
 
 })();
