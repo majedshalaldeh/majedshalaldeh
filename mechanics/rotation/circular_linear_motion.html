@@ -3,9 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>العلاقة بين الحركة الدائرية والحركة الخطية</title>
+<title>العلاقة بين الحركة الدائرية والحركة الخطية | الأستاذ ماجد شلالدة</title>
 <style>
   :root{
+    /* متغيرات المنصة الموحّدة */
+    --bg-color:#0b1329;
+    --bg-secondary:#0f1a35;
+    --main-card-bg:#1c2541;
+    --sub-card-bg:#3a506b;
+    --text-color:#ffffff;
+    --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8;
+    --accent-green:#06d6a0;
+    --accent-gold:#ffd166;
+    --accent-purple:#b185ff;
+    --accent-red:#ef476f;
+    --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.3);
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --transition-fast:0.2s ease;
+    --transition-normal:0.3s ease;
+
+    /* متغيرات التصميم التقني المميز */
     --bg-deep:#04070d;
     --bg-panel:#0a1220;
     --line:#1c2b3f;
@@ -17,57 +39,113 @@
     --text:#dce8f5;
     --text-dim:#7f95ab;
   }
+
+  body.light-mode{
+    --bg-color:#f0f4f8;
+    --bg-secondary:#e2e8f0;
+    --main-card-bg:#ffffff;
+    --sub-card-bg:#e8eef5;
+    --text-color:#1a202c;
+    --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+  }
+
   *{box-sizing:border-box;}
   html,body{
     margin:0; padding:0; width:100%; height:100%; overflow:hidden;
     background:radial-gradient(ellipse at 50% 20%, #0d1930 0%, var(--bg-deep) 65%);
     font-family:'Courier New', 'Consolas', monospace;
     color:var(--text);
+    transition:background .3s,color .3s;
   }
-  #canvasHolder{position:fixed; inset:0;}
+
+  body.light-mode{
+    background:radial-gradient(ellipse at 50% 20%, #dbe6f5 0%, #f0f4f8 65%);
+    color:#1a202c;
+  }
+
+  /* ============ شريط التنقل الموحّد ============ */
+  #navbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);
+    height:56px;
+    font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+  }
+  body.light-mode #navbar{background:rgba(255,255,255,0.92);}
+  .nav-brand{
+    font-size:1.05rem;font-weight:bold;
+    color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;
+  }
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{
+    color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:var(--radius-sm);
+    font-size:0.88rem;
+    transition:background .2s,color .2s;
+  }
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+  .theme-toggle{
+    background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.1rem;
+    width:36px;height:36px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .2s,background .2s;
+  }
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  /* ============ Breadcrumb ============ */
+  #breadcrumb{
+    position:fixed;top:70px;left:50%;transform:translateX(-50%);
+    z-index:4;
+    display:flex;align-items:center;gap:8px;
+    padding:8px 18px;
+    background:rgba(6,11,20,0.85);
+    border:1px solid var(--line);border-radius:10px;
+    font-size:12px;color:var(--text-dim);
+    font-family:'Segoe UI',system-ui,sans-serif;
+    backdrop-filter:blur(8px);
+  }
+  #breadcrumb a{
+    color:var(--field-cool);text-decoration:none;
+    transition:color .2s;
+  }
+  #breadcrumb a:hover{color:var(--amber);}
+  #breadcrumb .sep{opacity:0.5;}
+  #breadcrumb .cur{color:var(--text);font-weight:600;}
+
+  #canvasHolder{position:fixed; inset:0; z-index:1;}
   canvas{display:block;}
 
+  /* ============ العنوان ============ */
   #title{
-    position:fixed; top:22px; left:50%; transform:translateX(-50%);
+    position:fixed; top:110px; left:50%; transform:translateX(-50%);
     text-align:center; pointer-events:none; z-index:5;
   }
   #title h1{
-    margin:0; font-size:23px; letter-spacing:5px; font-weight:700;
+    margin:0; font-size:22px; letter-spacing:4px; font-weight:700;
     color:var(--text); text-transform:uppercase;
     text-shadow:0 0 18px rgba(58,160,255,0.35);
   }
   #title p{
-    margin:8px 0 0; font-size:15px; letter-spacing:2px; color:var(--text-dim);
+    margin:6px 0 0; font-size:14px; letter-spacing:2px; color:var(--text-dim);
   }
   #title .credit{
-    margin:12px 0 0; font-size:15px; letter-spacing:1px; color:var(--amber);
+    margin:10px 0 0; font-size:14px; letter-spacing:1px; color:var(--amber);
     display:flex; align-items:center; justify-content:center; gap:8px;
     direction:rtl;
   }
   #title .credit .dot{opacity:0.4; color:var(--text-dim);}
   #title .credit .phone{direction:ltr; unicode-bidi:embed; color:var(--field-cool);}
 
-  #nav{
-    position:fixed; top:20px; right:22px; z-index:6;
-    display:flex; flex-direction:row; gap:8px; align-items:center;
-  }
-  #nav a{
-    display:flex; align-items:center; gap:10px;
-    background:rgba(10,18,32,0.85); border:1px solid var(--line);
-    color:var(--text); text-decoration:none;
-    font-family:inherit; font-size:15px; letter-spacing:0.5px;
-    padding:10px 18px; border-radius:2px;
-    transition:border-color 0.2s, color 0.2s, transform 0.15s;
-    white-space:nowrap;
-  }
-  #nav a:hover{
-    border-color:var(--field-cool); color:var(--field-cool); transform:translateY(-2px);
-  }
-  #nav a .arrow{font-size:17px; line-height:1;}
-  #nav a.home:hover{border-color:var(--amber); color:var(--amber);}
-
+  /* ============ اللوحة اليسرى ============ */
   #leftStack{
-    position:fixed; top:140px; left:22px; z-index:5;
+    position:fixed; top:200px; left:22px; z-index:5;
     display:flex; flex-direction:column; gap:14px;
     width:275px;
   }
@@ -77,59 +155,111 @@
   }
   #hudPanel h3{
     margin:10px 0 8px; font-size:11px; letter-spacing:2px; color:var(--text);
-    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:6px;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--line); padding-bottom:6px;
   }
   #hudPanel h3:first-child{margin-top:0;}
-  .hudRow{display:flex; justify-content:space-between; font-size:12.5px; margin:6px 0; color:var(--text-dim);}
+  .hudRow{
+    display:flex; justify-content:space-between;
+    font-size:12.5px; margin:6px 0; color:var(--text-dim);
+  }
   .hudRow b{color:var(--text); direction:ltr;}
   .hudRow.pair{padding:4px 6px; border-radius:2px;}
   .hudRow.pair.circ{background:rgba(58,160,255,0.07);}
   .hudRow.pair.lin{background:rgba(255,90,60,0.07);}
 
-  #legend{background:rgba(6,11,20,0.75); font-size:12.5px; color:var(--text-dim);}
-  #legend h3{margin:0 0 10px; font-size:12px; letter-spacing:2px; color:var(--text); text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;}
-  #legend .factRow{margin:8px 0; line-height:1.6; direction:ltr; text-align:left;}
+  #legend{
+    background:rgba(6,11,20,0.75);
+    font-size:12.5px; color:var(--text-dim);
+  }
+  #legend h3{
+    margin:0 0 10px; font-size:12px; letter-spacing:2px;
+    color:var(--text); text-transform:uppercase;
+    border-bottom:1px solid var(--line); padding-bottom:8px;
+  }
+  #legend .factRow{margin:8px 0; line-height:1.6;}
   #legend .factRow b{color:var(--field-cool);}
 
-  /* =========================================================
-     RIGHT STACK: logo centered above the control panel
-     ========================================================= */
+  /* ============ اللوحة اليمنى ============ */
   #rightStack{
-    position:fixed; bottom:320px; right:22px; z-index:5;
-    display:flex; flex-direction:column; align-items:center;
-    gap:18px;
+    position:fixed;
+    top:200px;
+    right:22px;
+    z-index:5;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
     width:min(300px, 88vw);
   }
 
-  /* Circular logo */
+  #logoPanel{
+    width:100%;
+    padding:12px;
+    background:rgba(6,11,20,0.86);
+    border:1px solid var(--line);
+    border-radius:2px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  }
+
   #logoImg{
-    width:150px; height:150px;
+    width:100%;
+    max-width:160px;
+    height:auto;
     border-radius:50%;
-    object-fit:cover;
-    opacity:0.95;
-    pointer-events:none; user-select:none;
-    border:2px solid rgba(58,160,255,0.45);
-    box-shadow:
-      0 0 22px rgba(58,160,255,0.35),
-      0 0 0 6px rgba(58,160,255,0.06);
-    background:#0a1220;
+    background:#fff;
+    padding:6px;
+    display:block;
+    box-shadow:0 4px 16px rgba(58,160,255,0.25);
+    transition:transform .3s ease;
+    pointer-events:none;
+    user-select:none;
+  }
+  #logoPanel:hover #logoImg{
+    transform:scale(1.05);
+  }
+
+  #logoFallback{
+    display:none;
+    font-size:11px;
+    color:var(--text-dim);
+    text-align:center;
+    padding:14px;
+    line-height:1.6;
+  }
+  #logoFallback code{
+    color:var(--field-cool);
+    background:rgba(58,160,255,0.1);
+    padding:2px 6px;
+    border-radius:4px;
   }
 
   #controlPanel{
     width:100%;
-    background:rgba(6,11,20,0.86); border:1px solid var(--line); border-radius:2px;
+    background:rgba(6,11,20,0.86);
+    border:1px solid var(--line);
+    border-radius:2px;
     padding:16px 20px 18px;
   }
   #controlPanel h3{
     margin:0 0 10px; font-size:12px; letter-spacing:2px; color:var(--text);
-    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;
+    text-transform:uppercase;
+    border-bottom:1px solid var(--line); padding-bottom:8px;
   }
-  .ctrlRow{display:flex; justify-content:space-between; align-items:baseline; font-size:12px; margin-top:10px;}
+  .ctrlRow{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:12px; margin-top:10px;
+  }
   .ctrlRow .plabel{color:var(--text-dim); letter-spacing:0.3px;}
   .ctrlRow .pval{color:var(--amber); font-weight:700; direction:ltr;}
+
   #controlPanel input[type="range"]{
     -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
-    background:linear-gradient(90deg, var(--field-cool), var(--line)); outline:none; margin:4px 0 2px; cursor:pointer;
+    background:linear-gradient(90deg, var(--field-cool), var(--line));
+    outline:none; margin:4px 0 2px; cursor:pointer;
   }
   #controlPanel input[type="range"]::-webkit-slider-thumb{
     -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
@@ -141,44 +271,111 @@
     background:var(--amber); border:2px solid #0a1220;
     box-shadow:0 0 8px rgba(255,178,56,0.7); cursor:pointer;
   }
+
   .btnRow{display:flex; gap:8px; margin-top:14px;}
   .btnRow button{
     flex:1; font-family:inherit; font-size:12px; letter-spacing:1px;
     padding:10px 6px; border-radius:2px; cursor:pointer;
-    border:1px solid var(--line); transition:border-color 0.2s, color 0.2s;
+    border:1px solid var(--line);
+    transition:border-color 0.2s, color 0.2s;
     background:rgba(58,160,255,0.1); color:var(--field-cool);
   }
   .btnRow button:hover{border-color:var(--field-cool);}
   #resetBtn{background:rgba(255,90,60,0.1)!important; color:var(--field-hot)!important;}
   #resetBtn:hover{border-color:var(--field-hot)!important;}
 
+  /* ============ Footer ============ */
+  #footer{
+    position:fixed; bottom:0; left:0; right:0;
+    padding:8px 20px;
+    text-align:center;
+    font-size:11px;
+    color:var(--text-dim);
+    background:linear-gradient(0deg,rgba(4,7,13,0.95) 0%,transparent 100%);
+    pointer-events:none;
+    z-index:3;
+    font-family:'Segoe UI',system-ui,sans-serif;
+  }
+  #footer strong{color:var(--amber);}
+
+  /* ============ التجاوب ============ */
+  @media (max-width:900px){
+    #leftStack,#rightStack{width:240px;}
+    #leftStack{top:190px;}
+    #rightStack{top:190px;}
+  }
+
   @media (max-width:640px){
     #leftStack,#rightStack{display:none;}
-    #title h1{font-size:17px; letter-spacing:3px;}
-    #title p{font-size:12px;}
-    #title .credit{font-size:12px;}
-    #nav a{font-size:12px; padding:8px 12px;}
+
+    #breadcrumb{
+      top:62px;font-size:10.5px;padding:6px 12px;
+      max-width:calc(100vw - 20px);
+    }
+    #breadcrumb a{padding:0 2px;}
+
+    #title{top:100px;padding:0 10px;}
+    #title h1{font-size:14px;letter-spacing:2px;}
+    #title p{font-size:10.5px;margin-top:4px;}
+    #title .credit{font-size:10.5px;margin-top:6px;}
+
+    #navbar{padding:10px 15px;flex-wrap:wrap;gap:10px;}
+    .nav-links{order:3;width:100%;justify-content:center;}
+    .nav-links a{padding:6px 10px;font-size:0.8rem;}
+    .nav-brand span{display:none;}
+    #footer{font-size:9.5px;padding:5px 10px;}
   }
 </style>
 </head>
 <body>
 
-<div id="canvasHolder"></div>
+<!-- شريط التنقل الموحّد -->
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+</nav>
 
-<div id="nav">
-  <a class="home" href="../../index.html"><span class="arrow">⌂</span> العودة للصفحة الرئيسية</a>
-  <a class="field" href="rotation.html"><span class="arrow">↩</span> العودة للحركة الدورانية</a>
+<!-- Breadcrumb -->
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+  <span class="sep">›</span>
+  <a href="rotation.html">🔄 الحركة الدورانية</a>
+  <span class="sep">›</span>
+  <span class="cur">🔗 الحركة الدائرية والخطية</span>
 </div>
 
+<div id="canvasHolder"></div>
+
+<!-- العنوان -->
 <div id="title">
   <h1>العلاقة بين الحركة الدائرية والحركة الخطية</h1>
   <p>s = rθ &nbsp;|&nbsp; v = rω &nbsp;|&nbsp; aₜ = rα &nbsp;|&nbsp; a_c = rω²</p>
   <div class="credit">إعداد الأستاذ <span>ماجد شلالده</span><span class="dot">•</span><span class="phone">0599870176</span></div>
 </div>
 
-<!-- Right stack: circular logo centered above the control panel -->
+<!-- اللوحة اليمنى: الشعار + التحكم -->
 <div id="rightStack">
-  <img id="logoImg" src="logo.png" alt="شعار">
+  <div id="logoPanel">
+    <img id="logoImg"
+         src="../../logo.png"
+         alt="شعار الأستاذ ماجد شلالدة"
+         draggable="false"
+         onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';">
+    <div id="logoFallback">
+      ضع ملف الشعار<br>
+      بجانب الصفحة باسم<br>
+      <code>logo.png</code>
+    </div>
+  </div>
+
   <div id="controlPanel">
     <h3>معطيات الحركة</h3>
     <div class="ctrlRow"><span class="plabel">نصف القطر r (m)</span><span id="rval" class="pval">3.00</span></div>
@@ -196,6 +393,7 @@
   </div>
 </div>
 
+<!-- اللوحة اليسرى: القراءات + الدليل -->
 <div id="leftStack">
   <div id="hudPanel">
     <h3>الحركة الدائرية</h3>
@@ -219,12 +417,35 @@
   </div>
 </div>
 
+<!-- Footer -->
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (function(){
 
-  // ---------- basic setup ----------
+  /* ============================================================
+     0) الوضع الليلي/النهاري
+     ============================================================ */
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    themeToggle.textContent = '☀️';
+  }
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    themeToggle.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
+
+  /* ============================================================
+     1) الإعداد الأساسي
+     ============================================================ */
   const holder = document.getElementById('canvasHolder');
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x04070d, 0.014);
@@ -244,7 +465,9 @@
   controls.maxDistance = 80;
   controls.target.set(0, 1.5, 0);
 
-  // ---------- lighting ----------
+  /* ============================================================
+     2) الإضاءة
+     ============================================================ */
   scene.add(new THREE.AmbientLight(0x223344, 1.2));
   const key = new THREE.PointLight(0x6fb4ff, 1.4, 80);
   key.position.set(8, 12, 6);
@@ -256,9 +479,9 @@
   const grid = new THREE.GridHelper(40, 40, 0x14243a, 0x0c1626);
   scene.add(grid);
 
-  // ============================================================
-  // CIRCULAR TRACK + MARKER
-  // ============================================================
+  /* ============================================================
+     3) المسار الدائري
+     ============================================================ */
   const motionGroup = new THREE.Group();
   motionGroup.position.y = 1.5;
   scene.add(motionGroup);
@@ -272,8 +495,13 @@
 
   let r = 3;
   let circleTrack = null;
+
   function buildCircleTrack(){
-    if(circleTrack){ motionGroup.remove(circleTrack); circleTrack.geometry.dispose(); circleTrack.material.dispose(); }
+    if(circleTrack){
+      motionGroup.remove(circleTrack);
+      circleTrack.geometry.dispose();
+      circleTrack.material.dispose();
+    }
     const pts = [];
     const SEG = 128;
     for(let i=0;i<=SEG;i++){
@@ -281,31 +509,46 @@
       pts.push(new THREE.Vector3(Math.cos(t)*r, 0.02, Math.sin(t)*r));
     }
     const geo = new THREE.BufferGeometry().setFromPoints(pts);
-    const mat = new THREE.LineDashedMaterial({color:0x3aa0ff, dashSize:0.15, gapSize:0.1, transparent:true, opacity:0.6});
+    const mat = new THREE.LineDashedMaterial({
+      color:0x3aa0ff, dashSize:0.15, gapSize:0.1,
+      transparent:true, opacity:0.6
+    });
     circleTrack = new THREE.Line(geo, mat);
     circleTrack.computeLineDistances();
     motionGroup.add(circleTrack);
   }
   buildCircleTrack();
 
-  const circMarker = new THREE.Mesh(new THREE.SphereGeometry(0.14,20,20), new THREE.MeshPhysicalMaterial({color:0x3aa0ff, roughness:0.3, metalness:0.2}));
+  const circMarker = new THREE.Mesh(
+    new THREE.SphereGeometry(0.14,20,20),
+    new THREE.MeshPhysicalMaterial({color:0x3aa0ff, roughness:0.3, metalness:0.2})
+  );
   motionGroup.add(circMarker);
 
   const radiusLine = new THREE.Line(
-    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0.03,0), new THREE.Vector3(1,0.03,0)]),
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0,0.03,0),
+      new THREE.Vector3(1,0.03,0)
+    ]),
     new THREE.LineBasicMaterial({color:0x7f95ab, transparent:true, opacity:0.5})
   );
   motionGroup.add(radiusLine);
 
-  // ============================================================
-  // VECTOR ARROWS
-  // ============================================================
+  /* ============================================================
+     4) الأسهم
+     ============================================================ */
   function makeArrow(color, thicknessScale=1){
     const grp = new THREE.Group();
     const mat = new THREE.MeshBasicMaterial({color, transparent:true, opacity:0.95});
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.035*thicknessScale,0.035*thicknessScale,1,8), mat);
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035*thicknessScale,0.035*thicknessScale,1,8),
+      mat
+    );
     shaft.position.y = 0.5;
-    const head = new THREE.Mesh(new THREE.ConeGeometry(0.1*thicknessScale,0.26*thicknessScale,10), mat);
+    const head = new THREE.Mesh(
+      new THREE.ConeGeometry(0.1*thicknessScale,0.26*thicknessScale,10),
+      mat
+    );
     head.position.y = 1.0;
     grp.add(shaft); grp.add(head);
     return {grp, mat};
@@ -327,21 +570,30 @@
 
   const V_SCALE = 0.35, A_SCALE = 0.12;
 
-  // ---------- state ----------
-  let w0=2, alpha=0, playSpeed=1;
-  let simTime=0, theta=0, playing=false;
+  /* ============================================================
+     5) الحالة
+     ============================================================ */
+  let w0 = 2, alpha = 0, playSpeed = 1;
+  let simTime = 0, theta = 0, playing = false;
   let theta0Start = 0;
 
-  // ---------- UI wiring ----------
+  /* ============================================================
+     6) ربط عناصر التحكم
+     ============================================================ */
   const rSlider=document.getElementById('rSlider'), rvalEl=document.getElementById('rval');
   const w0Slider=document.getElementById('w0Slider'), w0valEl=document.getElementById('w0val');
   const aSlider=document.getElementById('aSlider'), avalEl=document.getElementById('aval');
   const playSpeedSlider=document.getElementById('playSpeedSlider'), playSpeedVal=document.getElementById('playSpeedVal');
   const playBtn=document.getElementById('playBtn'), resetBtn=document.getElementById('resetBtn');
 
-  const thetaVal=document.getElementById('thetaVal'), omegaVal=document.getElementById('omegaVal'), alphaVal=document.getElementById('alphaVal');
-  const sVal=document.getElementById('sVal'), vVal=document.getElementById('vVal'), atVal=document.getElementById('atVal'),
-        acVal=document.getElementById('acVal'), aTotalVal=document.getElementById('aTotalVal');
+  const thetaVal=document.getElementById('thetaVal'),
+        omegaVal=document.getElementById('omegaVal'),
+        alphaVal=document.getElementById('alphaVal');
+  const sVal=document.getElementById('sVal'),
+        vVal=document.getElementById('vVal'),
+        atVal=document.getElementById('atVal'),
+        acVal=document.getElementById('acVal'),
+        aTotalVal=document.getElementById('aTotalVal');
 
   function updateHud(theta, omega){
     const s = r*theta;
@@ -365,7 +617,10 @@
 
     const cx = Math.cos(theta)*r, cz = Math.sin(theta)*r;
     circMarker.position.set(cx, 0.14, cz);
-    radiusLine.geometry.setFromPoints([new THREE.Vector3(0,0.03,0), new THREE.Vector3(cx,0.03,cz)]);
+    radiusLine.geometry.setFromPoints([
+      new THREE.Vector3(0,0.03,0),
+      new THREE.Vector3(cx,0.03,cz)
+    ]);
 
     const tangentPos = new THREE.Vector3(-Math.sin(theta), 0, Math.cos(theta));
     const radialOut = new THREE.Vector3(Math.cos(theta), 0, Math.sin(theta));
@@ -406,7 +661,9 @@
 
   layout(0, w0);
 
-  // ---------- animation loop ----------
+  /* ============================================================
+     7) حلقة الرسم
+     ============================================================ */
   const clock = new THREE.Clock();
 
   function animate(){
