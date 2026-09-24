@@ -6,7 +6,6 @@
 <title>العوامل المؤثرة في عزم القوة | الأستاذ ماجد شلالدة</title>
 <style>
   :root{
-    /* متغيرات المنصة الموحّدة */
     --bg-color:#0b1329;
     --bg-secondary:#0f1a35;
     --main-card-bg:#1c2541;
@@ -27,7 +26,6 @@
     --transition-fast:0.2s ease;
     --transition-normal:0.3s ease;
 
-    /* متغيرات التصميم التقني المميز */
     --bg-deep:#04070d;
     --bg-panel:#0a1220;
     --line:#1c2b3f;
@@ -63,13 +61,6 @@
   body.light-mode{
     background:radial-gradient(ellipse at 50% 20%, #dbe6f5 0%, #f0f4f8 65%);
     color:#1a202c;
-  }
-
-  #watermark{
-    position:fixed;inset:0;pointer-events:none;z-index:0;
-    background-image:url('../../logo.png');
-    background-size:180px;background-repeat:repeat;
-    opacity:0.03;
   }
 
   /* ============ شريط التنقل الموحّد ============ */
@@ -150,31 +141,62 @@
   #title .credit .dot{opacity:0.4;color:var(--text-dim);}
   #title .credit .phone{direction:ltr;unicode-bidi:embed;color:var(--field-cool);}
 
-  /* ============ أزرار سريعة ============ */
-  #quickBtns{
-    position:fixed;top:80px;right:22px;z-index:6;
-    display:flex;gap:8px;
+  /* ❌ تم حذف #quickBtns */
+
+  /* ============ الشعار فوق لوحة التحكم ============ */
+  #logoPanel{
+    position:fixed;
+    top:110px;
+    right:22px;
+    z-index:6;
+    width:min(300px, 88vw);
+    padding:12px;
+    background:rgba(6,11,20,0.86);
+    border:1px solid var(--line);
+    border-radius:2px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
   }
-  #quickBtns a{
-    display:flex;align-items:center;gap:8px;
-    background:rgba(10,18,32,0.85);border:1px solid var(--line);
-    color:var(--text);text-decoration:none;
-    font-family:'Courier New',monospace;font-size:13px;
-    padding:8px 14px;border-radius:2px;
-    transition:border-color .2s,color .2s,transform .15s;
+  #logoPanel img{
+    width:100%;
+    max-width:180px;
+    height:auto;
+    border-radius:50%;
+    background:#fff;
+    padding:6px;
+    display:block;
+    box-shadow:0 4px 16px rgba(58,160,255,0.25);
+    transition:transform .3s ease;
   }
-  #quickBtns a:hover{
-    border-color:var(--field-cool);color:var(--field-cool);
-    transform:translateY(-2px);
+  #logoPanel:hover img{
+    transform:scale(1.05);
   }
-  #quickBtns a.home:hover{border-color:var(--amber);color:var(--amber);}
+  #logoFallback{
+    display:none;
+    font-size:11px;
+    color:var(--text-dim);
+    text-align:center;
+    padding:14px;
+    line-height:1.6;
+  }
+  #logoFallback code{
+    color:var(--field-cool);
+    background:rgba(58,160,255,0.1);
+    padding:2px 6px;
+    border-radius:4px;
+  }
 
   /* ============ لوحة التحكم ============ */
   #controlPanel{
-    position:fixed;top:150px;right:22px;z-index:5;
+    position:fixed;
+    top:330px;
+    right:22px;
+    z-index:5;
     background:rgba(6,11,20,0.86);border:1px solid var(--line);border-radius:2px;
     padding:16px 20px 18px;width:min(300px,88vw);
-    max-height:calc(100vh - 180px);
+    max-height:calc(100vh - 355px);
     overflow-y:auto;
     transition:transform 0.25s ease;
   }
@@ -287,11 +309,13 @@
   /* ============ التجاوب ============ */
   @media (max-width:640px){
     #legend{display:none;}
+
     #breadcrumb{
       top:62px;font-size:10.5px;padding:6px 12px;
       max-width:calc(100vw - 20px);
     }
     #breadcrumb a{padding:0 2px;}
+
     #title{top:100px;padding:0 10px;}
     #title h1{font-size:14px;letter-spacing:2px;}
     #title p{font-size:10.5px;margin-top:4px;}
@@ -306,6 +330,14 @@
     .hudRow.highlight b{font-size:13px;}
     #hudPanel .formula{display:none;}
 
+    #logoPanel{
+      top:100px;
+      right:12px;
+      width:100px;
+      padding:6px;
+    }
+    #logoPanel img{max-width:80px;padding:4px;}
+
     #controlPanel{
       top:auto;bottom:14px;left:12px;right:12px;
       width:auto;max-height:70vh;overflow-y:auto;
@@ -316,9 +348,6 @@
 
     #mobileToggle{display:flex;}
 
-    #quickBtns{top:70px;right:8px;}
-    #quickBtns a{font-size:10.5px;padding:6px 10px;}
-
     #navbar{padding:10px 15px;flex-wrap:wrap;gap:10px;}
     .nav-links{order:3;width:100%;justify-content:center;}
     .nav-links a{padding:6px 10px;font-size:0.8rem;}
@@ -328,8 +357,6 @@
 </style>
 </head>
 <body>
-
-<div id="watermark"></div>
 
 <!-- شريط التنقل الموحّد -->
 <nav id="navbar">
@@ -356,11 +383,7 @@
 
 <div id="canvasHolder"></div>
 
-<!-- أزرار سريعة -->
-<div id="quickBtns">
-  <a class="home" href="../../index.html">🏠 الرئيسية</a>
-  <a class="field" href="rotation.html">↩ الحركة الدورانية</a>
-</div>
+<!-- ❌ تم حذف #quickBtns -->
 
 <!-- العنوان -->
 <div id="title">
@@ -370,6 +393,20 @@
     إعداد الأستاذ <span>ماجد شلالده</span>
     <span class="dot">•</span>
     <span class="phone">0599870176</span>
+  </div>
+</div>
+
+<!-- الشعار فوق لوحة التحكم -->
+<div id="logoPanel">
+  <img id="logoImg"
+       src="../../logo.png"
+       alt="شعار الأستاذ ماجد شلالدة"
+       draggable="false"
+       onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';">
+  <div id="logoFallback">
+    ضع ملف الشعار<br>
+    بجانب الصفحة باسم<br>
+    <code>logo.png</code>
   </div>
 </div>
 
@@ -445,12 +482,7 @@
   });
 
   /* ============================================================
-     1) الشعار الخارجي
-     ============================================================ */
-  const LOGO_PATH = "../../logo.png";
-
-  /* ============================================================
-     2) الإعداد الأساسي
+     1) الإعداد الأساسي
      ============================================================ */
   const holder = document.getElementById('canvasHolder');
   const scene = new THREE.Scene();
@@ -473,7 +505,7 @@
   controls.target.set(0.8, 1.1, 0.8);
 
   /* ============================================================
-     3) الإضاءة
+     2) الإضاءة
      ============================================================ */
   scene.add(new THREE.AmbientLight(0x223344, 1.2));
   const key = new THREE.PointLight(0x6fb4ff, 1.4, 80);
@@ -490,33 +522,7 @@
   scene.add(grid);
 
   /* ============================================================
-     4) الشعار على الأرض
-     ============================================================ */
-  const logoTexture = new THREE.TextureLoader().load(
-    LOGO_PATH,
-    (tex) => {
-      tex.encoding = THREE.sRGBEncoding;
-      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    },
-    undefined,
-    () => {
-      console.warn("Logo file not found at: " + LOGO_PATH);
-      logoMesh.visible = false;
-    }
-  );
-
-  const logoMesh = new THREE.Mesh(
-    new THREE.CircleGeometry(1.65, 96),
-    new THREE.MeshBasicMaterial({
-      map: logoTexture, transparent: true, opacity: 0.65, depthWrite: false
-    })
-  );
-  logoMesh.rotation.x = -Math.PI/2;
-  logoMesh.position.set(0, 0.02, 0);
-  scene.add(logoMesh);
-
-  /* ============================================================
-     5) الأبعاد
+     3) الأبعاد
      ============================================================ */
   const AXLE_HEIGHT = 1.6;
   const ROD_Y       = 1.30;
@@ -524,7 +530,7 @@
   const ARC_Y       = ROD_Y + 0.28;
 
   /* ============================================================
-     6) المحور
+     4) المحور
      ============================================================ */
   const metalMat = new THREE.MeshPhysicalMaterial({
     color: 0x8ea4b8, roughness: 0.35, metalness: 0.55
@@ -559,7 +565,7 @@
   scene.add(pivotCap);
 
   /* ============================================================
-     7) الساق الدوّار
+     5) الساق الدوّار
      ============================================================ */
   let ROD_LENGTH = 2.5;
 
@@ -587,7 +593,7 @@
   rodGroup.add(appMarker);
 
   /* ============================================================
-     8) الأسهم
+     6) الأسهم
      ============================================================ */
   const RADIAL_SEGMENTS = 64;
 
@@ -647,7 +653,7 @@
   let rVectorVisible = true;
 
   /* ============================================================
-     9) ذراع العزم المتقطع
+     7) ذراع العزم المتقطع
      ============================================================ */
   const armPositions = new Float32Array(6);
   const armGeom = new THREE.BufferGeometry();
@@ -666,7 +672,7 @@
   scene.add(armLine);
 
   /* ============================================================
-     10) قوس الزاوية
+     8) قوس الزاوية
      ============================================================ */
   const ARC_STEPS = 48;
 
@@ -686,7 +692,7 @@
   let angleArcVisible = true;
 
   /* ============================================================
-     11) الحالة
+     9) الحالة
      ============================================================ */
   const G_ARROW_SCALE = 0.032;
   const TIME_SCALE    = 0.35;
@@ -777,7 +783,7 @@
   }
 
   /* ============================================================
-     12) ربط عناصر التحكم
+     10) ربط عناصر التحكم
      ============================================================ */
   const fSlider=document.getElementById('fSlider'), fval=document.getElementById('fval');
   const lSlider=document.getElementById('lSlider'), lvalEl=document.getElementById('lval');
@@ -858,7 +864,7 @@
   updateVisuals();
 
   /* ============================================================
-     13) حلقة الرسم
+     11) حلقة الرسم
      ============================================================ */
   const clock = new THREE.Clock();
 
