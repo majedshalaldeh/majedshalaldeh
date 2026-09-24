@@ -38,8 +38,20 @@
     --amber:#ffb238;
     --text:#dce8f5;
     --text-dim:#7f95ab;
+
+    /* خلفيات اللوحات (قابلة للتغيير في الوضع النهاري) */
+    --panel-bg:rgba(6,11,20,0.82);
+    --panel-bg-soft:rgba(6,11,20,0.75);
+    --breadcrumb-bg:rgba(6,11,20,0.85);
+    --footer-bg:linear-gradient(0deg,rgba(4,7,13,0.95) 0%,transparent 100%);
+
+    /* ظلال النصوص */
+    --title-shadow:0 0 18px rgba(58,160,255,0.35);
   }
 
+  /* ============================================================
+     ✅ الوضع النهاري — إعادة تعريف كل المتغيرات التقنية
+     ============================================================ */
   body.light-mode{
     --bg-color:#f0f4f8;
     --bg-secondary:#e2e8f0;
@@ -49,6 +61,25 @@
     --text-muted:#4a5568;
     --border-soft:rgba(0,0,0,0.08);
     --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+
+    /* ✅ إعادة تعريف المتغيرات التقنية للوضع النهاري */
+    --line:rgba(30,41,59,0.18);
+    --wire:#64748b;
+    --field-cool:#0369a1;
+    --field-hot:#dc2626;
+    --current:#dc2626;
+    --amber:#c2410c;
+    --text:#0f172a;
+    --text-dim:#475569;
+
+    /* ✅ خلفيات اللوحات في الوضع النهاري */
+    --panel-bg:rgba(255,255,255,0.94);
+    --panel-bg-soft:rgba(255,255,255,0.88);
+    --breadcrumb-bg:rgba(255,255,255,0.94);
+    --footer-bg:linear-gradient(0deg,rgba(240,244,248,0.95) 0%,transparent 100%);
+
+    /* ✅ ظل النص للعنوان */
+    --title-shadow:0 0 18px rgba(58,160,255,0.15);
   }
 
   *{box-sizing:border-box;}
@@ -105,11 +136,12 @@
     z-index:4;
     display:flex;align-items:center;gap:8px;
     padding:8px 18px;
-    background:rgba(6,11,20,0.85);
+    background:var(--breadcrumb-bg);
     border:1px solid var(--line);border-radius:10px;
     font-size:12px;color:var(--text-dim);
     font-family:'Segoe UI',system-ui,sans-serif;
     backdrop-filter:blur(8px);
+    transition:background .3s,border-color .3s,color .3s;
   }
   #breadcrumb a{
     color:var(--field-cool);text-decoration:none;
@@ -130,15 +162,18 @@
   #title h1{
     margin:0; font-size:22px; letter-spacing:4px; font-weight:700;
     color:var(--text); text-transform:uppercase;
-    text-shadow:0 0 18px rgba(58,160,255,0.35);
+    text-shadow:var(--title-shadow);
+    transition:color .3s,text-shadow .3s;
   }
   #title p{
     margin:6px 0 0; font-size:14px; letter-spacing:2px; color:var(--text-dim);
+    transition:color .3s;
   }
   #title .credit{
     margin:10px 0 0; font-size:14px; letter-spacing:1px; color:var(--amber);
     display:flex; align-items:center; justify-content:center; gap:8px;
     direction:rtl;
+    transition:color .3s;
   }
   #title .credit .dot{opacity:0.4; color:var(--text-dim);}
   #title .credit .phone{direction:ltr; unicode-bidi:embed; color:var(--field-cool);}
@@ -150,32 +185,46 @@
     width:275px;
   }
   #hudPanel, #legend{
-    background:rgba(6,11,20,0.82); border:1px solid var(--line); border-radius:2px;
+    background:var(--panel-bg);
+    border:1px solid var(--line);
+    border-radius:2px;
     padding:16px 20px 18px;
+    transition:background .3s,border-color .3s;
   }
   #hudPanel h3{
-    margin:10px 0 8px; font-size:11px; letter-spacing:2px; color:var(--text);
+    margin:10px 0 8px; font-size:11px; letter-spacing:2px;
+    color:var(--text);
     text-transform:uppercase;
     border-bottom:1px solid var(--line); padding-bottom:6px;
+    transition:color .3s,border-color .3s;
   }
   #hudPanel h3:first-child{margin-top:0;}
   .hudRow{
     display:flex; justify-content:space-between;
     font-size:12.5px; margin:6px 0; color:var(--text-dim);
+    transition:color .3s;
   }
-  .hudRow b{color:var(--text); direction:ltr;}
+  .hudRow b{
+    color:var(--text);
+    direction:ltr;
+    transition:color .3s;
+  }
   .hudRow.pair{padding:4px 6px; border-radius:2px;}
   .hudRow.pair.circ{background:rgba(58,160,255,0.07);}
   .hudRow.pair.lin{background:rgba(255,90,60,0.07);}
 
+  body.light-mode .hudRow.pair.circ{background:rgba(3,105,161,0.08);}
+  body.light-mode .hudRow.pair.lin{background:rgba(220,38,38,0.08);}
+
   #legend{
-    background:rgba(6,11,20,0.75);
+    background:var(--panel-bg-soft);
     font-size:12.5px; color:var(--text-dim);
   }
   #legend h3{
     margin:0 0 10px; font-size:12px; letter-spacing:2px;
     color:var(--text); text-transform:uppercase;
     border-bottom:1px solid var(--line); padding-bottom:8px;
+    transition:color .3s,border-color .3s;
   }
   #legend .factRow{margin:8px 0; line-height:1.6;}
   #legend .factRow b{color:var(--field-cool);}
@@ -196,13 +245,17 @@
   #logoPanel{
     width:100%;
     padding:12px;
-    background:rgba(6,11,20,0.86);
+    background:var(--panel-bg);
     border:1px solid var(--line);
     border-radius:2px;
     display:flex;
     align-items:center;
     justify-content:center;
     box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    transition:background .3s,border-color .3s,box-shadow .3s;
+  }
+  body.light-mode #logoPanel{
+    box-shadow:0 4px 16px rgba(0,0,0,0.1);
   }
 
   #logoImg{
@@ -239,32 +292,50 @@
 
   #controlPanel{
     width:100%;
-    background:rgba(6,11,20,0.86);
+    background:var(--panel-bg);
     border:1px solid var(--line);
     border-radius:2px;
     padding:16px 20px 18px;
+    transition:background .3s,border-color .3s;
   }
   #controlPanel h3{
-    margin:0 0 10px; font-size:12px; letter-spacing:2px; color:var(--text);
+    margin:0 0 10px; font-size:12px; letter-spacing:2px;
+    color:var(--text);
     text-transform:uppercase;
     border-bottom:1px solid var(--line); padding-bottom:8px;
+    transition:color .3s,border-color .3s;
   }
   .ctrlRow{
     display:flex; justify-content:space-between; align-items:baseline;
     font-size:12px; margin-top:10px;
   }
-  .ctrlRow .plabel{color:var(--text-dim); letter-spacing:0.3px;}
-  .ctrlRow .pval{color:var(--amber); font-weight:700; direction:ltr;}
+  .ctrlRow .plabel{
+    color:var(--text-dim);
+    letter-spacing:0.3px;
+    transition:color .3s;
+  }
+  .ctrlRow .pval{
+    color:var(--amber);
+    font-weight:700;
+    direction:ltr;
+    transition:color .3s;
+  }
 
   #controlPanel input[type="range"]{
     -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
     background:linear-gradient(90deg, var(--field-cool), var(--line));
     outline:none; margin:4px 0 2px; cursor:pointer;
+    transition:background .3s;
   }
   #controlPanel input[type="range"]::-webkit-slider-thumb{
     -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
     background:var(--amber); border:2px solid #0a1220;
     box-shadow:0 0 8px rgba(255,178,56,0.7); cursor:pointer;
+    transition:background .3s;
+  }
+  body.light-mode #controlPanel input[type="range"]::-webkit-slider-thumb{
+    border-color:#ffffff;
+    box-shadow:0 0 8px rgba(194,65,12,0.5);
   }
   #controlPanel input[type="range"]::-moz-range-thumb{
     width:12px; height:12px; border-radius:50%;
@@ -277,12 +348,19 @@
     flex:1; font-family:inherit; font-size:12px; letter-spacing:1px;
     padding:10px 6px; border-radius:2px; cursor:pointer;
     border:1px solid var(--line);
-    transition:border-color 0.2s, color 0.2s;
+    transition:border-color 0.2s, color 0.2s, background .3s;
     background:rgba(58,160,255,0.1); color:var(--field-cool);
   }
   .btnRow button:hover{border-color:var(--field-cool);}
   #resetBtn{background:rgba(255,90,60,0.1)!important; color:var(--field-hot)!important;}
   #resetBtn:hover{border-color:var(--field-hot)!important;}
+
+  body.light-mode .btnRow button{
+    background:rgba(3,105,161,0.1);
+  }
+  body.light-mode #resetBtn{
+    background:rgba(220,38,38,0.1)!important;
+  }
 
   /* ============ Footer ============ */
   #footer{
@@ -291,12 +369,13 @@
     text-align:center;
     font-size:11px;
     color:var(--text-dim);
-    background:linear-gradient(0deg,rgba(4,7,13,0.95) 0%,transparent 100%);
+    background:var(--footer-bg);
     pointer-events:none;
     z-index:3;
     font-family:'Segoe UI',system-ui,sans-serif;
+    transition:color .3s,background .3s;
   }
-  #footer strong{color:var(--amber);}
+  #footer strong{color:var(--amber);transition:color .3s;}
 
   /* ============ التجاوب ============ */
   @media (max-width:900px){
@@ -329,7 +408,6 @@
 </head>
 <body>
 
-<!-- شريط التنقل الموحّد -->
 <nav id="navbar">
   <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
   <div class="nav-links">
@@ -341,7 +419,6 @@
   <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
 </nav>
 
-<!-- Breadcrumb -->
 <div id="breadcrumb">
   <a href="../../index.html">🏠 الرئيسية</a>
   <span class="sep">›</span>
@@ -354,14 +431,12 @@
 
 <div id="canvasHolder"></div>
 
-<!-- العنوان -->
 <div id="title">
   <h1>العلاقة بين الحركة الدائرية والحركة الخطية</h1>
   <p>s = rθ &nbsp;|&nbsp; v = rω &nbsp;|&nbsp; aₜ = rα &nbsp;|&nbsp; a_c = rω²</p>
   <div class="credit">إعداد الأستاذ <span>ماجد شلالده</span><span class="dot">•</span><span class="phone">0599870176</span></div>
 </div>
 
-<!-- اللوحة اليمنى: الشعار + التحكم -->
 <div id="rightStack">
   <div id="logoPanel">
     <img id="logoImg"
@@ -393,7 +468,6 @@
   </div>
 </div>
 
-<!-- اللوحة اليسرى: القراءات + الدليل -->
 <div id="leftStack">
   <div id="hudPanel">
     <h3>الحركة الدائرية</h3>
@@ -417,7 +491,6 @@
   </div>
 </div>
 
-<!-- Footer -->
 <div id="footer">
   © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
 </div>
@@ -441,19 +514,46 @@
     const isLight = document.body.classList.contains('light-mode');
     themeToggle.textContent = isLight ? '☀️' : '🌙';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    /* ✅ تحديث خلفية المشهد ثلاثي الأبعاد */
+    updateSceneBackground();
   });
+
+  /* ✅ دالة لتحديث خلفية المشهد حسب الوضع */
+  function updateSceneBackground(){
+    const isLight = document.body.classList.contains('light-mode');
+    if (isLight){
+      scene.background = new THREE.Color(0xdbe6f5);
+      scene.fog = new THREE.FogExp2(0xdbe6f5, 0.014);
+      if (grid){
+        grid.material.color.setHex(0x94a3b8);
+        /* إعادة بناء الشبكة بألوان فاتحة */
+        scene.remove(grid);
+        grid = new THREE.GridHelper(40, 40, 0x94a3b8, 0xcbd5e1);
+        scene.add(grid);
+      }
+    } else {
+      scene.background = new THREE.Color(0x04070d);
+      scene.fog = new THREE.FogExp2(0x04070d, 0.014);
+      if (grid){
+        scene.remove(grid);
+        grid = new THREE.GridHelper(40, 40, 0x14243a, 0x0c1626);
+        scene.add(grid);
+      }
+    }
+  }
 
   /* ============================================================
      1) الإعداد الأساسي
      ============================================================ */
   const holder = document.getElementById('canvasHolder');
   const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x04070d);
   scene.fog = new THREE.FogExp2(0x04070d, 0.014);
 
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
   camera.position.set(9, 10, 13);
 
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:false});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   holder.appendChild(renderer.domElement);
@@ -468,7 +568,7 @@
   /* ============================================================
      2) الإضاءة
      ============================================================ */
-  scene.add(new THREE.AmbientLight(0x223344, 1.2));
+  scene.add(new THREE.AmbientLight(0xffffff, 1.2));
   const key = new THREE.PointLight(0x6fb4ff, 1.4, 80);
   key.position.set(8, 12, 6);
   scene.add(key);
@@ -476,8 +576,11 @@
   rim.position.set(-8, -3, -8);
   scene.add(rim);
 
-  const grid = new THREE.GridHelper(40, 40, 0x14243a, 0x0c1626);
+  let grid = new THREE.GridHelper(40, 40, 0x14243a, 0x0c1626);
   scene.add(grid);
+
+  /* ✅ تطبيق الوضع المحفوظ عند البداية */
+  updateSceneBackground();
 
   /* ============================================================
      3) المسار الدائري
