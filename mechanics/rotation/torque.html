@@ -3,9 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>محاكاة العوامل المؤثرة في عزم القوة</title>
+<title>العوامل المؤثرة في عزم القوة | الأستاذ ماجد شلالدة</title>
 <style>
   :root{
+    /* متغيرات المنصة الموحّدة */
+    --bg-color:#0b1329;
+    --bg-secondary:#0f1a35;
+    --main-card-bg:#1c2541;
+    --sub-card-bg:#3a506b;
+    --text-color:#ffffff;
+    --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8;
+    --accent-green:#06d6a0;
+    --accent-gold:#ffd166;
+    --accent-purple:#b185ff;
+    --accent-red:#ef476f;
+    --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.3);
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --transition-fast:0.2s ease;
+    --transition-normal:0.3s ease;
+
+    /* متغيرات التصميم التقني المميز */
     --bg-deep:#04070d;
     --bg-panel:#0a1220;
     --line:#1c2b3f;
@@ -17,173 +39,353 @@
     --text:#dce8f5;
     --text-dim:#7f95ab;
   }
+
+  body.light-mode{
+    --bg-color:#f0f4f8;
+    --bg-secondary:#e2e8f0;
+    --main-card-bg:#ffffff;
+    --sub-card-bg:#e8eef5;
+    --text-color:#1a202c;
+    --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+  }
+
   *{box-sizing:border-box;}
   html,body{
     margin:0; padding:0; width:100%; height:100%; overflow:hidden;
     background:radial-gradient(ellipse at 50% 20%, #0d1930 0%, var(--bg-deep) 65%);
     font-family:'Courier New', 'Consolas', monospace;
     color:var(--text);
+    transition:background .3s,color .3s;
   }
-  #canvasHolder{position:fixed; inset:0;}
+
+  body.light-mode{
+    background:radial-gradient(ellipse at 50% 20%, #dbe6f5 0%, #f0f4f8 65%);
+    color:#1a202c;
+  }
+
+  #watermark{
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:url('../../logo.png');
+    background-size:180px;background-repeat:repeat;
+    opacity:0.03;
+  }
+
+  /* ============ شريط التنقل الموحّد ============ */
+  #navbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);
+    height:56px;
+    font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+  }
+  body.light-mode #navbar{background:rgba(255,255,255,0.92);}
+  .nav-brand{
+    font-size:1.05rem;font-weight:bold;
+    color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;
+  }
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{
+    color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:var(--radius-sm);
+    font-size:0.88rem;
+    transition:background .2s,color .2s;
+  }
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+  .theme-toggle{
+    background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.1rem;
+    width:36px;height:36px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .2s,background .2s;
+  }
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  /* ============ Breadcrumb ============ */
+  #breadcrumb{
+    position:fixed;top:70px;left:50%;transform:translateX(-50%);
+    z-index:4;
+    display:flex;align-items:center;gap:8px;
+    padding:8px 18px;
+    background:rgba(6,11,20,0.85);
+    border:1px solid var(--line);border-radius:10px;
+    font-size:12px;color:var(--text-dim);
+    font-family:'Segoe UI',system-ui,sans-serif;
+    backdrop-filter:blur(8px);
+  }
+  #breadcrumb a{
+    color:var(--field-cool);text-decoration:none;
+    transition:color .2s;
+  }
+  #breadcrumb a:hover{color:var(--amber);}
+  #breadcrumb .sep{opacity:0.5;}
+  #breadcrumb .cur{color:var(--text);font-weight:600;}
+
+  #canvasHolder{position:fixed;inset:0;z-index:1;}
   canvas{display:block;}
 
+  /* ============ العنوان الرئيسي ============ */
   #title{
-    position:fixed; top:22px; left:50%; transform:translateX(-50%);
-    text-align:center; pointer-events:none; z-index:5;
+    position:fixed;top:110px;left:50%;transform:translateX(-50%);
+    text-align:center;pointer-events:none;z-index:5;
   }
   #title h1{
-    margin:0; font-size:23px; letter-spacing:5px; font-weight:700;
-    color:var(--text); text-transform:uppercase;
+    margin:0;font-size:22px;letter-spacing:4px;font-weight:700;
+    color:var(--text);text-transform:uppercase;
     text-shadow:0 0 18px rgba(58,160,255,0.35);
   }
   #title p{
-    margin:8px 0 0; font-size:15px; letter-spacing:2px; color:var(--text-dim);
+    margin:6px 0 0;font-size:14px;letter-spacing:2px;color:var(--text-dim);
   }
   #title .credit{
-    margin:12px 0 0; font-size:15px; letter-spacing:1px; color:var(--amber);
-    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:10px 0 0;font-size:14px;letter-spacing:1px;color:var(--amber);
+    display:flex;align-items:center;justify-content:center;gap:8px;
     direction:rtl;
   }
-  #title .credit .dot{opacity:0.4; color:var(--text-dim);}
-  #title .credit .phone{direction:ltr; unicode-bidi:embed; color:var(--field-cool);}
+  #title .credit .dot{opacity:0.4;color:var(--text-dim);}
+  #title .credit .phone{direction:ltr;unicode-bidi:embed;color:var(--field-cool);}
 
-  #nav{
-    position:fixed; top:20px; right:22px; z-index:6;
-    display:flex; flex-direction:column; gap:8px; align-items:flex-end;
+  /* ============ أزرار سريعة ============ */
+  #quickBtns{
+    position:fixed;top:80px;right:22px;z-index:6;
+    display:flex;gap:8px;
   }
-  #nav a{
-    display:flex; align-items:center; gap:10px;
-    background:rgba(10,18,32,0.85); border:1px solid var(--line);
-    color:var(--text); text-decoration:none;
-    font-family:inherit; font-size:15px; letter-spacing:0.5px;
-    padding:10px 18px; border-radius:2px;
-    transition:border-color 0.2s, color 0.2s, transform 0.15s;
-    white-space:nowrap;
+  #quickBtns a{
+    display:flex;align-items:center;gap:8px;
+    background:rgba(10,18,32,0.85);border:1px solid var(--line);
+    color:var(--text);text-decoration:none;
+    font-family:'Courier New',monospace;font-size:13px;
+    padding:8px 14px;border-radius:2px;
+    transition:border-color .2s,color .2s,transform .15s;
   }
-  #nav a:hover{
-    border-color:var(--field-cool); color:var(--field-cool); transform:translateX(-2px);
+  #quickBtns a:hover{
+    border-color:var(--field-cool);color:var(--field-cool);
+    transform:translateY(-2px);
   }
-  #nav a .arrow{font-size:17px; line-height:1;}
-  #nav a.home:hover{border-color:var(--amber); color:var(--amber);}
+  #quickBtns a.home:hover{border-color:var(--amber);color:var(--amber);}
 
+  /* ============ لوحة التحكم ============ */
   #controlPanel{
-    position:fixed; bottom:24px; right:22px; z-index:5;
-    background:rgba(6,11,20,0.86); border:1px solid var(--line); border-radius:2px;
-    padding:16px 20px 18px; width:min(300px, 88vw);
+    position:fixed;top:150px;right:22px;z-index:5;
+    background:rgba(6,11,20,0.86);border:1px solid var(--line);border-radius:2px;
+    padding:16px 20px 18px;width:min(300px,88vw);
+    max-height:calc(100vh - 180px);
+    overflow-y:auto;
     transition:transform 0.25s ease;
   }
   #controlPanel h3{
-    margin:0 0 10px; font-size:12px; letter-spacing:2px; color:var(--text);
-    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;
+    margin:0 0 10px;font-size:12px;letter-spacing:2px;color:var(--text);
+    text-transform:uppercase;
+    border-bottom:1px solid var(--line);padding-bottom:8px;
   }
-  .ctrlRow{display:flex; justify-content:space-between; align-items:baseline; font-size:12px; margin-top:10px;}
-  .ctrlRow .plabel{color:var(--text-dim); letter-spacing:0.3px;}
-  .ctrlRow .pval{color:var(--amber); font-weight:700; direction:ltr;}
+  .ctrlRow{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12px;margin-top:10px;
+  }
+  .ctrlRow .plabel{color:var(--text-dim);letter-spacing:0.3px;}
+  .ctrlRow .pval{color:var(--amber);font-weight:700;direction:ltr;}
+
   #controlPanel input[type="range"]{
-    -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
-    background:linear-gradient(90deg, var(--field-cool), var(--line)); outline:none; margin:4px 0 2px; cursor:pointer;
+    -webkit-appearance:none;width:100%;height:4px;border-radius:2px;
+    background:linear-gradient(90deg,var(--field-cool),var(--line));
+    outline:none;margin:4px 0 2px;cursor:pointer;
   }
   #controlPanel input[type="range"]::-webkit-slider-thumb{
-    -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
-    background:var(--amber); border:2px solid #0a1220;
-    box-shadow:0 0 8px rgba(255,178,56,0.7); cursor:pointer;
+    -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+    background:var(--amber);border:2px solid #0a1220;
+    box-shadow:0 0 8px rgba(255,178,56,0.7);cursor:pointer;
   }
   #controlPanel input[type="range"]::-moz-range-thumb{
-    width:12px; height:12px; border-radius:50%;
-    background:var(--amber); border:2px solid #0a1220;
-    box-shadow:0 0 8px rgba(255,178,56,0.7); cursor:pointer;
+    width:12px;height:12px;border-radius:50%;
+    background:var(--amber);border:2px solid #0a1220;
+    box-shadow:0 0 8px rgba(255,178,56,0.7);cursor:pointer;
   }
-  .btnRow{display:flex; gap:8px; margin-top:16px;}
+
+  .btnRow{display:flex;gap:8px;margin-top:16px;}
   .btnRow button{
-    flex:1; font-family:inherit; font-size:12px; letter-spacing:1px;
-    padding:10px 8px; border-radius:2px; cursor:pointer;
-    border:1px solid var(--line); transition:border-color 0.2s, color 0.2s;
-    background:rgba(58,160,255,0.1); color:var(--field-cool);
+    flex:1;font-family:inherit;font-size:12px;letter-spacing:1px;
+    padding:10px 8px;border-radius:2px;cursor:pointer;
+    border:1px solid var(--line);
+    transition:border-color .2s,color .2s;
+    background:rgba(58,160,255,0.1);color:var(--field-cool);
   }
   .btnRow button:hover{border-color:var(--field-cool);}
-  #resetBtn{background:rgba(255,90,60,0.1)!important; color:var(--field-hot)!important;}
+  #resetBtn{background:rgba(255,90,60,0.1)!important;color:var(--field-hot)!important;}
   #resetBtn:hover{border-color:var(--field-hot)!important;}
 
+  /* ============ لوحة النتائج ============ */
   #hudPanel{
-    position:fixed; top:140px; left:22px; z-index:5;
-    background:rgba(6,11,20,0.82); border:1px solid var(--line); border-radius:2px;
-    padding:16px 20px 18px; width:260px;
+    position:fixed;top:150px;left:22px;z-index:5;
+    background:rgba(6,11,20,0.82);border:1px solid var(--line);border-radius:2px;
+    padding:16px 20px 18px;width:270px;
   }
   #hudPanel h3{
-    margin:0 0 12px; font-size:13px; letter-spacing:2px; color:var(--text);
-    text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;
+    margin:0 0 12px;font-size:13px;letter-spacing:2px;color:var(--text);
+    text-transform:uppercase;
+    border-bottom:1px solid var(--line);padding-bottom:8px;
   }
-  .hudRow{display:flex; justify-content:space-between; font-size:13px; margin:7px 0; color:var(--text-dim);}
-  .hudRow b{color:var(--text); direction:ltr;}
-  .hudRow.highlight b{color:var(--amber); font-size:16px;}
-  .hudDivider{border-top:1px solid var(--line); margin:10px 0; padding-top:2px;}
-  #hudPanel .formula{font-size:12px; color:var(--text-dim); direction:ltr; text-align:center; margin-top:8px;}
+  .hudRow{
+    display:flex;justify-content:space-between;
+    font-size:13px;margin:7px 0;color:var(--text-dim);
+  }
+  .hudRow b{color:var(--text);direction:ltr;}
+  .hudRow.highlight b{color:var(--amber);font-size:16px;}
+  .hudDivider{border-top:1px solid var(--line);margin:10px 0;padding-top:2px;}
+  #hudPanel .formula{
+    font-size:12px;color:var(--text-dim);
+    direction:ltr;text-align:center;margin-top:8px;
+    font-family:'Courier New',monospace;
+  }
 
+  /* ============ صندوق العوامل ============ */
   #legend{
-    position:fixed; top:140px; right:22px; z-index:5;
-    background:rgba(6,11,20,0.75); border:1px solid var(--line); border-radius:2px;
-    padding:16px 20px; font-size:13px; color:var(--text-dim); max-width:250px;
+    position:fixed;top:450px;left:22px;z-index:5;
+    background:rgba(6,11,20,0.75);border:1px solid var(--line);border-radius:2px;
+    padding:16px 20px;font-size:13px;color:var(--text-dim);width:270px;
   }
-  #legend h3{margin:0 0 10px; font-size:12px; letter-spacing:2px; color:var(--text); text-transform:uppercase; border-bottom:1px solid var(--line); padding-bottom:8px;}
-  #legend .factRow{margin:9px 0; line-height:1.6;}
+  #legend h3{
+    margin:0 0 10px;font-size:12px;letter-spacing:2px;color:var(--text);
+    text-transform:uppercase;
+    border-bottom:1px solid var(--line);padding-bottom:8px;
+  }
+  #legend .factRow{margin:9px 0;line-height:1.6;}
   #legend .factRow b{color:var(--field-cool);}
 
+  /* ============ زر الجوال ============ */
   #mobileToggle{
     display:none;
-    position:fixed; bottom:18px; right:18px; z-index:7;
-    width:52px; height:52px; border-radius:50%;
-    background:rgba(10,18,32,0.95); border:1px solid var(--field-cool);
-    color:var(--field-cool); font-size:22px; line-height:1;
-    cursor:pointer; align-items:center; justify-content:center;
+    position:fixed;bottom:18px;right:18px;z-index:7;
+    width:52px;height:52px;border-radius:50%;
+    background:rgba(10,18,32,0.95);
+    border:1px solid var(--field-cool);
+    color:var(--field-cool);font-size:22px;line-height:1;
+    cursor:pointer;
+    align-items:center;justify-content:center;
     box-shadow:0 0 14px rgba(58,160,255,0.5);
   }
+  #mobileToggle.open{background:var(--field-cool);color:#0a1220;}
 
+  /* ============ Footer ============ */
+  #footer{
+    position:fixed;bottom:0;left:0;right:0;
+    padding:8px 20px;
+    text-align:center;
+    font-size:11px;
+    color:var(--text-dim);
+    background:linear-gradient(0deg,rgba(4,7,13,0.95) 0%,transparent 100%);
+    pointer-events:none;
+    z-index:3;
+    font-family:'Segoe UI',system-ui,sans-serif;
+  }
+  #footer strong{color:var(--amber);}
+
+  /* ============ التجاوب ============ */
   @media (max-width:640px){
     #legend{display:none;}
-    #hudPanel{
-      top:auto; bottom:86px; left:12px; right:12px;
-      width:auto; padding:10px 14px;
+    #breadcrumb{
+      top:62px;font-size:10.5px;padding:6px 12px;
+      max-width:calc(100vw - 20px);
     }
-    #hudPanel h3{font-size:11px; margin-bottom:8px;}
-    .hudRow{font-size:11px; margin:4px 0;}
+    #breadcrumb a{padding:0 2px;}
+    #title{top:100px;padding:0 10px;}
+    #title h1{font-size:14px;letter-spacing:2px;}
+    #title p{font-size:10.5px;margin-top:4px;}
+    #title .credit{font-size:10.5px;margin-top:6px;}
+
+    #hudPanel{
+      top:auto;bottom:86px;left:12px;right:12px;
+      width:auto;padding:10px 14px;
+    }
+    #hudPanel h3{font-size:11px;margin-bottom:8px;}
+    .hudRow{font-size:11px;margin:4px 0;}
     .hudRow.highlight b{font-size:13px;}
     #hudPanel .formula{display:none;}
 
     #controlPanel{
-      bottom:14px; left:12px; right:12px;
-      width:auto; max-height:70vh; overflow-y:auto;
+      top:auto;bottom:14px;left:12px;right:12px;
+      width:auto;max-height:70vh;overflow-y:auto;
       transform:translateY(calc(100% + 20px));
       padding:14px 16px;
     }
     #controlPanel.open{transform:translateY(0);}
 
     #mobileToggle{display:flex;}
-    #mobileToggle.open{background:var(--field-cool); color:#0a1220;}
 
-    #title h1{font-size:15px; letter-spacing:2px;}
-    #title p{font-size:11px; margin-top:4px;}
-    #title .credit{font-size:11px; margin-top:8px;}
-    #nav{top:12px; right:12px; gap:6px;}
-    #nav a{font-size:11px; padding:7px 11px;}
-    #nav a .arrow{font-size:13px;}
+    #quickBtns{top:70px;right:8px;}
+    #quickBtns a{font-size:10.5px;padding:6px 10px;}
+
+    #navbar{padding:10px 15px;flex-wrap:wrap;gap:10px;}
+    .nav-links{order:3;width:100%;justify-content:center;}
+    .nav-links a{padding:6px 10px;font-size:0.8rem;}
+    .nav-brand span{display:none;}
+    #footer{font-size:9.5px;padding:5px 10px;}
   }
 </style>
 </head>
 <body>
 
-<div id="canvasHolder"></div>
+<div id="watermark"></div>
 
-<div id="nav">
-  <a class="field" href="rotation.html"><span class="arrow">↩</span> العودة للحركة الدورانية</a>
-  <a class="home" href="../../index.html"><span class="arrow">⌂</span> العودة للصفحة الرئيسية</a>
+<!-- شريط التنقل الموحّد -->
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+</nav>
+
+<!-- Breadcrumb -->
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+  <span class="sep">›</span>
+  <a href="rotation.html">🔄 الحركة الدورانية</a>
+  <span class="sep">›</span>
+  <span class="cur">🔧 عزم القوة</span>
 </div>
 
+<div id="canvasHolder"></div>
+
+<!-- أزرار سريعة -->
+<div id="quickBtns">
+  <a class="home" href="../../index.html">🏠 الرئيسية</a>
+  <a class="field" href="rotation.html">↩ الحركة الدورانية</a>
+</div>
+
+<!-- العنوان -->
 <div id="title">
   <h1>العوامل المؤثرة في عزم القوة</h1>
   <p>τ = F × r × sin θ</p>
-  <div class="credit">إعداد الأستاذ <span>ماجد شلالده</span><span class="dot">•</span><span class="phone">0599870176</span></div>
+  <div class="credit">
+    إعداد الأستاذ <span>ماجد شلالده</span>
+    <span class="dot">•</span>
+    <span class="phone">0599870176</span>
+  </div>
 </div>
 
+<!-- لوحة النتائج -->
+<div id="hudPanel">
+  <h3>النتائج اللحظية</h3>
+  <div class="hudRow"><span>ذراع القوة العمودي d = r sinθ</span><b id="dVal">0.00 m</b></div>
+  <div class="hudRow highlight"><span>عزم القوة τ = F·d</span><b id="tauVal">0.00 N·m</b></div>
+  <div class="hudDivider"></div>
+  <div class="hudRow"><span>عزم القصور الذاتي I = ⅓mL²</span><b id="iVal">0.00 kg·m²</b></div>
+  <div class="hudRow"><span>التسارع الزاوي α = τ/I</span><b id="alphaVal">0.00 rad/s²</b></div>
+  <div class="hudRow"><span>السرعة الزاوية الحالية ω</span><b id="omegaVal">0.00 rad/s</b></div>
+  <div class="formula">لاحظ: تثبيت F وr وتغيير θ فقط يوضح أثر الزاوية</div>
+</div>
+
+<!-- صندوق العوامل -->
 <div id="legend">
   <h3>العوامل الثلاثة</h3>
   <div class="factRow"><b>F</b> — شدة القوة: زيادتها تزيد العزم <b>خطيًا</b>.</div>
@@ -191,19 +393,9 @@
   <div class="factRow"><b>θ</b> — الزاوية بين القوة والذراع: العزم أقصى ما يكون عند <b>90°</b>، ويصبح صفرًا عند 0° أو 180°.</div>
 </div>
 
-<div id="hudPanel">
-  <h3>النتائج اللحظية</h3>
-  <div class="hudRow"><span>ذراع القوة العمودي d = r sinθ</span><b id="dVal">0.00 m</b></div>
-  <div class="hudRow highlight"><span>عزم القوة τ = F·d</span><b id="tauVal">0.00 N·m</b></div>
-  <div class="hudDivider"></div>
-  <div class="hudRow"><span>عزم القصور الذاتي I = ⅓mL&sup2;</span><b id="iVal">0.00 kg·m²</b></div>
-  <div class="hudRow"><span>التسارع الزاوي α = τ/I</span><b id="alphaVal">0.00 rad/s²</b></div>
-  <div class="hudRow"><span>السرعة الزاوية الحالية ω</span><b id="omegaVal">0.00 rad/s</b></div>
-  <div class="formula">لاحظ: تثبيت F وr وتغيير θ فقط يوضح أثر الزاوية بمعزل عن باقي العوامل</div>
-</div>
-
 <button id="mobileToggle" aria-label="toggle controls">☰</button>
 
+<!-- لوحة التحكم -->
 <div id="controlPanel">
   <h3>معطيات العزم</h3>
   <div class="ctrlRow"><span class="plabel">شدة القوة F (N)</span><span id="fval" class="pval">20.0</span></div>
@@ -226,17 +418,40 @@
   </div>
 </div>
 
+<!-- Footer -->
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (function(){
 
-  // ============================================================
-  // LOGO — external file (place logo.png next to this HTML file)
-  // ============================================================
-  const LOGO_PATH = "logo.png";
+  /* ============================================================
+     0) الوضع الليلي/النهاري
+     ============================================================ */
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    themeToggle.textContent = '☀️';
+  }
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    themeToggle.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  });
 
-  // ---------- basic setup ----------
+  /* ============================================================
+     1) الشعار الخارجي
+     ============================================================ */
+  const LOGO_PATH = "../../logo.png";
+
+  /* ============================================================
+     2) الإعداد الأساسي
+     ============================================================ */
   const holder = document.getElementById('canvasHolder');
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x04070d, 0.015);
@@ -257,7 +472,9 @@
   controls.maxDistance = 50;
   controls.target.set(0.8, 1.1, 0.8);
 
-  // ---------- lighting ----------
+  /* ============================================================
+     3) الإضاءة
+     ============================================================ */
   scene.add(new THREE.AmbientLight(0x223344, 1.2));
   const key = new THREE.PointLight(0x6fb4ff, 1.4, 80);
   key.position.set(6, 10, 5);
@@ -272,9 +489,9 @@
   const grid = new THREE.GridHelper(30, 30, 0x14243a, 0x0c1626);
   scene.add(grid);
 
-  // ============================================================
-  // FLOOR LOGO — external file
-  // ============================================================
+  /* ============================================================
+     4) الشعار على الأرض
+     ============================================================ */
   const logoTexture = new THREE.TextureLoader().load(
     LOGO_PATH,
     (tex) => {
@@ -285,42 +502,30 @@
     () => {
       console.warn("Logo file not found at: " + LOGO_PATH);
       logoMesh.visible = false;
-      logoGlow.visible = false;
     }
   );
 
   const logoMesh = new THREE.Mesh(
-    new THREE.CircleGeometry(2.2, 96),
+    new THREE.CircleGeometry(1.65, 96),
     new THREE.MeshBasicMaterial({
-      map: logoTexture, transparent: true, opacity: 1, depthWrite: false
+      map: logoTexture, transparent: true, opacity: 0.65, depthWrite: false
     })
   );
   logoMesh.rotation.x = -Math.PI/2;
   logoMesh.position.set(0, 0.02, 0);
   scene.add(logoMesh);
 
-  const logoGlow = new THREE.Mesh(
-    new THREE.RingGeometry(2.1, 2.6, 96),
-    new THREE.MeshBasicMaterial({
-      color: 0x1c3352, transparent: true, opacity: 0.3,
-      side: THREE.DoubleSide, depthWrite: false
-    })
-  );
-  logoGlow.rotation.x = -Math.PI/2;
-  logoGlow.position.set(0, 0.01, 0);
-  scene.add(logoGlow);
-
-  // ============================================================
-  // DIMENSIONS — tall axle raises the rod well above the floor
-  // ============================================================
+  /* ============================================================
+     5) الأبعاد
+     ============================================================ */
   const AXLE_HEIGHT = 1.6;
   const ROD_Y       = 1.30;
   const ARM_Y       = ROD_Y + 0.12;
   const ARC_Y       = ROD_Y + 0.28;
 
-  // ============================================================
-  // PIVOT — tall smooth axle with base & collar
-  // ============================================================
+  /* ============================================================
+     6) المحور
+     ============================================================ */
   const metalMat = new THREE.MeshPhysicalMaterial({
     color: 0x8ea4b8, roughness: 0.35, metalness: 0.55
   });
@@ -353,9 +558,9 @@
   pivotCap.position.y = AXLE_HEIGHT + 0.05;
   scene.add(pivotCap);
 
-  // ============================================================
-  // ROD
-  // ============================================================
+  /* ============================================================
+     7) الساق الدوّار
+     ============================================================ */
   let ROD_LENGTH = 2.5;
 
   const rodGroup = new THREE.Group();
@@ -381,9 +586,9 @@
   appMarker.position.y = ROD_Y;
   rodGroup.add(appMarker);
 
-  // ============================================================
-  // ARROWS — smooth cylinders with proper shading
-  // ============================================================
+  /* ============================================================
+     8) الأسهم
+     ============================================================ */
   const RADIAL_SEGMENTS = 64;
 
   function makeArrow(color, thicknessScale = 1, emissiveIntensity = 0.35){
@@ -431,10 +636,7 @@
     arrow.head.position.y = shaftLen + effectiveHead / 2;
   }
 
-  // Force arrow — bright red, the visual focus
   const forceArrow = makeArrow(0xff3b30, 1.0, 0.35);
-
-  // r vector — BRIGHT neon green (0x39ff14) with strong glow
   const rArrow = makeArrow(0x39ff14, 0.65, 0.45);
 
   scene.add(forceArrow.grp);
@@ -444,9 +646,9 @@
   rodGroup.add(rArrow.grp);
   let rVectorVisible = true;
 
-  // ============================================================
-  // MOMENT-ARM dashed line — preallocated buffer
-  // ============================================================
+  /* ============================================================
+     9) ذراع العزم المتقطع
+     ============================================================ */
   const armPositions = new Float32Array(6);
   const armGeom = new THREE.BufferGeometry();
   const armAttr = new THREE.BufferAttribute(armPositions, 3);
@@ -463,9 +665,9 @@
   armLine.frustumCulled = false;
   scene.add(armLine);
 
-  // ============================================================
-  // ANGLE ARC — preallocated buffer
-  // ============================================================
+  /* ============================================================
+     10) قوس الزاوية
+     ============================================================ */
   const ARC_STEPS = 48;
 
   const arcPositions = new Float32Array((ARC_STEPS + 1) * 3);
@@ -483,9 +685,9 @@
   scene.add(arcLine);
   let angleArcVisible = true;
 
-  // ============================================================
-  // STATE
-  // ============================================================
+  /* ============================================================
+     11) الحالة
+     ============================================================ */
   const G_ARROW_SCALE = 0.032;
   const TIME_SCALE    = 0.35;
   const Y_AXIS        = new THREE.Vector3(0, 1, 0);
@@ -574,7 +776,9 @@
     }
   }
 
-  // ---------- UI wiring ----------
+  /* ============================================================
+     12) ربط عناصر التحكم
+     ============================================================ */
   const fSlider=document.getElementById('fSlider'), fval=document.getElementById('fval');
   const lSlider=document.getElementById('lSlider'), lvalEl=document.getElementById('lval');
   const rSlider=document.getElementById('rSlider'), rvalEl=document.getElementById('rval');
@@ -653,7 +857,9 @@
 
   updateVisuals();
 
-  // ---------- animation loop ----------
+  /* ============================================================
+     13) حلقة الرسم
+     ============================================================ */
   const clock = new THREE.Clock();
 
   function animate(){
