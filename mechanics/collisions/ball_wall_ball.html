@@ -183,7 +183,7 @@
   }
 
   /* ============================================================
-     ✅ لوحة التحكم — مضغوطة بدون شريط تمرير
+     ✅ لوحة التحكم — بدون شريط تمرير ظاهر
      ============================================================ */
   #panel{
     position:fixed;
@@ -191,41 +191,44 @@
     right: var(--panel-right);
     width: var(--panel-width);
     max-height: calc(100% - 330px);
-    overflow-y: auto;                /* يظهر فقط عند الحاجة الشديدة */
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* ✅ إخفاء شريط التمرير في كل المتصفحات */
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* Edge / IE */
+
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: 16px;
-    padding: 12px 14px 10px;         /* ← ضغط padding */
+    padding: 10px 12px 8px;
     backdrop-filter: blur(10px);
     z-index: 35;
   }
-  #panel::-webkit-scrollbar{width:5px;}
-  #panel::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.3);border-radius:3px;}
-  /* ✅ إخفاء شريط التمرير في Firefox عند عدم الحاجة */
-  #panel{ scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.4) transparent; }
+  #panel::-webkit-scrollbar{ display:none; width:0; height:0; }  /* Chrome / Safari */
 
   #panel h3{
-    margin:0 0 8px;                  /* ← من 12 إلى 8 */
-    font-size:13.5px;                /* ← من 14 إلى 13.5 */
+    margin:0 0 6px;
+    font-size:13px;
     color:var(--accent2);
     border-bottom:1px solid var(--panel-border);
-    padding-bottom:6px;              /* ← من 8 إلى 6 */
+    padding-bottom:5px;
   }
 
   .ctrlGroup{
-    margin-bottom: 8px;              /* ← من 12 إلى 8 */
-    padding: 8px 10px;               /* ← من 10px 12px إلى 8px 10px */
-    border-radius: 10px;
+    margin-bottom: 6px;
+    padding: 6px 9px;
+    border-radius: 9px;
     background: rgba(128,128,128,.06);
   }
   .ctrlGroup .title{
-    font-size: 11.5px;               /* ← من 12 إلى 11.5 */
+    font-size: 11px;
     font-weight: bold;
-    margin-bottom: 5px;              /* ← من 8 إلى 5 */
+    margin-bottom: 3px;
     display: flex; align-items: center; gap: 6px;
   }
   .ctrlGroup .title .dot{
-    width: 10px; height: 10px;       /* ← من 12 إلى 10 */
+    width: 9px; height: 9px;
     border-radius: 50%; flex: none;
   }
   .ctrlGroup.ball1 .title{color:#06d6a0;}
@@ -240,37 +243,37 @@
   .ctrlRow{
     display: flex;
     justify-content: space-between;
-    font-size: 11.5px;               /* ← من 12 إلى 11.5 */
-    margin: 3px 0 2px;               /* ← من 6px 0 3px إلى 3px 0 2px */
+    font-size: 11px;
+    margin: 2px 0 1px;
   }
   .ctrlRow span{color:var(--muted);}
   .ctrlRow b{
     color:var(--text);
     direction:ltr;
     font-family:'Courier New',monospace;
-    font-size: 11.5px;
+    font-size: 11px;
   }
 
   input[type=range]{
     width: 100%;
     accent-color: var(--accent);
-    margin: 2px 0 4px;               /* ← من 5px إلى 4px */
-    height: 14px;                    /* ← ارتفاع أنحف */
+    margin: 1px 0 3px;
+    height: 12px;
   }
 
   .btn-row{
     display: flex; gap: 6px;
-    margin-top: 8px;                 /* ← من 10 إلى 8 */
+    margin-top: 6px;
     flex-wrap: wrap;
   }
   .btn{
     flex: 1;
-    padding: 8px 8px;                /* ← من 9px 10px إلى 8px 8px */
-    border-radius: 9px;
+    padding: 7px 8px;
+    border-radius: 8px;
     border: 1px solid var(--panel-border);
     background: rgba(128,128,128,.08);
     color: var(--text);
-    font-size: 12px;                 /* ← من 12.5 إلى 12 */
+    font-size: 11.5px;
     font-weight: bold;
     cursor: pointer;
     font-family: inherit;
@@ -282,12 +285,12 @@
   .sound-btn{
     display: flex; align-items: center; justify-content: center; gap: 6px;
     width: 100%;
-    padding: 7px;                    /* ← من 9 إلى 7 */
-    border-radius: 9px;
+    padding: 6px;
+    border-radius: 8px;
     border: 1px solid var(--panel-border);
     background: rgba(177,133,255,.1);
     color: var(--text);
-    font-size: 11.5px;               /* ← من 12.5 إلى 11.5 */
+    font-size: 11px;
     font-weight: bold;
     cursor: pointer;
     font-family: inherit;
@@ -321,7 +324,7 @@
     #logoWrap{top:105px;height:130px;}
     #logoWrap img{width:115px;height:115px;}
     #logoFallback{width:115px;height:115px;font-size:3.5rem;}
-    #panel{top:245px;max-height:calc(100% - 305px);}
+    #panel{top:245px;max-height:calc(100% - 300px);padding:9px 10px 7px;}
   }
   @media(max-width:650px){
     #hud{display:none;}
@@ -331,7 +334,7 @@
     #logoWrap{top:auto;bottom:16px;left:8px;right:auto;width:90px;height:90px;}
     #logoWrap img{width:80px;height:80px;}
     #logoFallback{width:80px;height:80px;font-size:2.8rem;}
-    #panel{top:auto;bottom:16px;right:8px;left:auto;width:calc(100vw - 116px);max-width:320px;max-height:62vh;}
+    #panel{top:auto;bottom:16px;right:8px;left:auto;width:calc(100vw - 116px);max-width:320px;max-height:62vh;padding:9px 10px 7px;}
     #hint{display:none;}
     #footer{font-size:9.5px;padding:5px 10px;}
   }
