@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اصطدام كرة بجدار ثم بكرة ثانية | الأستاذ ماجد شلالدة</title>
+<style>
+  :root{
+    --bg-color:#0b1329;
+    --main-card-bg:#1c2541;
+    --sub-card-bg:#3a506b;
+    --text-color:#ffffff;
+    --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8;
+    --accent-green:#06d6a0;
+    --accent-gold:#ffd166;
+    --accent-red:#ef476f;
+    --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --radius-sm:8px;
+
+    --panel-bg: rgba(18,22,32,0.92);
+    --panel-border: rgba(255,255,255,0.10);
+    --accent: #5b8cff;
+    --accent2: #ffb545;
+    --text: #eef1f7;
+    --muted: #9aa3b5;
+
+    --panel-width: 320px;
+    --panel-right: 18px;
+
+    --scene-bg: #0b0e14;
+  }
+
+  body.light-mode{
+    --main-card-bg:#ffffff;
+    --sub-card-bg:#e8eef5;
+    --text-color:#1a202c;
+    --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+
+    --panel-bg: rgba(255,255,255,0.94);
+    --panel-border: rgba(0,0,0,0.12);
+    --accent: #2563eb;
+    --accent2: #c2410c;
+    --text: #0f172a;
+    --muted: #475569;
+
+    --scene-bg: #dbe6f5;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;overflow:hidden;
+    background:var(--scene-bg);
+    font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+    color:var(--text);
+    transition:background .3s,color .3s;
+  }
+
+  #canvasHost{position:fixed;inset:0;z-index:1;}
+  #canvasHost canvas{display:block;}
+
+  #navbar{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);
+    height:56px;
+  }
+  body.light-mode #navbar{background:rgba(255,255,255,0.92);}
+  .nav-brand{
+    font-size:1.05rem;font-weight:bold;
+    color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;
+  }
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{
+    color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:var(--radius-sm);
+    font-size:0.88rem;
+    transition:background .2s,color .2s;
+  }
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+  .theme-toggle{
+    background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.1rem;
+    width:36px;height:36px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  #breadcrumb{
+    position:fixed;top:70px;left:50%;transform:translateX(-50%);
+    z-index:40;
+    display:flex;align-items:center;gap:8px;
+    padding:8px 18px;
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);border-radius:10px;
+    font-size:12px;color:var(--muted);
+    backdrop-filter:blur(8px);
+  }
+  #breadcrumb a{color:var(--accent);text-decoration:none;}
+  #breadcrumb .sep{opacity:0.5;}
+  #breadcrumb .cur{color:var(--text);font-weight:600;}
+
+  #siteHeader{
+    position:fixed;top:105px;left:0;right:0;
+    height:60px;
+    padding:8px 20px 0 20px;
+    text-align:center;
+    z-index:25;pointer-events:none;
+  }
+  #titleBlock{
+    max-width:900px;
+    margin:0 auto;
+    text-align:center;
+    pointer-events:none;
+  }
+  #titleBlock h1{
+    margin:0;font-size:18px;line-height:1.4;
+    color:var(--accent2);
+    text-shadow:0 2px 8px rgba(0,0,0,.15);
+  }
+  #titleBlock .credit{
+    font-size:11px;color:var(--muted);
+    margin-top:3px;
+  }
+
+  #hud{
+    position:fixed;
+    top:175px;left:18px;
+    width:290px;
+    max-height:calc(100% - 255px);
+    overflow-y:auto;
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    padding:16px 18px;
+    backdrop-filter:blur(10px);
+    z-index:35;
+  }
+  #hud::-webkit-scrollbar{width:5px;}
+  #hud::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.4);border-radius:3px;}
+
+  #hud h3{
+    margin:0 0 10px;font-size:13.5px;color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);padding-bottom:6px;
+  }
+  .hudRow{
+    display:flex;justify-content:space-between;
+    font-size:12px;margin:5px 0;color:var(--muted);
+  }
+  .hudRow b{color:var(--text);direction:ltr;font-family:'Courier New',monospace;}
+
+  #logoWrap{
+    position:fixed;
+    top:120px;
+    right:var(--panel-right);
+    width:var(--panel-width);
+    height:150px;
+    display:flex;justify-content:center;align-items:center;
+    z-index:30;pointer-events:none;
+  }
+  #logoWrap img{
+    width:130px;height:130px;
+    border-radius:50%;
+    background:#fff;object-fit:cover;
+    box-shadow:0 6px 30px rgba(0,0,0,.5), 0 0 0 4px rgba(255,255,255,.08);
+    border:3px solid rgba(255,255,255,.2);
+  }
+  body.light-mode #logoWrap img{
+    box-shadow:0 6px 30px rgba(0,0,0,.2), 0 0 0 4px rgba(0,0,0,.05);
+    border-color:rgba(0,0,0,.1);
+  }
+  #logoFallback{
+    display:none;width:130px;height:130px;border-radius:50%;
+    background:linear-gradient(135deg,#f77f00,#00b4d8);
+    align-items:center;justify-content:center;
+    font-size:4rem;color:#fff;
+  }
+
+  /* ============================================================
+     ✅ لوحة التحكم — مضغوطة بدون شريط تمرير
+     ============================================================ */
+  #panel{
+    position:fixed;
+    top: 275px;
+    right: var(--panel-right);
+    width: var(--panel-width);
+    max-height: calc(100% - 330px);
+    overflow-y: auto;                /* يظهر فقط عند الحاجة الشديدة */
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 12px 14px 10px;         /* ← ضغط padding */
+    backdrop-filter: blur(10px);
+    z-index: 35;
+  }
+  #panel::-webkit-scrollbar{width:5px;}
+  #panel::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.3);border-radius:3px;}
+  /* ✅ إخفاء شريط التمرير في Firefox عند عدم الحاجة */
+  #panel{ scrollbar-width: thin; scrollbar-color: rgba(128,128,128,0.4) transparent; }
+
+  #panel h3{
+    margin:0 0 8px;                  /* ← من 12 إلى 8 */
+    font-size:13.5px;                /* ← من 14 إلى 13.5 */
+    color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);
+    padding-bottom:6px;              /* ← من 8 إلى 6 */
+  }
+
+  .ctrlGroup{
+    margin-bottom: 8px;              /* ← من 12 إلى 8 */
+    padding: 8px 10px;               /* ← من 10px 12px إلى 8px 10px */
+    border-radius: 10px;
+    background: rgba(128,128,128,.06);
+  }
+  .ctrlGroup .title{
+    font-size: 11.5px;               /* ← من 12 إلى 11.5 */
+    font-weight: bold;
+    margin-bottom: 5px;              /* ← من 8 إلى 5 */
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ctrlGroup .title .dot{
+    width: 10px; height: 10px;       /* ← من 12 إلى 10 */
+    border-radius: 50%; flex: none;
+  }
+  .ctrlGroup.ball1 .title{color:#06d6a0;}
+  .ctrlGroup.ball1 .title .dot{background:#06d6a0;}
+  .ctrlGroup.ball2 .title{color:#ef476f;}
+  .ctrlGroup.ball2 .title .dot{background:#ef476f;}
+  .ctrlGroup.wall .title{color:#ffd166;}
+  .ctrlGroup.wall .title .dot{background:#ffd166;}
+  .ctrlGroup.sound .title{color:#b185ff;}
+  .ctrlGroup.sound .title .dot{background:#b185ff;}
+
+  .ctrlRow{
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;               /* ← من 12 إلى 11.5 */
+    margin: 3px 0 2px;               /* ← من 6px 0 3px إلى 3px 0 2px */
+  }
+  .ctrlRow span{color:var(--muted);}
+  .ctrlRow b{
+    color:var(--text);
+    direction:ltr;
+    font-family:'Courier New',monospace;
+    font-size: 11.5px;
+  }
+
+  input[type=range]{
+    width: 100%;
+    accent-color: var(--accent);
+    margin: 2px 0 4px;               /* ← من 5px إلى 4px */
+    height: 14px;                    /* ← ارتفاع أنحف */
+  }
+
+  .btn-row{
+    display: flex; gap: 6px;
+    margin-top: 8px;                 /* ← من 10 إلى 8 */
+    flex-wrap: wrap;
+  }
+  .btn{
+    flex: 1;
+    padding: 8px 8px;                /* ← من 9px 10px إلى 8px 8px */
+    border-radius: 9px;
+    border: 1px solid var(--panel-border);
+    background: rgba(128,128,128,.08);
+    color: var(--text);
+    font-size: 12px;                 /* ← من 12.5 إلى 12 */
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    transition: .2s;
+  }
+  .btn:hover{background:rgba(128,128,128,.18);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .sound-btn{
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%;
+    padding: 7px;                    /* ← من 9 إلى 7 */
+    border-radius: 9px;
+    border: 1px solid var(--panel-border);
+    background: rgba(177,133,255,.1);
+    color: var(--text);
+    font-size: 11.5px;               /* ← من 12.5 إلى 11.5 */
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    transition: .2s;
+  }
+  .sound-btn:hover{background:rgba(177,133,255,.2);}
+  .sound-btn.off{opacity:0.5;}
+
+  #footer{
+    position:fixed;bottom:0;left:0;right:0;
+    padding:8px 20px;text-align:center;
+    font-size:11px;color:var(--muted);
+    background:linear-gradient(0deg, var(--panel-bg) 0%, transparent 100%);
+    pointer-events:none;z-index:20;
+  }
+  #footer strong{color:var(--accent2);}
+
+  #hint{
+    position:fixed;bottom:44px;left:50%;transform:translateX(-50%);
+    color:var(--muted);font-size:12px;
+    background:var(--panel-bg);padding:6px 14px;border-radius:20px;
+    pointer-events:none;z-index:5;
+    border:1px solid var(--panel-border);
+  }
+
+  @media(max-width:900px){
+    :root{--panel-width:280px;--panel-right:10px;}
+    #titleBlock h1{font-size:15px;}
+    #siteHeader{padding:8px 10px 0 10px;top:100px;height:55px;}
+    #hud{width:250px;top:165px;}
+    #logoWrap{top:105px;height:130px;}
+    #logoWrap img{width:115px;height:115px;}
+    #logoFallback{width:115px;height:115px;font-size:3.5rem;}
+    #panel{top:245px;max-height:calc(100% - 305px);}
+  }
+  @media(max-width:650px){
+    #hud{display:none;}
+    #siteHeader{position:static;height:auto;padding:70px 10px 0;}
+    #titleBlock h1{font-size:13px;padding:0 4px;}
+    #breadcrumb{top:60px;font-size:10px;padding:5px 12px;max-width:calc(100vw - 20px);}
+    #logoWrap{top:auto;bottom:16px;left:8px;right:auto;width:90px;height:90px;}
+    #logoWrap img{width:80px;height:80px;}
+    #logoFallback{width:80px;height:80px;font-size:2.8rem;}
+    #panel{top:auto;bottom:16px;right:8px;left:auto;width:calc(100vw - 116px);max-width:320px;max-height:62vh;}
+    #hint{display:none;}
+    #footer{font-size:9.5px;padding:5px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="canvasHost"></div>
+
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle">🌙</button>
+</nav>
+
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+  <span class="sep">›</span>
+  <a href="momentum.html">🎯 الزخم والتصادمات</a>
+  <span class="sep">›</span>
+  <span class="cur">🎬 اصطدام كرة بجدار ثم بكرة</span>
+</div>
+
+<div id="siteHeader">
+  <div id="titleBlock">
+    <h1>اصطدام كرة بجدار ثم بكرة ثانية — حفظ الزخم والطاقة</h1>
+    <div class="credit">إعداد وتطوير: الأستاذ ماجد شلالده &nbsp;|&nbsp; 0599870176</div>
+  </div>
+</div>
+
+<div id="hud">
+  <h3>📊 القراءات اللحظية</h3>
+
+  <div style="margin-bottom:8px;padding:6px 8px;border-radius:6px;background:rgba(6,214,160,0.1);">
+    <div style="font-size:11px;color:#06d6a0;font-weight:bold;margin-bottom:4px;">🟢 الكرة الخضراء (المتحركة)</div>
+    <div class="hudRow"><span>السرعة v₁</span><b id="v1Val">+5.00 m/s</b></div>
+    <div class="hudRow"><span>الزخم p₁</span><b id="p1Val">+10.0 kg·m/s</b></div>
+    <div class="hudRow"><span>طاقة الحركة KE₁</span><b id="ke1Val">25.0 J</b></div>
+  </div>
+
+  <div style="margin-bottom:8px;padding:6px 8px;border-radius:6px;background:rgba(239,71,111,0.1);">
+    <div style="font-size:11px;color:#ef476f;font-weight:bold;margin-bottom:4px;">🔴 الكرة الحمراء (الساكنة)</div>
+    <div class="hudRow"><span>السرعة v₂</span><b id="v2Val">0.00 m/s</b></div>
+    <div class="hudRow"><span>الزخم p₂</span><b id="p2Val">0.0 kg·m/s</b></div>
+    <div class="hudRow"><span>طاقة الحركة KE₂</span><b id="ke2Val">0.0 J</b></div>
+  </div>
+
+  <div style="padding:8px;border-radius:6px;background:rgba(0,180,216,0.1);border-top:1px solid var(--panel-border);">
+    <div class="hudRow"><span>الزخم الكلي p</span><b id="ptotVal">10.0 kg·m/s</b></div>
+    <div class="hudRow"><span>الطاقة الكلية KE</span><b id="ketotVal">25.0 J</b></div>
+    <div class="hudRow"><span>حالة النظام</span><b id="stateVal" style="color:#ffd166;">جاهز</b></div>
+  </div>
+</div>
+
+<div id="logoWrap">
+  <img src="../../logo.png" alt="الشعار"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+  <div id="logoFallback">⚛️</div>
+</div>
+
+<div id="panel">
+  <h3>🎛️ لوحة التحكم</h3>
+
+  <div class="ctrlGroup ball1">
+    <div class="title"><span class="dot"></span>🟢 الكرة الخضراء — المتحركة</div>
+    <div class="ctrlRow"><span>الكتلة m₁</span><b id="m1Val">2.0 kg</b></div>
+    <input id="m1Slider" type="range" min="0.5" max="10" step="0.1" value="2">
+    <div class="ctrlRow"><span>السرعة الابتدائية v₁</span><b id="v1oVal">5.0 m/s</b></div>
+    <input id="v1oSlider" type="range" min="1" max="10" step="0.1" value="5">
+  </div>
+
+  <div class="ctrlGroup ball2">
+    <div class="title"><span class="dot"></span>🔴 الكرة الحمراء — الساكنة</div>
+    <div class="ctrlRow"><span>الكتلة m₂</span><b id="m2Val">3.0 kg</b></div>
+    <input id="m2Slider" type="range" min="0.5" max="10" step="0.1" value="3">
+    <div class="ctrlRow"><span>السرعة الابتدائية v₂</span><b id="v2oVal">0.0 m/s</b></div>
+    <input id="v2oSlider" type="range" min="-10" max="10" step="0.1" value="0">
+  </div>
+
+  <div class="ctrlGroup wall">
+    <div class="title"><span class="dot"></span>الجدار والتصادم</div>
+    <div class="ctrlRow"><span>معامل الارتداد من الجدار</span><b id="ewVal">1.00</b></div>
+    <input id="ewSlider" type="range" min="0.1" max="1" step="0.01" value="1">
+    <div class="ctrlRow"><span>معامل الارتداد بين الكرتين</span><b id="ebVal">1.00</b></div>
+    <input id="ebSlider" type="range" min="0.1" max="1" step="0.01" value="1">
+    <div class="ctrlRow"><span>سرعة العرض</span><b id="spVal">1.0×</b></div>
+    <input id="spSlider" type="range" min="0.1" max="3" step="0.1" value="1">
+  </div>
+
+  <div class="ctrlGroup sound">
+    <div class="title"><span class="dot"></span>🔊 إعدادات الصوت</div>
+    <div class="ctrlRow"><span>مستوى الصوت</span><b id="volVal">70%</b></div>
+    <input id="volSlider" type="range" min="0" max="100" step="1" value="70">
+    <button class="sound-btn" id="soundToggle">🔊 الصوت: مفعّل</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn primary" id="playBtn">▶ تشغيل</button>
+    <button class="btn" id="resetBtn">↺ إعادة</button>
+  </div>
+</div>
+
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<div id="hint">🖱️ اسحب للتدوير • 🖲️ عجلة الماوس للتقريب</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ============================================================
+     0) نظام الصوت
+     ============================================================ */
+  const Sound = (() => {
+    let ctx = null;
+    let enabled = true;
+    let masterVolume = 0.7;
+
+    function getCtx(){
+      if (!ctx){
+        try { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch(e){ return null; }
+      }
+      if (ctx.state === 'suspended') ctx.resume();
+      return ctx;
+    }
+
+    function playWallHit(){
+      if (!enabled) return;
+      const c = getCtx(); if (!c) return;
+      const t = c.currentTime;
+      const osc = c.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(380, t);
+      osc.frequency.exponentialRampToValueAtTime(120, t + 0.08);
+      const g = c.createGain();
+      g.gain.setValueAtTime(masterVolume * 0.5, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.15);
+
+      const osc2 = c.createOscillator();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(800, t);
+      osc2.frequency.exponentialRampToValueAtTime(200, t + 0.05);
+      const g2 = c.createGain();
+      g2.gain.setValueAtTime(masterVolume * 0.3, t);
+      g2.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      osc2.connect(g2); g2.connect(c.destination);
+      osc2.start(t); osc2.stop(t + 0.08);
+    }
+
+    function playBallCollision(){
+      if (!enabled) return;
+      const c = getCtx(); if (!c) return;
+      const t = c.currentTime;
+      const osc = c.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.exponentialRampToValueAtTime(60, t + 0.12);
+      const g = c.createGain();
+      g.gain.setValueAtTime(masterVolume * 0.6, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.2);
+
+      const osc2 = c.createOscillator();
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(450, t);
+      osc2.frequency.exponentialRampToValueAtTime(150, t + 0.06);
+      const g2 = c.createGain();
+      g2.gain.setValueAtTime(masterVolume * 0.25, t);
+      g2.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc2.connect(g2); g2.connect(c.destination);
+      osc2.start(t); osc2.stop(t + 0.1);
+    }
+
+    function playStart(){
+      if (!enabled) return;
+      const c = getCtx(); if (!c) return;
+      const t = c.currentTime;
+      const osc = c.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, t);
+      osc.frequency.exponentialRampToValueAtTime(800, t + 0.15);
+      const g = c.createGain();
+      g.gain.setValueAtTime(masterVolume * 0.2, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.2);
+    }
+
+    function playReset(){
+      if (!enabled) return;
+      const c = getCtx(); if (!c) return;
+      const t = c.currentTime;
+      const osc = c.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, t);
+      osc.frequency.exponentialRampToValueAtTime(200, t + 0.2);
+      const g = c.createGain();
+      g.gain.setValueAtTime(masterVolume * 0.2, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+      osc.connect(g); g.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.25);
+    }
+
+    function playFinish(){
+      if (!enabled) return;
+      const c = getCtx(); if (!c) return;
+      const baseT = c.currentTime;
+      const notes = [523.25, 659.25, 783.99];
+      notes.forEach((freq, i) => {
+        const t = baseT + i * 0.12;
+        const osc = c.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t);
+        const g = c.createGain();
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(masterVolume * 0.25, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        osc.connect(g); g.connect(c.destination);
+        osc.start(t); osc.stop(t + 0.25);
+      });
+    }
+
+    return {
+      wallHit: playWallHit,
+      ballCollision: playBallCollision,
+      start: playStart,
+      reset: playReset,
+      finish: playFinish,
+      toggle: () => { enabled = !enabled; return enabled; },
+      setVolume: (v) => { masterVolume = Math.max(0, Math.min(1, v)); }
+    };
+  })();
+
+  /* ============================================================
+     1) الوضع الليلي/النهاري
+     ============================================================ */
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light'){
+    document.body.classList.add('light-mode');
+    themeToggle.textContent = '☀️';
+  }
+
+  /* ============================================================
+     2) الحالة
+     ============================================================ */
+  const state = {
+    m1: 2.0, m2: 3.0,
+    v1_0: 5.0, v2_0: 0.0,
+    eWall: 1.0, eBall: 1.0,
+    speedScale: 1.0,
+    playing: false, t: 0,
+    x1: 0, v1: 5.0,
+    x2: 0, v2: 0.0,
+    hitWall: false, collisionOccurred: false, finished: false
+  };
+
+  /* ============================================================
+     3) الإعدادات
+     ============================================================ */
+  const WALL_X = 7;
+  const GREEN_START = 0;
+  const RED_START = -6;
+  const WALL_W = 0.5;
+  const WALL_H = 4;
+  const WALL_D = 6;
+  const RADIUS_SCALE = 0.45;
+
+  /* ============================================================
+     4) المشهد
+     ============================================================ */
+  const host = document.getElementById('canvasHost');
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0b0e14);
+  scene.fog = new THREE.Fog(0x0b0e14, 30, 70);
+
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 500);
+  const camTarget = new THREE.Vector3(0, 1, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  host.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 10;
+  controls.maxDistance = 70;
+  controls.target.copy(camTarget);
+  camera.position.set(13, 11, 20);
+  controls.update();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  /* ============================================================
+     5) الإضاءة
+     ============================================================ */
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+  const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+  sun.position.set(10, 15, 8);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left = -20;
+  sun.shadow.camera.right = 20;
+  sun.shadow.camera.top = 20;
+  sun.shadow.camera.bottom = -20;
+  scene.add(sun);
+
+  const fill = new THREE.DirectionalLight(0x88bbff, 0.4);
+  fill.position.set(-8, 6, -10);
+  scene.add(fill);
+
+  /* ============================================================
+     6) الأرضية
+     ============================================================ */
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(60, 40),
+    new THREE.MeshStandardMaterial({ color: 0x1a2540, roughness: 0.95, metalness: 0.05 })
+  );
+  ground.rotation.x = -Math.PI/2;
+  ground.position.y = -0.05;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  const grid = new THREE.GridHelper(60, 30, 0x3a5a80, 0x1a2a4a);
+  grid.position.y = -0.02;
+  grid.material.transparent = true;
+  grid.material.opacity = 0.35;
+  scene.add(grid);
+
+  /* ============================================================
+     7) الجدار
+     ============================================================ */
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: 0x4a5a70, metalness: 0.5, roughness: 0.5
+  });
+  const wall = new THREE.Mesh(
+    new THREE.BoxGeometry(WALL_W, WALL_H, WALL_D),
+    wallMat
+  );
+  wall.position.set(WALL_X + WALL_W/2, WALL_H/2, 0);
+  wall.castShadow = true;
+  wall.receiveShadow = true;
+  scene.add(wall);
+
+  const wallEdge = new THREE.LineSegments(
+    new THREE.EdgesGeometry(wall.geometry),
+    new THREE.LineBasicMaterial({ color: 0xffd166 })
+  );
+  wallEdge.position.copy(wall.position);
+  scene.add(wallEdge);
+
+  /* ============================================================
+     8) الكرات
+     ============================================================ */
+  const ball1Mat = new THREE.MeshStandardMaterial({
+    color: 0x06d6a0, emissive: 0x06d6a0, emissiveIntensity: 0.35,
+    metalness: 0.3, roughness: 0.3
+  });
+  const ball2Mat = new THREE.MeshStandardMaterial({
+    color: 0xef476f, emissive: 0xef476f, emissiveIntensity: 0.35,
+    metalness: 0.3, roughness: 0.3
+  });
+
+  const ball1 = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 24), ball1Mat);
+  ball1.castShadow = true;
+  scene.add(ball1);
+
+  const ball2 = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 24), ball2Mat);
+  ball2.castShadow = true;
+  scene.add(ball2);
+
+  const shadowDisk1 = new THREE.Mesh(
+    new THREE.CircleGeometry(1, 24),
+    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4 })
+  );
+  shadowDisk1.rotation.x = -Math.PI/2;
+  shadowDisk1.position.y = 0.01;
+  scene.add(shadowDisk1);
+
+  const shadowDisk2 = shadowDisk1.clone();
+  scene.add(shadowDisk2);
+
+  /* ============================================================
+     9) الأدوات
+     ============================================================ */
+  function radiusFromMass(m){
+    return Math.pow(m, 1/3) * RADIUS_SCALE;
+  }
+
+  /* ============================================================
+     10) إعادة الضبط
+     ============================================================ */
+  function resetSim(){
+    state.t = 0;
+    state.playing = false;
+    state.finished = false;
+
+    state.x1 = GREEN_START;
+    state.v1 = state.v1_0;
+
+    state.x2 = RED_START;
+    state.v2 = state.v2_0;
+
+    state.hitWall = false;
+    state.collisionOccurred = false;
+
+    const r1 = radiusFromMass(state.m1);
+    const r2 = radiusFromMass(state.m2);
+
+    ball1.scale.setScalar(r1);
+    ball2.scale.setScalar(r2);
+    ball1.position.set(state.x1, r1, 0);
+    ball2.position.set(state.x2, r2, 0);
+    shadowDisk1.scale.setScalar(r1);
+    shadowDisk2.scale.setScalar(r2);
+    shadowDisk1.position.set(state.x1, 0.01, 0);
+    shadowDisk2.position.set(state.x2, 0.01, 0);
+
+    updateHUD();
+
+    document.getElementById('playBtn').textContent = '▶ تشغيل';
+    document.getElementById('playBtn').classList.add('primary');
+    document.getElementById('stateVal').textContent = 'جاهز';
+    document.getElementById('stateVal').style.color = '#ffd166';
+  }
+
+  /* ============================================================
+     11) تحديث القراءات
+     ============================================================ */
+  function updateHUD(){
+    const p1 = state.m1 * state.v1;
+    const p2 = state.m2 * state.v2;
+    const ke1 = 0.5 * state.m1 * state.v1 * state.v1;
+    const ke2 = 0.5 * state.m2 * state.v2 * state.v2;
+
+    const fmtV = v => (v >= 0 ? '+' : '') + v.toFixed(2) + ' m/s';
+    const fmtP = p => (p >= 0 ? '+' : '') + p.toFixed(1) + ' kg·m/s';
+    const fmtKE = k => k.toFixed(1) + ' J';
+
+    document.getElementById('v1Val').textContent = fmtV(state.v1);
+    document.getElementById('p1Val').textContent = fmtP(p1);
+    document.getElementById('ke1Val').textContent = fmtKE(ke1);
+
+    document.getElementById('v2Val').textContent = fmtV(state.v2);
+    document.getElementById('p2Val').textContent = fmtP(p2);
+    document.getElementById('ke2Val').textContent = fmtKE(ke2);
+
+    document.getElementById('ptotVal').textContent = fmtP(p1 + p2);
+    document.getElementById('ketotVal').textContent = fmtKE(ke1 + ke2);
+  }
+
+  /* ============================================================
+     12) الخطوة الفيزيائية
+     ============================================================ */
+  function step(dt){
+    const r1 = radiusFromMass(state.m1);
+    const r2 = radiusFromMass(state.m2);
+
+    state.x1 += state.v1 * dt;
+    state.x2 += state.v2 * dt;
+
+    // اصطدام الكرة الخضراء بالجدار
+    const wallSurface = WALL_X - r1;
+    if (state.v1 > 0 && state.x1 >= wallSurface && !state.hitWall){
+      state.x1 = wallSurface;
+      state.v1 = -state.v1 * state.eWall;
+      state.hitWall = true;
+      Sound.wallHit();
+      document.getElementById('stateVal').textContent = '🟢 ارتدت عن الجدار';
+      document.getElementById('stateVal').style.color = '#06d6a0';
+    }
+
+    // اصطدام الكرة الخضراء بالحمراء
+    const dx = state.x1 - state.x2;
+    const minDist = r1 + r2;
+    const approaching = (state.v1 < state.v2);
+
+    if (dx > 0 && dx <= minDist && approaching && !state.collisionOccurred){
+      state.x1 = state.x2 + minDist;
+
+      const m1 = state.m1, m2 = state.m2;
+      const u1 = state.v1, u2 = state.v2;
+      const v1_new = ((m1 - m2*state.eBall) * u1 + (1 + state.eBall) * m2 * u2) / (m1 + m2);
+      const v2_new = ((m2 - m1*state.eBall) * u2 + (1 + state.eBall) * m1 * u1) / (m1 + m2);
+
+      state.v1 = v1_new;
+      state.v2 = v2_new;
+      state.collisionOccurred = true;
+
+      Sound.ballCollision();
+
+      document.getElementById('stateVal').textContent = '💥 تصادمت الكرتان';
+      document.getElementById('stateVal').style.color = '#ef476f';
+    }
+
+    ball1.position.x = state.x1;
+    ball2.position.x = state.x2;
+    shadowDisk1.position.x = state.x1;
+    shadowDisk2.position.x = state.x2;
+
+    if (state.collisionOccurred){
+      if (state.x1 > 25 || state.x1 < -25 || state.x2 > 25 || state.x2 < -25){
+        state.playing = false;
+        state.finished = true;
+        Sound.finish();
+        document.getElementById('stateVal').textContent = '✅ انتهت المحاكاة';
+        document.getElementById('stateVal').style.color = '#38d996';
+        document.getElementById('playBtn').textContent = '▶ إعادة التشغيل';
+        document.getElementById('playBtn').classList.remove('primary');
+      }
+    }
+  }
+
+  /* ============================================================
+     13) حلقة الرسوم
+     ============================================================ */
+  let lastTime = performance.now();
+
+  function animate(now){
+    requestAnimationFrame(animate);
+    const realDt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+
+    if (state.playing){
+      const simDt = realDt * state.speedScale;
+      const substeps = 6;
+      for (let i = 0; i < substeps; i++){
+        step(simDt / substeps);
+        if (!state.playing) break;
+      }
+      state.t += simDt;
+      updateHUD();
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  /* ============================================================
+     14) ربط التحكم
+     ============================================================ */
+  const m1Slider = document.getElementById('m1Slider');
+  const v1oSlider = document.getElementById('v1oSlider');
+  const m2Slider = document.getElementById('m2Slider');
+  const v2oSlider = document.getElementById('v2oSlider');
+  const ewSlider = document.getElementById('ewSlider');
+  const ebSlider = document.getElementById('ebSlider');
+  const spSlider = document.getElementById('spSlider');
+  const volSlider = document.getElementById('volSlider');
+  const soundToggle = document.getElementById('soundToggle');
+
+  m1Slider.addEventListener('input', () => {
+    state.m1 = parseFloat(m1Slider.value);
+    document.getElementById('m1Val').textContent = state.m1.toFixed(1) + ' kg';
+    resetSim();
+  });
+
+  v1oSlider.addEventListener('input', () => {
+    state.v1_0 = parseFloat(v1oSlider.value);
+    document.getElementById('v1oVal').textContent = state.v1_0.toFixed(1) + ' m/s';
+    resetSim();
+  });
+
+  m2Slider.addEventListener('input', () => {
+    state.m2 = parseFloat(m2Slider.value);
+    document.getElementById('m2Val').textContent = state.m2.toFixed(1) + ' kg';
+    resetSim();
+  });
+
+  v2oSlider.addEventListener('input', () => {
+    state.v2_0 = parseFloat(v2oSlider.value);
+    document.getElementById('v2oVal').textContent = state.v2_0.toFixed(1) + ' m/s';
+    resetSim();
+  });
+
+  ewSlider.addEventListener('input', () => {
+    state.eWall = parseFloat(ewSlider.value);
+    document.getElementById('ewVal').textContent = state.eWall.toFixed(2);
+    resetSim();
+  });
+
+  ebSlider.addEventListener('input', () => {
+    state.eBall = parseFloat(ebSlider.value);
+    document.getElementById('ebVal').textContent = state.eBall.toFixed(2);
+    resetSim();
+  });
+
+  spSlider.addEventListener('input', () => {
+    state.speedScale = parseFloat(spSlider.value);
+    document.getElementById('spVal').textContent = state.speedScale.toFixed(1) + '×';
+  });
+
+  volSlider.addEventListener('input', () => {
+    const v = parseFloat(volSlider.value) / 100;
+    Sound.setVolume(v);
+    document.getElementById('volVal').textContent = volSlider.value + '%';
+  });
+
+  soundToggle.addEventListener('click', () => {
+    const enabled = Sound.toggle();
+    soundToggle.textContent = enabled ? '🔊 الصوت: مفعّل' : '🔇 الصوت: متوقف';
+    soundToggle.classList.toggle('off', !enabled);
+  });
+
+  document.getElementById('playBtn').addEventListener('click', () => {
+    if (state.finished || (!state.playing && state.t === 0 && !state.hitWall)){
+      resetSim();
+    }
+    state.playing = !state.playing;
+    const btn = document.getElementById('playBtn');
+    btn.textContent = state.playing ? '⏸ إيقاف' : (state.finished ? '▶ إعادة التشغيل' : '▶ متابعة');
+    if (state.playing){
+      btn.classList.remove('primary');
+      Sound.start();
+      document.getElementById('stateVal').textContent = '▶ قيد التشغيل';
+      document.getElementById('stateVal').style.color = '#5b8cff';
+    }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    Sound.reset();
+    resetSim();
+  });
+
+  /* ============================================================
+     15) تبديل الوضع
+     ============================================================ */
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    themeToggle.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+
+    const bgColor = isLight ? 0xdbe6f5 : 0x0b0e14;
+    scene.background = new THREE.Color(bgColor);
+    scene.fog = new THREE.Fog(bgColor, 30, 70);
+    ground.material.color.setHex(isLight ? 0xc8d3e0 : 0x1a2540);
+  });
+
+  /* ============================================================
+     16) الإقلاع
+     ============================================================ */
+  resetSim();
+  requestAnimationFrame(animate);
+
+})();
+</script>
+</body>
+</html>
