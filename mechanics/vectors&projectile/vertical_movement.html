@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محاكاة المقذوف الرأسي</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;
+    font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",sans-serif;
+    background:#0b1220;color:#e6eefc;-webkit-font-smoothing:antialiased}
+  #scene{position:fixed;inset:0}
+  #header{position:fixed;top:14px;left:50%;transform:translateX(-50%);
+    text-align:center;z-index:10;pointer-events:none;padding:10px 26px;
+    background:rgba(13,21,36,.72);backdrop-filter:blur(10px);
+    border:1px solid rgba(90,140,220,.22);border-radius:16px;
+    box-shadow:0 8px 28px rgba(0,0,0,.4);
+    max-width:min(640px, calc(100vw - 340px));}
+  #header h1{margin:0 0 3px;font-size:19px;color:#8ab4ff;
+    letter-spacing:.3px;font-weight:800;
+    text-shadow:0 2px 12px rgba(77,163,255,.4);}
+  #header .dev{margin:0;font-size:12.5px;color:#ffd166;font-weight:700;}
+  #header .dev span{color:#a8e6cf;font-variant-numeric:tabular-nums;
+    direction:ltr;display:inline-block;}
+  #navBtns{position:fixed;top:14px;right:14px;z-index:11;
+    display:flex;gap:8px;align-items:center;}
+  .navBtn{display:inline-flex;align-items:center;gap:6px;
+    padding:9px 14px;border-radius:11px;cursor:pointer;
+    font-family:inherit;font-size:12.5px;font-weight:700;
+    text-decoration:none;color:#dbe8ff;
+    background:rgba(13,21,36,.9);backdrop-filter:blur(10px);
+    border:1px solid rgba(90,140,220,.35);
+    box-shadow:0 6px 20px rgba(0,0,0,.45);
+    transition:.18s;white-space:nowrap;}
+  .navBtn:hover{background:rgba(37,99,235,.9);
+    border-color:rgba(140,180,255,.7);transform:translateY(-1px);}
+  .navBtn.primary{background:linear-gradient(180deg,#3d8bfd,#2563eb);
+    border-color:rgba(140,180,255,.5);}
+  .navBtn .ico{font-size:15px;line-height:1}
+  #logoBox{position:fixed;top:120px;left:14px;width:250px;z-index:9;
+    padding:10px;background:rgba(13,21,36,.9);backdrop-filter:blur(12px);
+    border:1px solid rgba(90,140,220,.28);border-radius:14px;
+    box-shadow:0 10px 28px rgba(0,0,0,.55);
+    display:flex;justify-content:center;align-items:center;}
+  #logoBox img{width:70%;height:auto;display:block;margin:0 auto;
+    border-radius:50%;background:#fff;}
+  #dataPanel{position:fixed;top:315px;left:14px;width:250px;z-index:9;
+    padding:12px 14px;font-size:12.5px;
+    background:rgba(13,21,36,.9);backdrop-filter:blur(12px);
+    border:1px solid rgba(90,140,220,.28);border-radius:16px;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);
+    max-height:calc(100vh - 329px);overflow-y:auto;
+    scrollbar-width:thin;scrollbar-color:#2b3d5e transparent;}
+  #dataPanel::-webkit-scrollbar{width:6px}
+  #dataPanel::-webkit-scrollbar-thumb{background:#2b3d5e;border-radius:3px}
+  #dataPanel h2{margin:0 0 9px;font-size:12.5px;color:#8ab4ff;
+    letter-spacing:.4px;font-weight:800;
+    padding-bottom:7px;border-bottom:1px solid rgba(90,140,220,.22);
+    display:flex;align-items:center;gap:7px;}
+  #dataPanel h2::before{content:'';width:8px;height:8px;border-radius:2px;
+    background:#4da3ff;box-shadow:0 0 8px #4da3ff;}
+  .dataRow{display:flex;justify-content:space-between;align-items:center;
+    padding:5.5px 0;font-size:12px;
+    border-bottom:1px dashed rgba(90,140,220,.1);}
+  .dataRow:last-child{border-bottom:none}
+  .dataRow span{color:#8b9cc0}
+  .dataRow b{color:#a8e6cf;font-variant-numeric:tabular-nums;
+    font-weight:700;text-align:left;direction:ltr;}
+  .dataRow b.up{color:#66ff99}
+  .dataRow b.down{color:#ff8888}
+  .dataRow b.peak{color:#ffd166}
+  .dataRow b.dist{color:#7fd1ff}
+  #scopeWrap{margin-top:10px;padding-top:10px;
+    border-top:1px solid rgba(90,140,220,.18);}
+  #scopeWrap .cap{font-size:11px;color:#8b9cc0;margin-bottom:5px;
+    display:flex;justify-content:space-between;}
+  #scope{display:block;width:100%;height:90px;
+    background:#08111f;border-radius:8px;
+    border:1px solid rgba(90,140,220,.22);}
+  #panel{position:fixed;top:120px;right:14px;width:342px;
+    max-height:calc(100vh - 134px);overflow-y:auto;padding:14px 16px 18px;
+    background:rgba(13,21,36,.9);backdrop-filter:blur(12px);
+    border:1px solid rgba(90,140,220,.28);border-radius:16px;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);font-size:13px;z-index:9;
+    scrollbar-width:thin;scrollbar-color:#2b3d5e transparent;}
+  #panel::-webkit-scrollbar{width:6px}
+  #panel::-webkit-scrollbar-thumb{background:#2b3d5e;border-radius:3px}
+  .group{margin-bottom:13px}
+  .group.gen{border:1px solid rgba(77,163,255,.3);
+    background:rgba(77,163,255,.05);
+    border-radius:11px;padding:10px 11px 8px;margin-bottom:13px;}
+  .group.gen h3{margin:0 0 9px;font-size:12px;color:#4da3ff;
+    letter-spacing:.4px;font-weight:700;
+    display:flex;align-items:center;gap:6px;}
+  .group.gen h3::before{content:'';width:8px;height:8px;border-radius:2px;
+    background:#4da3ff;box-shadow:0 0 8px #4da3ff;}
+  .group.grav{border:1px solid rgba(255,102,204,.3);
+    background:rgba(255,102,204,.05);
+    border-radius:11px;padding:10px 11px 8px;margin-bottom:13px;}
+  .group.grav h3{margin:0 0 9px;font-size:12px;color:#ff66cc;
+    letter-spacing:.4px;font-weight:700;
+    display:flex;align-items:center;gap:6px;}
+  .group.grav h3::before{content:'';width:8px;height:8px;border-radius:2px;
+    background:#ff66cc;box-shadow:0 0 8px #ff66cc;}
+  .group.grav input[type=range]{background:linear-gradient(90deg,#8a2a6a,#ff66cc);}
+  .group.grav input[type=range]::-webkit-slider-thumb{
+    background:#ff66cc;box-shadow:0 0 10px rgba(255,102,204,.8);}
+  .group.grav .row .val{color:#ff66cc;background:rgba(255,102,204,.15);}
+  .group.grav .hint{color:#e6a0d8}
+  .group.env{border:1px solid rgba(80,250,123,.3);
+    background:rgba(80,250,123,.05);
+    border-radius:11px;padding:10px 11px 8px;margin-bottom:13px;}
+  .group.env h3{margin:0 0 9px;font-size:12px;color:#50fa7b;
+    letter-spacing:.4px;font-weight:700;
+    display:flex;align-items:center;gap:6px;}
+  .group.env h3::before{content:'';width:8px;height:8px;border-radius:2px;
+    background:#50fa7b;box-shadow:0 0 8px #50fa7b;}
+  .row{display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:6px;font-size:12.5px}
+  .row .val{font-weight:700;color:#ffd166;font-variant-numeric:tabular-nums;
+    background:rgba(255,209,102,.1);padding:2px 8px;border-radius:6px;
+    min-width:72px;text-align:center;}
+  .group.gen .row .val{color:#4da3ff;background:rgba(77,163,255,.12)}
+  input[type=range]{-webkit-appearance:none;width:100%;height:5px;
+    border-radius:4px;outline:none;
+    background:linear-gradient(90deg,#2f6fd0,#4da3ff);
+    cursor:pointer;direction:ltr}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;
+    width:16px;height:16px;border-radius:50%;
+    background:#4da3ff;border:2px solid #0b1220;
+    box-shadow:0 0 10px rgba(77,163,255,.6)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;
+    border-radius:50%;background:#4da3ff;border:2px solid #0b1220}
+  input[type=range]:disabled{opacity:.4;cursor:not-allowed}
+  .hint{font-size:10.5px;color:#63739a;margin-top:4px;min-height:14px}
+  .group.gen .hint{color:#8bb8e6}
+  .group.env .hint{color:#8fdfa8}
+  .btns{display:flex;gap:8px;margin:14px 0 10px}
+  button{flex:1;padding:9px 10px;border-radius:10px;border:none;
+    cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;
+    transition:.18s;background:linear-gradient(180deg,#3d8bfd,#2563eb);
+    color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+  button:hover{transform:translateY(-1px);filter:brightness(1.1)}
+  button.ghost{background:rgba(255,255,255,.07);color:#b9c8e6;
+    box-shadow:none;border:1px solid rgba(140,170,220,.25)}
+  button.ghost:hover{background:rgba(255,255,255,.13)}
+  .modeBtns{display:flex;gap:6px;margin:2px 0 10px}
+  .modeBtn{flex:1;font-size:11px;padding:7px 4px;border-radius:8px;
+    background:rgba(255,255,255,.06);color:#b9c8e6;
+    border:1px solid rgba(140,170,220,.22);box-shadow:none;
+    font-weight:700;transition:.15s;white-space:nowrap}
+  .modeBtn:hover{background:rgba(255,255,255,.12);transform:none;filter:none}
+  .modeBtn.active{background:linear-gradient(180deg,#3d8bfd,#2563eb);
+    color:#fff;border-color:rgba(140,180,255,.6);
+    box-shadow:0 4px 14px rgba(37,99,235,.4)}
+  .legend{border-top:1px solid rgba(90,140,220,.18);
+    padding-top:11px;margin-top:12px;}
+  .legend label{display:flex;align-items:center;gap:8px;padding:5px 2px;
+    cursor:pointer;font-size:12px;border-radius:7px;transition:.15s}
+  .legend label:hover{background:rgba(255,255,255,.04)}
+  .legend input{accent-color:#4da3ff;cursor:pointer;width:14px;height:14px}
+  .legend i{width:12px;height:12px;border-radius:3px;flex-shrink:0;
+    box-shadow:0 0 8px currentColor}
+  .foot{margin-top:10px;font-size:10.5px;color:#5a6a8f;
+    text-align:center;line-height:1.6}
+  @media (max-width:960px){
+    #header{max-width:calc(100vw - 40px);top:64px;padding:8px 16px}
+    #header h1{font-size:16px}
+    #panel{top:150px;right:10px;width:calc(100vw - 20px);
+           max-height:calc(55vh - 20px)}
+    #logoBox{top:56px;left:10px;width:120px;padding:6px;border-radius:10px}
+    #dataPanel{top:auto;bottom:10px;left:10px;width:calc(100vw - 20px);
+               max-height:36vh}
+    #navBtns{top:10px;right:10px}
+    .navBtn{padding:8px 10px;font-size:11.5px}
+    .navBtn .lbl{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+
+<div id="header">
+  <h1>محاكاة المقذوف الرأسي</h1>
+  <p class="dev">إعداد وتطوير الأستاذ ماجد شلالده &nbsp;•&nbsp; <span>0599870176</span></p>
+</div>
+
+<!-- ===== أزرار التنقل: زر الرئيسية أولاً (يمين) ثم زر المتجهات (يسار) ===== -->
+<div id="navBtns">
+  <a class="navBtn primary" id="btnHome" href="../index.html" title="العودة للصفحة الرئيسية">
+    <span class="ico">🏠</span>
+    <span class="lbl">الصفحة الرئيسية</span>
+  </a>
+  <a class="navBtn" id="btnVectors" href="vectors_motion_2d.html"
+     title="العودة لصفحة المتجهات والحركة في بعدين">
+    <span class="ico">↩</span>
+    <span class="lbl">لمتجهات والحركة في بعدين</span>
+  </a>
+</div>
+
+<div id="logoBox">
+  <img id="logoImg" src="logo.png" alt="شعار الأستاذ ماجد شلالده">
+</div>
+
+<div id="dataPanel">
+  <h2>البيانات المباشرة</h2>
+  <div class="dataRow"><span>الزمن t</span><b id="outT">0.00 s</b></div>
+  <div class="dataRow"><span>الارتفاع y</span><b id="outY">0.00 m</b></div>
+  <div class="dataRow"><span>المسافة المقطوعة d</span><b id="outD" class="dist">0.00 m</b></div>
+  <div class="dataRow"><span>السرعة v</span><b id="outV" class="up">+20.00 m/s</b></div>
+  <div class="dataRow"><span>التسارع a</span><b id="outA">−9.80 m/s²</b></div>
+  <div class="dataRow"><span>حالة الحركة</span><b id="outState" class="up">صاعد ↑</b></div>
+  <div class="dataRow"><span>أقصى ارتفاع h<sub>max</sub></span><b id="outHmax" class="peak">20.41 m</b></div>
+  <div class="dataRow"><span>زمن الصعود t<sub>up</sub></span><b id="outTup" class="peak">2.04 s</b></div>
+  <div class="dataRow"><span>الزمن الكلي</span><b id="outTtotal" class="peak">4.08 s</b></div>
+
+  <div id="scopeWrap">
+    <div class="cap"><span>منحنى السرعة — الزمن</span><span id="scopeCap">v = +20.00 m/s</span></div>
+    <canvas id="scope" width="440" height="180"></canvas>
+  </div>
+</div>
+
+<div id="panel">
+  <div class="group gen">
+    <h3>نمط الحركة</h3>
+    <div class="modeBtns">
+      <button class="modeBtn active" data-mode="up">↑ قذف لأعلى</button>
+      <button class="modeBtn" data-mode="free">↓ سقوط حر</button>
+      <button class="modeBtn" data-mode="down">⤓ قذف لأسفل</button>
+    </div>
+    <div class="hint" id="modeHint">اختر نمط الحركة المطلوب</div>
+  </div>
+
+  <div class="group gen">
+    <h3>الإعدادات الابتدائية</h3>
+    <div class="row"><span>السرعة الابتدائية v₀</span><span class="val" id="v0Val">20.0 m/s</span></div>
+    <input type="range" id="v0" min="5" max="40" step="0.5" value="20">
+    <div class="hint" id="v0Hint">موجبة = قذف نحو الأعلى</div>
+    <div style="height:10px"></div>
+    <div class="row"><span>الارتفاع الابتدائي y₀</span><span class="val" id="y0Val">0.0 m</span></div>
+    <input type="range" id="y0" min="0" max="100" step="0.5" value="0">
+    <div class="hint" id="y0Hint">ارتفاع نقطة الإطلاق عن سطح الأرض</div>
+  </div>
+
+  <div class="group grav">
+    <h3>تسارع الجذب g</h3>
+    <div class="row"><span>شدة g</span><span class="val" id="gVal">9.80 m/s²</span></div>
+    <input type="range" id="gMag" min="1" max="20" step="0.1" value="9.8">
+    <div class="hint">الأرض 9.8 • القمر 1.6 • المريخ 3.7 • المشتري 24.8</div>
+  </div>
+
+  <div class="group env">
+    <h3>مقاومة الهواء</h3>
+    <div class="row"><span>المعامل k</span><span class="val" id="kVal">0.00</span></div>
+    <input type="range" id="kMag" min="0" max="0.5" step="0.01" value="0">
+    <div class="hint">0 = إهمال المقاومة • أعلى = مقاومة أكبر</div>
+  </div>
+
+  <div class="btns">
+    <button id="play">⏸ إيقاف</button>
+    <button id="reset" class="ghost">↺ إعادة</button>
+  </div>
+
+  <div class="legend">
+    <label><input type="checkbox" id="showTrail" checked>
+      <i style="background:#ffd166;color:#ffd166"></i>المسار مع النقاط الزمنية</label>
+    <label><input type="checkbox" id="showVelocity" checked>
+      <i style="background:#66ff99;color:#66ff99"></i>سهم السرعة اللحظية</label>
+    <label><input type="checkbox" id="showAccel" checked>
+      <i style="background:#ff4d4d;color:#ff4d4d"></i>سهم تسارع الجذب g</label>
+    <label><input type="checkbox" id="showPeak" checked>
+      <i style="background:#ff66cc;color:#ff66cc"></i>خط أقصى ارتفاع</label>
+    <label><input type="checkbox" id="showRuler" checked>
+      <i style="background:#4da3ff;color:#4da3ff"></i>مسطرة الارتفاع</label>
+  </div>
+
+  <div class="foot">اسحب بالفأرة للتدوير • عجلة الفأرة للتقريب</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ================= الثوابت ================= */
+const BALL_R  = 0.75;
+const MAX_Y   = 105;
+
+/* ================= الحالة ================= */
+const state = {
+  mode: 'up',
+  v0: 20.0,
+  y0: 0.0,
+  g:  9.8,
+  k:  0.0,
+  t:  0.0,
+  y:  0.0,
+  v:  20.0,
+  distance: 0.0,
+  running: true,
+  finished: false,
+  vHistory: new Array(300).fill(0),
+  peakY: 0,
+  peakT: 0,
+  startV: 20.0,
+  tTotal: 0
+};
+
+/* ================= المشهد ================= */
+const container = document.getElementById('scene');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b1220);
+scene.fog = new THREE.Fog(0x0b1220, 60, 220);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 800);
+camera.position.set(26, 18, 34);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 8, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 5;
+controls.maxDistance = 200;
+controls.maxPolarAngle = Math.PI * 0.49;
+
+/* ================= الإضاءة ================= */
+scene.add(new THREE.HemisphereLight(0x9ec5ff, 0x151d30, 1.15));
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 2.1);
+dirLight.position.set(30, 80, 30);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(2048, 2048);
+const SH = 70;
+dirLight.shadow.camera.left   = -SH;
+dirLight.shadow.camera.right  =  SH;
+dirLight.shadow.camera.top    =  SH;
+dirLight.shadow.camera.bottom = -SH;
+dirLight.shadow.camera.near = 1;
+dirLight.shadow.camera.far  = 250;
+dirLight.shadow.bias = -0.0006;
+dirLight.target.position.set(0, 25, 0);
+scene.add(dirLight, dirLight.target);
+
+/* ================= الأرضية ================= */
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(300, 300),
+  new THREE.MeshStandardMaterial({ color: 0x14203a, roughness: 1, metalness: 0 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = 0;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const grid = new THREE.GridHelper(300, 150, 0x2f4a75, 0x1c2942);
+grid.position.y = 0.01;
+grid.material.transparent = true;
+grid.material.opacity = 0.45;
+scene.add(grid);
+
+/* ================= المسطرة الرأسية ================= */
+const rulerGroup = new THREE.Group();
+scene.add(rulerGroup);
+
+const RULER_X = 3.0;
+
+const rulerPostGeo = new THREE.CylinderGeometry(0.05, 0.05, MAX_Y, 8);
+const rulerPost = new THREE.Mesh(rulerPostGeo,
+  new THREE.MeshStandardMaterial({
+    color: 0x4da3ff, metalness: 0.8, roughness: 0.3,
+    emissive: 0x001133, emissiveIntensity: 0.4
+  })
+);
+rulerPost.position.set(RULER_X, MAX_Y/2, 0);
+rulerPost.castShadow = true;
+rulerGroup.add(rulerPost);
+
+for (let h = 5; h <= MAX_Y; h += 5) {
+  const tickLen = (h % 10 === 0) ? 0.7 : 0.4;
+  const tickGeo = new THREE.CylinderGeometry(0.02, 0.02, tickLen, 6);
+  const tick = new THREE.Mesh(tickGeo,
+    new THREE.MeshBasicMaterial({ color: 0x4da3ff })
+  );
+  tick.rotation.z = Math.PI/2;
+  tick.position.set(RULER_X - tickLen/2, h, 0);
+  rulerGroup.add(tick);
+
+  if (h % 10 === 0) {
+    const cvs = document.createElement('canvas');
+    cvs.width = 160;
+    cvs.height = 64;
+    const c2d = cvs.getContext('2d');
+    c2d.font = 'bold 44px "Segoe UI", Arial';
+    c2d.textAlign = 'center';
+    c2d.textBaseline = 'middle';
+    c2d.fillStyle = '#8ab4ff';
+    c2d.fillText(h + ' m', 80, 32);
+    const tex = new THREE.CanvasTexture(cvs);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: tex, transparent: true, depthTest: false, depthWrite: false
+    }));
+    sp.scale.set(3.2, 1.25, 1);
+    sp.position.set(RULER_X - 2.2, h, 0);
+    sp.renderOrder = 15;
+    rulerGroup.add(sp);
+  }
+}
+
+/* ================= خط أقصى ارتفاع ================= */
+const peakGroup = new THREE.Group();
+scene.add(peakGroup);
+
+const peakLineMat = new THREE.LineDashedMaterial({
+  color: 0xff66cc,
+  dashSize: 0.6, gapSize: 0.4,
+  transparent: true, opacity: 0.9
+});
+
+let peakLine = null;
+let peakLabel = null;
+
+function makeTextLabel(text, color, size = 1) {
+  const fs = 96, pad = 24;
+  const c = document.createElement('canvas');
+  let ctx = c.getContext('2d');
+  const font = `900 ${fs}px "Segoe UI", Arial, sans-serif`;
+  ctx.font = font;
+  const tw = ctx.measureText(text).width;
+  c.width = Math.ceil(tw + pad*2);
+  c.height = Math.ceil(fs + pad*1.2);
+  ctx = c.getContext('2d');
+  ctx.font = font;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const r = 22;
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.arcTo(c.width, 0, c.width, c.height, r);
+  ctx.arcTo(c.width, c.height, 0, c.height, r);
+  ctx.arcTo(0, c.height, 0, 0, r);
+  ctx.arcTo(0, 0, c.width, 0, r);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(8,14,26,0.88)';
+  ctx.fill();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.fillText(text, c.width/2, c.height/2 + 3);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: tex, transparent: true, depthTest: false, depthWrite: false
+  }));
+  sp.renderOrder = 20;
+  const sc = 0.0055 * size;
+  sp.scale.set(c.width * sc, c.height * sc, 1);
+  return sp;
+}
+
+function updatePeakLine() {
+  if (peakLine) { peakGroup.remove(peakLine); peakLine.geometry.dispose(); }
+  if (peakLabel) peakGroup.remove(peakLabel);
+
+  const yPeak = state.peakY;
+  if (state.mode !== 'up' || yPeak < 0.5) return;
+
+  const points = [
+    new THREE.Vector3(-4, yPeak, 0),
+    new THREE.Vector3( 4, yPeak, 0)
+  ];
+  const geo = new THREE.BufferGeometry().setFromPoints(points);
+  peakLine = new THREE.Line(geo, peakLineMat);
+  peakLine.computeLineDistances();
+  peakGroup.add(peakLine);
+
+  peakLabel = makeTextLabel(`h_max = ${yPeak.toFixed(2)} m`, '#ff66cc', 0.75);
+  peakLabel.position.set(-4.5, yPeak, 0);
+  peakGroup.add(peakLabel);
+}
+
+/* ================= الجسم (الكرة) ================= */
+const ball = new THREE.Mesh(
+  new THREE.SphereGeometry(BALL_R, 48, 36),
+  new THREE.MeshStandardMaterial({
+    color: 0xffd166,
+    metalness: 0.55,
+    roughness: 0.25,
+    emissive: 0x6a5000,
+    emissiveIntensity: 0.65
+  })
+);
+ball.castShadow = true;
+ball.receiveShadow = true;
+scene.add(ball);
+
+/* ================= سهم السرعة ================= */
+const velArrow = new THREE.ArrowHelper(
+  new THREE.Vector3(0, 1, 0),
+  new THREE.Vector3(),
+  0.01,
+  0x66ff99,
+  0.45,
+  0.24
+);
+velArrow.line.material.depthTest = false;
+velArrow.line.material.linewidth = 3;
+velArrow.cone.material.depthTest = false;
+velArrow.line.renderOrder = 16;
+velArrow.cone.renderOrder = 16;
+scene.add(velArrow);
+
+const velLabel = makeTextLabel('v', '#66ff99', 0.65);
+scene.add(velLabel);
+
+/* ================= سهم تسارع الجذب ================= */
+const accArrow = new THREE.ArrowHelper(
+  new THREE.Vector3(0, -1, 0),
+  new THREE.Vector3(),
+  0.01,
+  0xff4d4d,
+  0.35,
+  0.20
+);
+accArrow.line.material.depthTest = false;
+accArrow.line.material.linewidth = 2;
+accArrow.cone.material.depthTest = false;
+accArrow.line.renderOrder = 16;
+accArrow.cone.renderOrder = 16;
+scene.add(accArrow);
+
+const accLabel = makeTextLabel('g', '#ff4d4d', 0.65);
+scene.add(accLabel);
+
+/* ================= المسار والنقاط الزمنية ================= */
+const trailGroup = new THREE.Group();
+scene.add(trailGroup);
+
+const trailLineMat = new THREE.LineBasicMaterial({
+  color: 0xffd166, transparent: true, opacity: 0.55
+});
+let trailLine = null;
+
+const trailMarkers = [];
+const MARKER_INTERVAL = 0.5;
+const markerGeo = new THREE.SphereGeometry(0.20, 14, 12);
+const markerMat = new THREE.MeshBasicMaterial({
+  color: 0xffd166, transparent: true, opacity: 0.95
+});
+
+let lastMarkerT = -1;
+
+/* ================= ضبط الكاميرا تلقائياً حسب الارتفاع ================= */
+function adjustCamera() {
+  const yTop = Math.max(state.peakY, state.y0, 5);
+  const needed = yTop * 1.4 + 10;
+
+  if (state.mode === 'up') {
+    camera.position.set(
+      needed * 0.55,
+      Math.max(needed * 0.35, 8),
+      needed * 0.85
+    );
+    controls.target.set(0, Math.max(state.y0 * 0.5 + 3, 5), 0);
+  } else {
+    camera.position.set(
+      needed * 0.5,
+      Math.max(state.y0 * 0.55 + 5, 10),
+      needed * 0.75
+    );
+    controls.target.set(0, Math.max(state.y0 * 0.5, 5), 0);
+  }
+  controls.update();
+}
+
+/* ================= تطبيق نمط الحركة ================= */
+function applyMode(mode) {
+  state.mode = mode;
+
+  if (mode === 'up') {
+    v0S.disabled = false;
+    v0S.style.opacity = 1;
+    y0S.max = 100;
+    state.v0 = Math.abs(parseFloat(v0S.value));
+    state.y0 = parseFloat(y0S.value);
+    v0Val.textContent = state.v0.toFixed(1) + ' m/s';
+    y0Val.textContent = state.y0.toFixed(1) + ' m';
+    v0Hint.textContent = 'موجبة = قذف نحو الأعلى';
+    y0Hint.textContent = 'ارتفاع نقطة الإطلاق عن سطح الأرض (0 - 100 m)';
+    modeHint.textContent = 'يبدأ الجسم بقذف نحو الأعلى من الارتفاع y₀';
+  } else if (mode === 'free') {
+    v0S.disabled = true;
+    v0S.style.opacity = 0.4;
+    state.v0 = 0;
+
+    y0S.value = 100;
+    state.y0 = 100;
+
+    v0Val.textContent = '0.0 m/s';
+    y0Val.textContent = state.y0.toFixed(1) + ' m';
+    v0Hint.textContent = 'في السقوط الحر تكون v₀ = 0 دائماً';
+    y0Hint.textContent = 'ارتفاع الإفلات (1 - 100 m)';
+    modeHint.textContent = 'يبدأ الجسم من السكون عند الارتفاع y₀';
+  } else if (mode === 'down') {
+    v0S.disabled = false;
+    v0S.style.opacity = 1;
+    y0S.max = 100;
+    if (parseFloat(y0S.value) < 1) y0S.value = 50;
+    state.v0 = -Math.abs(parseFloat(v0S.value));
+    state.y0 = parseFloat(y0S.value);
+    v0Val.textContent = state.v0.toFixed(1) + ' m/s';
+    y0Val.textContent = state.y0.toFixed(1) + ' m';
+    v0Hint.textContent = 'سالب = قذف نحو الأسفل';
+    y0Hint.textContent = 'ارتفاع نقطة الإطلاق (1 - 100 m)';
+    modeHint.textContent = 'يبدأ الجسم بقذف نحو الأسفل من الارتفاع y₀';
+  }
+
+  resetSim();
+  adjustCamera();
+}
+
+/* ================= إعادة البناء ================= */
+function resetSim() {
+  state.t = 0;
+  state.y = state.y0;
+  state.v = state.v0;
+  state.distance = 0.0;
+  state.running = true;
+  state.finished = false;
+  state.vHistory.fill(0);
+  state.startV = state.v0;
+
+  if (state.mode === 'up' && state.v0 > 0) {
+    if (state.k < 1e-4) {
+      state.peakY = state.y0 + (state.v0 * state.v0) / (2 * state.g);
+      state.peakT = state.v0 / state.g;
+    } else {
+      let y = state.y0, v = state.v0, t = 0;
+      const dtN = 0.001;
+      let maxY = y;
+      while (v > 0 && t < 30) {
+        const a = -state.g - state.k * v * Math.abs(v);
+        v += a * dtN;
+        y += v * dtN;
+        t += dtN;
+        if (y > maxY) maxY = y;
+        if (v <= 0) break;
+      }
+      state.peakY = maxY;
+      state.peakT = t;
+    }
+  } else {
+    state.peakY = state.y0;
+    state.peakT = 0;
+  }
+
+  state.tTotal = computeTotalTime();
+
+  for (const m of trailMarkers) trailGroup.remove(m);
+  trailMarkers.length = 0;
+  lastMarkerT = -1;
+
+  updatePeakLine();
+  updateBallPosition();
+  updateReadouts();
+  updateScope();
+
+  adjustCamera();
+}
+
+/* ================= حساب الزمن الكلي ================= */
+function computeTotalTime() {
+  let y = state.y0, v = state.v0, t = 0;
+  const dtN = 0.001;
+  let safety = 0;
+  while (y > 0 && safety++ < 120000) {
+    const a = -state.g - state.k * v * Math.abs(v);
+    v += a * dtN;
+    y += v * dtN;
+    t += dtN;
+  }
+  return t;
+}
+
+/* ================= خط المسار ================= */
+function updateTrailLine() {
+  if (trailLine) { trailGroup.remove(trailLine); trailLine.geometry.dispose(); }
+
+  let yTop, yBot;
+  if (state.mode === 'up') {
+    yTop = Math.max(state.y, state.y0);
+    yBot = state.y0;
+  } else {
+    yTop = state.y0;
+    yBot = Math.min(state.y, state.y0);
+  }
+
+  const pts = [
+    new THREE.Vector3(0, yBot, 0),
+    new THREE.Vector3(0, yTop, 0)
+  ];
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  trailLine = new THREE.Line(geo, trailLineMat);
+  trailLine.renderOrder = 14;
+  trailGroup.add(trailLine);
+}
+
+/* ================= تحديث موضع الكرة والأسهم ================= */
+function updateBallPosition() {
+  ball.position.set(0, state.y + BALL_R, 0);
+
+  if (showVelocityCb.checked && Math.abs(state.v) > 0.15) {
+    const len = Math.min(8, Math.abs(state.v) * 0.22);
+    const dir = state.v > 0
+      ? new THREE.Vector3(0, 1, 0)
+      : new THREE.Vector3(0, -1, 0);
+    velArrow.visible = true;
+    velArrow.position.set(0, state.y + BALL_R, 0);
+    velArrow.setDirection(dir);
+    velArrow.setLength(len, 0.45, 0.24);
+
+    const col = state.v > 0 ? 0x66ff99 : 0xff8a4d;
+    velArrow.setColor(col);
+
+    velLabel.visible = true;
+    velLabel.position.copy(velArrow.position).addScaledVector(dir, len + 0.85);
+    velLabel.material.map = makeTextLabel(
+      `v = ${state.v.toFixed(1)} m/s`,
+      state.v > 0 ? '#66ff99' : '#ff8a4d',
+      0.55
+    ).material.map;
+  } else {
+    velArrow.visible = false;
+    velLabel.visible = false;
+  }
+
+  if (showAccelCb.checked && state.g > 0.05) {
+    const len = Math.min(2.8, state.g * 0.15);
+    accArrow.visible = true;
+    accArrow.position.set(0, state.y + BALL_R, 0);
+    accArrow.setDirection(new THREE.Vector3(0, -1, 0));
+    accArrow.setLength(len, 0.35, 0.20);
+
+    accLabel.visible = true;
+    accLabel.position.copy(accArrow.position).add(new THREE.Vector3(0, -len - 0.75, 0));
+  } else {
+    accArrow.visible = false;
+    accLabel.visible = false;
+  }
+
+  updateTrailLine();
+}
+
+/* ================= الفيزياء ================= */
+function physicsStep(dt) {
+  const a = -state.g - state.k * state.v * Math.abs(state.v);
+
+  state.v += a * dt;
+  state.y += state.v * dt;
+
+  state.t += dt;
+  state.distance += Math.abs(state.v) * dt;
+
+  if (state.t - lastMarkerT >= MARKER_INTERVAL) {
+    lastMarkerT = state.t;
+    const m = new THREE.Mesh(markerGeo, markerMat);
+    m.position.set(0, state.y + BALL_R, 0);
+    m.renderOrder = 14;
+    trailGroup.add(m);
+    trailMarkers.push(m);
+  }
+
+  if (state.y <= 0 && state.v < 0 && state.t > 0.05) {
+    state.y = 0;
+    state.v = 0;
+    state.running = false;
+    state.finished = true;
+    playBtn.textContent = '▶ تشغيل';
+  }
+
+  state.vHistory.push(state.v);
+  if (state.vHistory.length > 300) state.vHistory.shift();
+}
+
+/* ================= حلقة الرسم ================= */
+let last = performance.now();
+let acc = 0;
+const FIXED_DT = 1 / 240;
+
+function animate(now) {
+  requestAnimationFrame(animate);
+
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  if (state.running) {
+    acc += dt;
+    let guard = 0;
+    while (acc >= FIXED_DT && guard++ < 800) {
+      physicsStep(FIXED_DT);
+      acc -= FIXED_DT;
+    }
+  } else acc = 0;
+
+  updateBallPosition();
+  updateReadouts();
+  updateScope();
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+/* ================= القراءات ================= */
+const outT = document.getElementById('outT');
+const outY = document.getElementById('outY');
+const outD = document.getElementById('outD');
+const outV = document.getElementById('outV');
+const outA = document.getElementById('outA');
+const outState = document.getElementById('outState');
+const outHmax = document.getElementById('outHmax');
+const outTup = document.getElementById('outTup');
+const outTtotal = document.getElementById('outTtotal');
+
+function updateReadouts() {
+  outT.textContent = state.t.toFixed(2) + ' s';
+  outY.textContent = state.y.toFixed(2) + ' m';
+  outD.textContent = state.distance.toFixed(2) + ' m';
+
+  const sign = state.v >= 0 ? '+' : '';
+  outV.textContent = sign + state.v.toFixed(2) + ' m/s';
+  outV.className = state.v > 0.15 ? 'up' : (state.v < -0.15 ? 'down' : '');
+
+  const a = -state.g - state.k * state.v * Math.abs(state.v);
+  outA.textContent = a.toFixed(2) + ' m/s²';
+
+  let st, stClass;
+  if (state.finished) {
+    st = 'وصل إلى الأرض'; stClass = '';
+  } else if (Math.abs(state.v) < 0.15 && state.t > 0.1) {
+    if (state.mode === 'up' && state.t >= state.peakT - 0.05) {
+      st = 'في أقصى ارتفاع ⤒'; stClass = 'peak';
+    } else {
+      st = 'ساكن'; stClass = '';
+    }
+  } else if (state.v > 0.15) {
+    st = 'صاعد ↑'; stClass = 'up';
+  } else {
+    st = 'هابط ↓'; stClass = 'down';
+  }
+  outState.textContent = st;
+  outState.className = stClass;
+
+  outHmax.textContent = state.peakY.toFixed(2) + ' m';
+  outTup.textContent = state.peakT.toFixed(2) + ' s';
+  outTtotal.textContent = state.tTotal.toFixed(2) + ' s';
+}
+
+/* ================= لوحة منحنى السرعة ================= */
+const scopeCanvas = document.getElementById('scope');
+const scopeCtx = scopeCanvas.getContext('2d');
+const scopeCap = document.getElementById('scopeCap');
+
+function updateScope() {
+  const W = scopeCanvas.width;
+  const H = scopeCanvas.height;
+  scopeCtx.clearRect(0, 0, W, H);
+
+  scopeCtx.strokeStyle = 'rgba(90,140,220,0.14)';
+  scopeCtx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) {
+    const y = H * i / 4;
+    scopeCtx.beginPath();
+    scopeCtx.moveTo(0, y);
+    scopeCtx.lineTo(W, y);
+    scopeCtx.stroke();
+  }
+  for (let i = 1; i < 6; i++) {
+    const x = W * i / 6;
+    scopeCtx.beginPath();
+    scopeCtx.moveTo(x, 0);
+    scopeCtx.lineTo(x, H);
+    scopeCtx.stroke();
+  }
+
+  const zeroY = H / 2;
+  scopeCtx.strokeStyle = 'rgba(90,140,220,0.5)';
+  scopeCtx.lineWidth = 1.4;
+  scopeCtx.beginPath();
+  scopeCtx.moveTo(0, zeroY);
+  scopeCtx.lineTo(W, zeroY);
+  scopeCtx.stroke();
+
+  const maxAbsV = Math.max(
+    Math.abs(state.startV),
+    Math.abs(state.vHistory.reduce((a,b) => Math.abs(b) > Math.abs(a) ? b : a, 0)),
+    1
+  ) * 1.15;
+  const scale = (H * 0.42) / maxAbsV;
+
+  const N = state.vHistory.length;
+  if (N > 1) {
+    scopeCtx.beginPath();
+    scopeCtx.moveTo(0, zeroY);
+    for (let i = 0; i < N; i++) {
+      const x = (i / (N - 1)) * W;
+      const y = zeroY - state.vHistory[i] * scale;
+      scopeCtx.lineTo(x, y);
+    }
+    scopeCtx.lineTo(W, zeroY);
+    scopeCtx.closePath();
+    const grd = scopeCtx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, 'rgba(102,255,153,0.35)');
+    grd.addColorStop(0.5, 'rgba(102,255,153,0.03)');
+    grd.addColorStop(1, 'rgba(255,138,77,0.35)');
+    scopeCtx.fillStyle = grd;
+    scopeCtx.fill();
+
+    scopeCtx.beginPath();
+    for (let i = 0; i < N; i++) {
+      const x = (i / (N - 1)) * W;
+      const y = zeroY - state.vHistory[i] * scale;
+      if (i === 0) scopeCtx.moveTo(x, y);
+      else scopeCtx.lineTo(x, y);
+    }
+    scopeCtx.strokeStyle = '#66ff99';
+    scopeCtx.lineWidth = 2.2;
+    scopeCtx.stroke();
+
+    const xEnd = W;
+    const yEnd = zeroY - state.v * scale;
+    scopeCtx.beginPath();
+    scopeCtx.arc(xEnd - 2, yEnd, 5, 0, Math.PI * 2);
+    scopeCtx.fillStyle = state.v > 0 ? '#66ff99' : '#ff8a4d';
+    scopeCtx.fill();
+    scopeCtx.strokeStyle = '#0b1220';
+    scopeCtx.lineWidth = 2;
+    scopeCtx.stroke();
+  }
+
+  scopeCtx.fillStyle = '#8b9cc0';
+  scopeCtx.font = '11px "Segoe UI"';
+  scopeCtx.textAlign = 'left';
+  scopeCtx.fillText('v (m/s)', 4, 12);
+  scopeCtx.textAlign = 'right';
+  scopeCtx.fillText('t →', W - 4, H - 4);
+
+  scopeCap.textContent = `v = ${state.v >= 0 ? '+' : ''}${state.v.toFixed(2)} m/s`;
+}
+
+/* ================= عناصر الواجهة ================= */
+const el = id => document.getElementById(id);
+const v0S = el('v0'), y0S = el('y0'), gMagS = el('gMag'), kMagS = el('kMag');
+const v0Val = el('v0Val'), y0Val = el('y0Val'), gVal = el('gVal'), kVal = el('kVal');
+const v0Hint = el('v0Hint'), y0Hint = el('y0Hint'), modeHint = el('modeHint');
+const playBtn = el('play'), resetBtn = el('reset');
+const showTrailCb    = el('showTrail');
+const showVelocityCb = el('showVelocity');
+const showAccelCb    = el('showAccel');
+const showPeakCb     = el('showPeak');
+const showRulerCb    = el('showRuler');
+
+/* ---------- مستمعو التحكم ---------- */
+v0S.addEventListener('input', () => {
+  if (state.mode === 'free') return;
+  const mag = parseFloat(v0S.value);
+  state.v0 = (state.mode === 'down') ? -mag : mag;
+  v0Val.textContent = state.v0.toFixed(1) + ' m/s';
+  resetSim();
+});
+
+y0S.addEventListener('input', () => {
+  state.y0 = parseFloat(y0S.value);
+  if (state.mode !== 'up' && state.y0 < 1) {
+    state.y0 = 1;
+    y0S.value = 1;
+  }
+  y0Val.textContent = state.y0.toFixed(1) + ' m';
+  resetSim();
+});
+
+gMagS.addEventListener('input', () => {
+  state.g = parseFloat(gMagS.value);
+  gVal.textContent = state.g.toFixed(2) + ' m/s²';
+  resetSim();
+});
+
+kMagS.addEventListener('input', () => {
+  state.k = parseFloat(kMagS.value);
+  kVal.textContent = state.k.toFixed(2);
+  resetSim();
+});
+
+playBtn.addEventListener('click', () => {
+  state.running = !state.running;
+  playBtn.textContent = state.running ? '⏸ إيقاف' : '▶ تشغيل';
+  if (state.running && state.finished) resetSim();
+});
+
+resetBtn.addEventListener('click', resetSim);
+
+document.querySelectorAll('.modeBtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.modeBtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyMode(btn.dataset.mode);
+  });
+});
+
+showTrailCb.addEventListener('change', () => {
+  trailGroup.visible = showTrailCb.checked;
+});
+
+showPeakCb.addEventListener('change', () => {
+  peakGroup.visible = showPeakCb.checked;
+});
+
+showRulerCb.addEventListener('change', () => {
+  rulerGroup.visible = showRulerCb.checked;
+});
+
+/* ================= الإقلاع ================= */
+resetSim();
+adjustCamera();
+requestAnimationFrame(animate);
+
+/* ================= الحجم ================= */
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
