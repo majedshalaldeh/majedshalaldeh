@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>موصلان ومقاومتان (3D) | الأستاذ ماجد شلالدة</title>
+<style>
+  :root{
+    --bg-color:#0b1329; --main-card-bg:#1c2541; --sub-card-bg:#3a506b;
+    --text-color:#ffffff; --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8; --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --panel-bg:rgba(18,22,32,0.92);
+    --panel-border:rgba(255,255,255,0.10);
+    --accent:#5b8cff; --accent2:#ffb545;
+    --text:#eef1f7; --muted:#9aa3b5;
+    --panel-width:320px; --panel-right:18px;
+    --scene-bg:#0b0e14;
+  }
+  body.light-mode{
+    --main-card-bg:#ffffff; --sub-card-bg:#e8eef5;
+    --text-color:#1a202c; --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --panel-bg:rgba(255,255,255,0.94);
+    --panel-border:rgba(0,0,0,0.12);
+    --accent:#2563eb; --accent2:#c2410c;
+    --text:#0f172a; --muted:#475569;
+    --scene-bg:#dbe6f5;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;
+    background:var(--scene-bg);font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+    color:var(--text);transition:background .3s,color .3s;}
+  #canvasHost{position:fixed;inset:0;z-index:1;}
+  #canvasHost canvas{display:block;}
+
+  #navbar{position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;height:56px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);}
+  body.light-mode #navbar{background:rgba(255,255,255,0.92);}
+  .nav-brand{font-size:1.05rem;font-weight:bold;color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;}
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:8px;font-size:.88rem;transition:.2s;}
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+  .theme-toggle{background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.1rem;width:36px;height:36px;
+    border-radius:50%;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;transition:.2s;}
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  #breadcrumb{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:40;
+    display:flex;align-items:center;gap:8px;padding:8px 18px;font-size:12px;
+    color:var(--muted);background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:10px;backdrop-filter:blur(8px);}
+  #breadcrumb a{color:var(--accent);text-decoration:none;}
+  #breadcrumb .sep{opacity:.5;}
+  #breadcrumb .cur{color:var(--text);font-weight:600;}
+
+  #siteHeader{position:fixed;top:105px;left:0;right:0;height:60px;
+    padding:8px 20px 0;text-align:center;z-index:25;pointer-events:none;}
+  #titleBlock{max-width:900px;margin:0 auto;text-align:center;}
+  #titleBlock h1{margin:0;font-size:18px;line-height:1.4;color:var(--accent2);
+    text-shadow:0 2px 8px rgba(0,0,0,.15);}
+  #titleBlock .credit{font-size:11px;color:var(--muted);margin-top:3px;}
+
+  #hud{position:fixed;top:175px;left:18px;width:290px;
+    max-height:calc(100% - 255px);overflow-y:auto;
+    background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:14px;padding:16px 18px;backdrop-filter:blur(10px);z-index:35;}
+  #hud::-webkit-scrollbar{width:5px;}
+  #hud::-webkit-scrollbar-thumb{background:rgba(128,128,128,.4);border-radius:3px;}
+  #hud h3{margin:0 0 10px;font-size:13.5px;color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);padding-bottom:6px;}
+  .hudRow{display:flex;justify-content:space-between;font-size:12px;
+    margin:5px 0;color:var(--muted);}
+  .hudRow b{color:var(--text);direction:ltr;font-family:'Courier New',monospace;}
+  .hudRow b.warm{color:#ffb457;}
+  .hudRow b.hot{color:#ff7a7a;}
+  .hudRow b.cool{color:#8effa8;}
+  .hudRow b.cyan{color:#7ee6ff;}
+  .hudRow b.red{color:#ff9090;}
+  .hudRow b.neg{color:#ff66cc;}
+
+  #logoWrap{position:fixed;top:120px;right:var(--panel-right);
+    width:var(--panel-width);height:150px;
+    display:flex;justify-content:center;align-items:center;z-index:30;pointer-events:none;}
+  #logoWrap img{width:130px;height:130px;border-radius:50%;background:#fff;
+    object-fit:cover;box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);
+    border:3px solid rgba(255,255,255,.2);}
+  body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);
+    border-color:rgba(0,0,0,.1);}
+  #logoFallback{display:none;width:130px;height:130px;border-radius:50%;
+    background:linear-gradient(135deg,#f77f00,#00b4d8);
+    align-items:center;justify-content:center;font-size:4rem;color:#fff;}
+
+  #panel{position:fixed;top:275px;right:var(--panel-right);
+    width:var(--panel-width);max-height:calc(100% - 330px);
+    overflow-y:auto;overflow-x:hidden;
+    scrollbar-width:none;-ms-overflow-style:none;
+    background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:16px;padding:10px 12px 8px;backdrop-filter:blur(10px);z-index:35;}
+  #panel::-webkit-scrollbar{display:none;width:0;height:0;}
+  #panel h3{margin:0 0 6px;font-size:13px;color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);padding-bottom:5px;}
+
+  .ctrlGroup{margin-bottom:6px;padding:6px 9px;border-radius:9px;
+    background:rgba(128,128,128,.06);}
+  .ctrlGroup .title{font-size:11px;font-weight:bold;margin-bottom:3px;
+    display:flex;align-items:center;gap:6px;}
+  .ctrlGroup .title .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .ctrlGroup.c-cyan .title{color:#5bc0eb;} .ctrlGroup.c-cyan .title .dot{background:#5bc0eb;}
+  .ctrlGroup.c-gold .title{color:#ffd166;} .ctrlGroup.c-gold .title .dot{background:#ffd166;}
+  .ctrlGroup.c-green .title{color:#4dff9b;} .ctrlGroup.c-green .title .dot{background:#4dff9b;}
+  .ctrlGroup.c-red .title{color:#ff9090;} .ctrlGroup.c-red .title .dot{background:#ff9090;}
+
+  .ctrlRow{display:flex;justify-content:space-between;font-size:11px;margin:2px 0 1px;}
+  .ctrlRow span{color:var(--muted);}
+  .ctrlRow b{color:var(--text);direction:ltr;font-family:'Courier New',monospace;font-size:11px;}
+  .ctrlRow b.warm{color:#ffb457;} .ctrlRow b.cool{color:#8effa8;}
+  .ctrlRow b.highlight{color:#ffd54a;} .ctrlRow b.cyan{color:#7ee6ff;}
+  .ctrlRow b.red{color:#ff9090;}
+
+  input[type=range]{width:100%;accent-color:var(--accent);margin:1px 0 3px;height:12px;}
+
+  .btn-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .btn{flex:1;padding:7px 8px;border-radius:8px;border:1px solid var(--panel-border);
+    background:rgba(128,128,128,.08);color:var(--text);font-size:11.5px;
+    font-weight:bold;cursor:pointer;font-family:inherit;transition:.2s;}
+  .btn:hover{background:rgba(128,128,128,.18);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .flipBtn{width:100%;margin-top:6px;padding:9px;display:flex;
+    align-items:center;justify-content:center;gap:8px;border-radius:9px;
+    font-weight:bold;letter-spacing:.3px;font-size:11.5px;cursor:pointer;
+    font-family:inherit;transition:.2s;}
+  #flipFieldBtn{border:1px solid rgba(180,140,255,.45);
+    background:linear-gradient(135deg,rgba(80,40,160,.55),rgba(40,60,140,.55));
+    color:#e5d6ff;}
+  #flipFieldBtn:hover{background:linear-gradient(135deg,rgba(110,60,200,.70),rgba(55,85,180,.70));
+    border-color:rgba(200,170,255,.8);box-shadow:0 0 20px rgba(140,100,255,.45);}
+  .flipBtn .icon{font-size:16px;line-height:1;}
+
+  #footer{position:fixed;bottom:0;left:0;right:0;padding:8px 20px;
+    text-align:center;font-size:11px;color:var(--muted);
+    background:linear-gradient(0deg,var(--panel-bg) 0%,transparent 100%);
+    pointer-events:none;z-index:20;}
+  #footer strong{color:var(--accent2);}
+
+  #hint{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);
+    color:var(--muted);font-size:12px;background:var(--panel-bg);
+    padding:6px 14px;border-radius:20px;border:1px solid var(--panel-border);
+    pointer-events:none;z-index:5;}
+
+  #formula{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+    padding:7px 18px;background:var(--panel-bg);backdrop-filter:blur(12px);
+    border:1px solid var(--panel-border);border-radius:11px;
+    color:var(--muted);font-size:12px;direction:ltr;
+    font-family:'Cambria Math','Times New Roman',serif;letter-spacing:.5px;
+    z-index:10;white-space:nowrap;}
+  #formula b{color:#ffd54a;font-weight:700;}
+  #formula em{color:#7ee6ff;font-style:normal;font-weight:700;}
+
+  @media(max-width:900px){
+    :root{--panel-width:280px;--panel-right:10px;}
+    #titleBlock h1{font-size:15px;}
+    #siteHeader{padding:8px 10px 0;top:100px;height:55px;}
+    #hud{width:250px;top:165px;}
+    #logoWrap{top:105px;height:130px;}
+    #logoWrap img{width:115px;height:115px;}
+    #logoFallback{width:115px;height:115px;font-size:3.5rem;}
+    #panel{top:245px;max-height:calc(100% - 300px);padding:9px 10px 7px;}
+  }
+  @media(max-width:650px){
+    #hud{display:none;}
+    #siteHeader{position:static;height:auto;padding:70px 10px 0;}
+    #titleBlock h1{font-size:13px;padding:0 4px;}
+    #breadcrumb{top:60px;font-size:10px;padding:5px 12px;max-width:calc(100vw - 20px);}
+    #logoWrap{top:auto;bottom:16px;left:8px;right:auto;width:90px;height:90px;}
+    #logoWrap img{width:80px;height:80px;}
+    #logoFallback{width:80px;height:80px;font-size:2.8rem;}
+    #panel{top:auto;bottom:16px;right:8px;left:auto;
+      width:calc(100vw - 116px);max-width:320px;max-height:62vh;padding:9px 10px 7px;}
+    #hint{display:none;} #formula{font-size:10px;padding:5px 10px;bottom:8px;}
+    #footer{font-size:9.5px;padding:5px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="canvasHost"></div>
+
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+</nav>
+
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+  <span class="sep">›</span>
+  <a href="induction.html">🌀 الحث الكهرومغناطيسي</a>
+  <span class="sep">›</span>
+  <span class="cur">🎬 موصلان ومقاومتان (3D)</span>
+</div>
+
+<div id="siteHeader">
+  <div id="titleBlock">
+    <h1>موصلان ومقاومتان بقيم مستقلة — محاكاة ثلاثية الأبعاد</h1>
+    <div class="credit">إعداد وتطوير: الأستاذ ماجد شلالده &nbsp;|&nbsp; 0599870176</div>
+  </div>
+</div>
+
+<div id="hud">
+  <h3>📊 القراءات اللحظية</h3>
+  <div class="hudRow"><span>R₁ (علوية)</span><b class="red" id="rR1">1.20 Ω</b></div>
+  <div class="hudRow"><span>R₂ (سفلية)</span><b class="cyan" id="rR2">1.20 Ω</b></div>
+  <div class="hudRow"><span>R<sub>total</sub></span><b class="cyan" id="rRtot">2.40 Ω</b></div>
+  <div class="hudRow"><span>v<sub>A</sub></span><b class="red" id="rVA">0.000 m/s</b></div>
+  <div class="hudRow"><span>v<sub>B</sub></span><b class="cyan" id="rVB">0.000 m/s</b></div>
+  <div class="hudRow"><span>Δv = v<sub>B</sub> − v<sub>A</sub></span><b class="cool" id="rDV">0.000 m/s</b></div>
+  <div class="hudRow"><span>ε = BL(v<sub>B</sub>−v<sub>A</sub>)</span><b class="warm" id="rE">0.000 V</b></div>
+  <div class="hudRow"><span>التيار I</span><b class="warm" id="rI">0.000 A</b></div>
+  <div class="hudRow"><span>F<sub>mag</sub> على A</span><b class="hot" id="rFA">0.000 N</b></div>
+  <div class="hudRow"><span>F<sub>mag</sub> على B</span><b class="hot" id="rFB">0.000 N</b></div>
+</div>
+
+<div id="logoWrap">
+  <img src="../../logo.png" alt="الشعار"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+  <div id="logoFallback">⚛️</div>
+</div>
+
+<div id="panel">
+  <h3>🎛️ لوحة التحكم</h3>
+
+  <div class="ctrlGroup c-gold">
+    <div class="title"><span class="dot"></span>هندسة الموصل</div>
+    <div class="ctrlRow"><span>طول الموصل L</span><b class="highlight" id="lVal">1.60 m</b></div>
+    <input type="range" id="lSlider" min="0.6" max="2.4" step="0.05" value="1.6">
+  </div>
+
+  <div class="ctrlGroup c-cyan">
+    <div class="title"><span class="dot"></span>المجال والمقاومتان</div>
+    <div class="ctrlRow"><span>شدة المجال B</span><b class="cyan" id="bVal">0.60 T ↓</b></div>
+    <input type="range" id="bSlider" min="0.2" max="2" step="0.05" value="0.6">
+    <div class="ctrlRow"><span>R₁ (علوية)</span><b class="red" id="r1Val">1.20 Ω</b></div>
+    <input type="range" id="r1Slider" min="0.2" max="10" step="0.1" value="1.2">
+    <div class="ctrlRow"><span>R₂ (سفلية)</span><b class="cyan" id="r2Val">1.20 Ω</b></div>
+    <input type="range" id="r2Slider" min="0.2" max="10" step="0.1" value="1.2">
+  </div>
+
+  <div class="ctrlGroup c-green">
+    <div class="title"><span class="dot"></span>القوى الخارجية</div>
+    <div class="ctrlRow"><span>القوة على A</span><b class="cool" id="faVal">+1.00 N →</b></div>
+    <input type="range" id="faSlider" min="-3" max="3" step="0.05" value="1">
+    <div class="ctrlRow"><span>القوة على B</span><b class="cool" id="fbVal">0.00 N</b></div>
+    <input type="range" id="fbSlider" min="-3" max="3" step="0.05" value="0">
+  </div>
+
+  <button class="flipBtn" id="flipFieldBtn" title="عكس اتجاه المجال المغناطيسي">
+    <span class="icon">↓</span>
+    <span class="text">عكس اتجاه المجال المغناطيسي</span>
+  </button>
+
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="btn primary" id="playBtn">⏸ إيقاف</button>
+    <button class="btn" id="resetBtn">↺ إعادة</button>
+  </div>
+</div>
+
+<div id="formula">ε = B·L·(v<sub>B</sub> − v<sub>A</sub>) &nbsp;|&nbsp; I = ε/(R₁+R₂) &nbsp;|&nbsp; F<sub>mag</sub> = <em>B²L²Δv/(R₁+R₂)</em></div>
+
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد
+  <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<div id="hint">🖱️ اسحب للتدوير • 🖲️ عجلة الماوس للتقريب</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const MASS    = 1.0;
+const RAIL_X0 = -4.0, RAIL_X1 = 4.0;
+const XA_MIN  = -3.5, XA_MAX = -0.65;
+const XB_MIN  =  0.65, XB_MAX =  3.5;
+const RES_HW  = 0.18;
+const ROD_Y   = 0.045;
+
+const params = { L: 1.6, B: 0.6, R1: 1.2, R2: 1.2, FA: 1.0, FB: 0.0 };
+let Bsign = 1;
+let xA = -2.5, xB = 2.5;
+let vA = 0, vB = 0;
+let emf = 0, current = 0, fmagA = 0, fmagB = 0;
+let running = true, phase = 0, endTimer = 0;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x080b12);
+scene.fog = new THREE.Fog(0x080b12, 18, 45);
+
+const camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 300);
+camera.position.set(8, 7, 10);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.getElementById('canvasHost').appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.6, 0);
+controls.enableDamping = true; controls.dampingFactor = 0.075;
+controls.minDistance = 4; controls.maxDistance = 30;
+controls.maxPolarAngle = Math.PI * 0.495;
+controls.update();
+
+scene.add(new THREE.HemisphereLight(0x9dc4ff, 0x0c1018, 1.15));
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.2);
+keyLight.position.set(7, 14, 9);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.camera.left = -10; keyLight.shadow.camera.right = 10;
+keyLight.shadow.camera.top = 10; keyLight.shadow.camera.bottom = -10;
+keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 45;
+keyLight.shadow.bias = -0.0005;
+scene.add(keyLight);
+scene.add(new THREE.DirectionalLight(0x4d8bff, 1.1).translateX(-8));
+
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(60, 60),
+  new THREE.MeshStandardMaterial({ color: 0x0e131d, roughness: 0.96, metalness: 0.05 }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = -0.95;
+ground.receiveShadow = true; scene.add(ground);
+const grid = new THREE.GridHelper(60, 60, 0x1d3a63, 0x152a45);
+grid.position.y = -0.94; grid.material.transparent = true; grid.material.opacity = 0.45;
+scene.add(grid);
+
+const railMat = new THREE.MeshStandardMaterial({ color: 0xb9c4d4, metalness: 0.95, roughness: 0.22, emissive: 0x0a1526 });
+const rodMatA = new THREE.MeshStandardMaterial({ color: 0xe06060, metalness: 0.85, roughness: 0.25, emissive: 0x3a0808 });
+const rodMatB = new THREE.MeshStandardMaterial({ color: 0x60b0e0, metalness: 0.85, roughness: 0.25, emissive: 0x082a3a });
+
+function createArrow(colorHex, shaftR, headR, headL, em = 0.4) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({
+    color: colorHex, roughness: 0.35, metalness: 0.35,
+    emissive: new THREE.Color(colorHex).multiplyScalar(em),
+    transparent: true, opacity: 0.95 });
+  const sh = new THREE.Mesh(new THREE.CylinderGeometry(shaftR, shaftR, 1, 14), mat);
+  sh.rotation.z = -Math.PI / 2;
+  const hd = new THREE.Mesh(new THREE.ConeGeometry(headR, headL, 20), mat);
+  hd.rotation.z = -Math.PI / 2;
+  g.add(sh, hd);
+  g.userData.setLength = (len) => {
+    const l = Math.max(len, 0.0001);
+    const s = Math.max(l - headL, 0.0001);
+    sh.scale.y = s; sh.position.x = s / 2;
+    hd.position.x = l - headL / 2;
+    g.visible = len > 0.05;
+  };
+  g.userData.setLength(1);
+  return g;
+}
+
+const railSegs = [];
+const railGeoL = new THREE.BoxGeometry(-RES_HW - RAIL_X0, 0.06, 0.09);
+const railGeoR = new THREE.BoxGeometry(RAIL_X1 - RES_HW, 0.06, 0.09);
+
+for (const side of [-1, 1]) {
+  const zPos = side * params.L / 2;
+  const leftSeg = new THREE.Mesh(railGeoL, railMat);
+  leftSeg.position.set((RAIL_X0 + (-RES_HW)) / 2, -0.03, zPos);
+  leftSeg.castShadow = true; leftSeg.receiveShadow = true;
+  scene.add(leftSeg); railSegs.push({ mesh: leftSeg, side, part: 'L' });
+
+  const rightSeg = new THREE.Mesh(railGeoR, railMat);
+  rightSeg.position.set((RES_HW + RAIL_X1) / 2, -0.03, zPos);
+  rightSeg.castShadow = true; rightSeg.receiveShadow = true;
+  scene.add(rightSeg); railSegs.push({ mesh: rightSeg, side, part: 'R' });
+}
+
+const resistorGeo = new THREE.CylinderGeometry(0.085, 0.085, RES_HW * 2, 24);
+const bandGeo     = new THREE.CylinderGeometry(0.092, 0.092, 0.025, 24);
+
+function createResistor(bandColors, matColor) {
+  const g = new THREE.Group();
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: matColor, roughness: 0.55, metalness: 0.15,
+    emissive: new THREE.Color(matColor).multiplyScalar(0.05) });
+
+  const body = new THREE.Mesh(resistorGeo, bodyMat);
+  body.rotation.z = Math.PI / 2;
+  body.castShadow = true;
+  g.add(body);
+
+  const bandPositions = [-0.36, -0.15, 0.06, 0.27];
+  const bands = [];
+  bandColors.forEach((c, i) => {
+    const band = new THREE.Mesh(
+      bandGeo,
+      new THREE.MeshStandardMaterial({ color: c, roughness: 0.5, metalness: 0.1 })
+    );
+    band.rotation.z = Math.PI / 2;
+    band.position.x = bandPositions[i] * 2 * RES_HW;
+    g.add(band);
+    bands.push(band);
+  });
+
+  return { group: g, body, bands };
+}
+
+const res1 = createResistor(
+  [0x8b3a2f, 0x1f1f1f, 0xd4a017, 0x2f6b3a],
+  0xd6b8a0
+);
+res1.group.position.set(0, -0.03, -params.L / 2);
+scene.add(res1.group);
+
+const res2 = createResistor(
+  [0x1f3a7a, 0x1f1f1f, 0xd4a017, 0x2f6b3a],
+  0xa0c4d6
+);
+res2.group.position.set(0, -0.03, params.L / 2);
+scene.add(res2.group);
+
+const rodA = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 1), rodMatA);
+rodA.position.set(xA, ROD_Y, 0);
+rodA.scale.z = params.L + 0.14;
+rodA.castShadow = true; scene.add(rodA);
+
+const rodB = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 1), rodMatB);
+rodB.position.set(xB, ROD_Y, 0);
+rodB.scale.z = params.L + 0.14;
+rodB.castShadow = true; scene.add(rodB);
+
+const glowA = new THREE.PointLight(0xff6060, 1.0, 2.4, 2);
+glowA.position.set(xA, ROD_Y + 0.25, 0);
+scene.add(glowA);
+const glowB = new THREE.PointLight(0x60b0ff, 1.0, 2.4, 2);
+glowB.position.set(xB, ROD_Y + 0.25, 0);
+scene.add(glowB);
+
+const fieldMat = new THREE.MeshStandardMaterial({
+  color: 0x4da3ff, emissive: 0x1a5fbf, emissiveIntensity: 1.4,
+  transparent: true, opacity: 0.42, roughness: 0.4, metalness: 0.1,
+  depthWrite: false });
+const FIELD_LEN = 1.7, FIELD_TOP_Y = 2.05, FIELD_BOT_Y = 0.35;
+const faGeo = {
+  shaft: new THREE.CylinderGeometry(0.011, 0.011, 1, 8),
+  head:  new THREE.ConeGeometry(0.048, 0.22, 12) };
+const fieldArrows = [];
+let fieldX = -3.6;
+for (let i = 0; i < 9; i++) {
+  for (const zFrac of [-2, -1, 0, 1, 2]) {
+    const g = new THREE.Group();
+    const sh = new THREE.Mesh(faGeo.shaft, fieldMat);
+    sh.rotation.z = -Math.PI / 2;
+    const s = FIELD_LEN - 0.22; sh.scale.y = s; sh.position.x = s / 2;
+    const hd = new THREE.Mesh(faGeo.head, fieldMat);
+    hd.rotation.z = -Math.PI / 2;
+    hd.position.x = FIELD_LEN - 0.11;
+    g.add(sh, hd);
+    g.userData.baseX = fieldX;
+    g.userData.zFrac = zFrac;
+    g.userData.baseZ = zFrac * params.L / 2;
+    g.position.set(fieldX, FIELD_TOP_Y, g.userData.baseZ);
+    g.rotation.z = -Math.PI / 2;
+    scene.add(g); fieldArrows.push(g);
+  }
+  fieldX += 0.9;
+}
+
+const N_DOTS = 50;
+const dots = [];
+const dotGeo = new THREE.SphereGeometry(0.05, 10, 10);
+const C_POS = 0xffe066, C_NEG = 0xff77dd;
+for (let i = 0; i < N_DOTS; i++) {
+  const mat = new THREE.MeshBasicMaterial({ color: C_POS });
+  const d = new THREE.Mesh(dotGeo, mat);
+  d.visible = false; scene.add(d); dots.push(d);
+}
+
+const _pt = new THREE.Vector3();
+function pathPoint(s, out) {
+  const halfZ = params.L / 2, rw = RES_HW;
+  const segs = [
+    { len: params.L,                    t: 'rodA' },
+    { len: Math.max(-xA - rw, 0.001),   t: 'botL' },
+    { len: 2 * rw,                      t: 'res2' },
+    { len: Math.max(xB - rw, 0.001),    t: 'botR' },
+    { len: params.L,                    t: 'rodB' },
+    { len: Math.max(xB - rw, 0.001),    t: 'topR' },
+    { len: 2 * rw,                      t: 'res1' },
+    { len: Math.max(-xA - rw, 0.001),   t: 'topL' },
+  ];
+  let total = 0;
+  for (const sg of segs) total += sg.len;
+  let t = (((s % 1) + 1) % 1) * total;
+  for (const sg of segs) {
+    if (t < sg.len) {
+      const u = t / sg.len;
+      const z = ROD_Y + 0.005;
+      switch (sg.t) {
+        case 'rodA': out.set(xA, z, -halfZ + u * params.L); break;
+        case 'botL': out.set(xA + u * (-xA - rw), z, halfZ); break;
+        case 'res2': out.set(-rw + u * 2 * rw, z, halfZ); break;
+        case 'botR': out.set(rw + u * (xB - rw), z, halfZ); break;
+        case 'rodB': out.set(xB, z, halfZ - u * params.L); break;
+        case 'topR': out.set(xB - u * (xB - rw), z, -halfZ); break;
+        case 'res1': out.set(rw - u * 2 * rw, z, -halfZ); break;
+        case 'topL': out.set(-rw + u * (xA + rw), z, -halfZ); break;
+      }
+      return out;
+    }
+    t -= sg.len;
+  }
+  return out;
+}
+
+const vArrowA = createArrow(0xffd54a, 0.026, 0.08, 0.24, 0.5);
+const vArrowB = createArrow(0xffd54a, 0.026, 0.08, 0.24, 0.5);
+const fExtA   = createArrow(0x4dff9b, 0.022, 0.07, 0.22, 0.4);
+const fExtB   = createArrow(0x4dff9b, 0.022, 0.07, 0.22, 0.4);
+const fMagA   = createArrow(0xff5f5f, 0.022, 0.07, 0.22, 0.4);
+const fMagB   = createArrow(0xff5f5f, 0.022, 0.07, 0.22, 0.4);
+scene.add(vArrowA, vArrowB, fExtA, fExtB, fMagA, fMagB);
+
+function makeLabel(text, color, fs = 72, w = 1.4, h = 0.7) {
+  const cv = document.createElement('canvas');
+  cv.width = 320; cv.height = 160;
+  const c = cv.getContext('2d');
+  c.font = `bold ${fs}px "Segoe UI", Tahoma, sans-serif`;
+  c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.shadowColor = color; c.shadowBlur = 22;
+  c.fillText(text, 160, 80);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = 4;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, depthTest: false });
+  const spr = new THREE.Sprite(mat);
+  spr.scale.set(w, h, 1);
+  return spr;
+}
+const labelBDown = makeLabel('B ↓', '#5fb0ff');
+const labelBUp   = makeLabel('B ↑', '#b48fff');
+labelBDown.position.set(-4.05, 2.42, params.L / 2 + 0.7);
+labelBUp.position.set(-4.05, 2.42, params.L / 2 + 0.7);
+scene.add(labelBDown, labelBUp);
+labelBUp.visible = false;
+
+const labelA = makeLabel('A', '#ff9090', 72);
+const labelB = makeLabel('B', '#7ee6ff', 72);
+scene.add(labelA, labelB);
+
+function updateForLength() {
+  const halfZ = params.L / 2;
+  railSegs.forEach(seg => { seg.mesh.position.z = seg.side * halfZ; });
+  res1.group.position.z = -halfZ;
+  res2.group.position.z =  halfZ;
+  rodA.scale.z = params.L + 0.14;
+  rodB.scale.z = params.L + 0.14;
+  fieldArrows.forEach(g => {
+    const z = g.userData.zFrac * halfZ;
+    g.position.z = z; g.userData.baseZ = z;
+  });
+  labelBDown.position.z = halfZ + 0.7;
+  labelBUp.position.z = halfZ + 0.7;
+  applyField();
+}
+function applyField() {
+  for (const g of fieldArrows) {
+    if (Bsign > 0) {
+      g.position.set(g.userData.baseX, FIELD_TOP_Y, g.userData.baseZ);
+      g.rotation.z = -Math.PI / 2;
+    } else {
+      g.position.set(g.userData.baseX, FIELD_BOT_Y, g.userData.baseZ);
+      g.rotation.z = Math.PI / 2;
+    }
+  }
+}
+
+function physicsStep(dt) {
+  const sub = 8, h = dt / sub;
+  const Bz = params.B * Bsign;
+  const L  = params.L;
+  const Rtot = params.R1 + params.R2;
+  const k = params.B * params.B * L * L / Rtot;
+
+  for (let i = 0; i < sub; i++) {
+    const dv = vB - vA;
+    const FmA = k * dv;
+    const FmB = -k * dv;
+    const aA = (params.FA + FmA) / MASS;
+    const aB = (params.FB + FmB) / MASS;
+    vA += aA * h; xA += vA * h;
+    vB += aB * h; xB += vB * h;
+  }
+
+  const dv = vB - vA;
+  fmagA = k * dv;
+  fmagB = -k * dv;
+  emf = Bz * L * (vA - vB);
+  current = emf / Rtot;
+
+  let hitBounds = false;
+  if (xA < XA_MIN) { xA = XA_MIN; if (vA < 0) vA = 0; hitBounds = true; }
+  if (xA > XA_MAX) { xA = XA_MAX; if (vA > 0) vA = 0; hitBounds = true; }
+  if (xB < XB_MIN) { xB = XB_MIN; if (vB < 0) vB = 0; hitBounds = true; }
+  if (xB > XB_MAX) { xB = XB_MAX; if (vB > 0) vB = 0; hitBounds = true; }
+
+  const stopped = Math.abs(vA) < 0.05 && Math.abs(vB) < 0.05;
+  if (hitBounds && stopped) {
+    endTimer += dt;
+    if (endTimer > 1.5) { xA = -2.5; xB = 2.5; vA = 0; vB = 0; endTimer = 0; }
+  } else endTimer = 0;
+}
+
+function updateScene(dt) {
+  rodA.position.x = xA;
+  rodB.position.x = xB;
+  glowA.position.x = xA;
+  glowB.position.x = xB;
+  labelA.position.set(xA, 1.15, 0);
+  labelB.position.set(xB, 1.15, 0);
+
+  vArrowA.position.set(xA, 1.05, 0);
+  vArrowA.visible = Math.abs(vA) > 0.02;
+  if (vArrowA.visible) {
+    vArrowA.userData.setLength(Math.min(Math.abs(vA) * 0.7, 1.8));
+    vArrowA.rotation.y = vA >= 0 ? 0 : Math.PI;
+  }
+  fExtA.position.set(xA, 0.72, 0);
+  fExtA.visible = Math.abs(params.FA) > 0.02;
+  if (fExtA.visible) {
+    fExtA.userData.setLength(Math.min(Math.abs(params.FA) * 0.6, 1.8));
+    fExtA.rotation.y = params.FA >= 0 ? 0 : Math.PI;
+  }
+  fMagA.position.set(xA, 0.38, 0);
+  fMagA.visible = Math.abs(fmagA) > 0.02;
+  if (fMagA.visible) {
+    fMagA.userData.setLength(Math.min(Math.abs(fmagA) * 0.6, 1.8));
+    fMagA.rotation.y = fmagA >= 0 ? 0 : Math.PI;
+  }
+
+  vArrowB.position.set(xB, 1.05, 0);
+  vArrowB.visible = Math.abs(vB) > 0.02;
+  if (vArrowB.visible) {
+    vArrowB.userData.setLength(Math.min(Math.abs(vB) * 0.7, 1.8));
+    vArrowB.rotation.y = vB >= 0 ? 0 : Math.PI;
+  }
+  fExtB.position.set(xB, 0.72, 0);
+  fExtB.visible = Math.abs(params.FB) > 0.02;
+  if (fExtB.visible) {
+    fExtB.userData.setLength(Math.min(Math.abs(params.FB) * 0.6, 1.8));
+    fExtB.rotation.y = params.FB >= 0 ? 0 : Math.PI;
+  }
+  fMagB.position.set(xB, 0.38, 0);
+  fMagB.visible = Math.abs(fmagB) > 0.02;
+  if (fMagB.visible) {
+    fMagB.userData.setLength(Math.min(Math.abs(fmagB) * 0.6, 1.8));
+    fMagB.rotation.y = fmagB >= 0 ? 0 : Math.PI;
+  }
+
+  if (Math.abs(current) > 0.008) {
+    phase += current * 0.4 * dt;
+    phase = ((phase % 1) + 1) % 1;
+    const c = current >= 0 ? C_POS : C_NEG;
+    for (let i = 0; i < N_DOTS; i++) {
+      const s = ((i / N_DOTS) + phase) % 1;
+      pathPoint(s, _pt);
+      dots[i].position.copy(_pt);
+      dots[i].visible = true;
+      dots[i].material.color.setHex(c);
+    }
+  } else {
+    for (const d of dots) d.visible = false;
+  }
+
+  const t = performance.now() * 0.001;
+  fieldMat.opacity = 0.36 + 0.10 * Math.sin(t * 1.6);
+
+  updateHUD();
+}
+
+const elR1   = document.getElementById('rR1');
+const elR2   = document.getElementById('rR2');
+const elRtot = document.getElementById('rRtot');
+const elVA   = document.getElementById('rVA');
+const elVB   = document.getElementById('rVB');
+const elDV   = document.getElementById('rDV');
+const elE    = document.getElementById('rE');
+const elI    = document.getElementById('rI');
+const elFA   = document.getElementById('rFA');
+const elFB   = document.getElementById('rFB');
+
+function updateHUD() {
+  elR1.textContent = params.R1.toFixed(2) + ' Ω';
+  elR2.textContent = params.R2.toFixed(2) + ' Ω';
+  elRtot.textContent = (params.R1 + params.R2).toFixed(2) + ' Ω';
+  elVA.textContent = vA.toFixed(3) + ' m/s';
+  elVA.classList.toggle('neg', vA < 0);
+  elVB.textContent = vB.toFixed(3) + ' m/s';
+  elVB.classList.toggle('neg', vB < 0);
+  elDV.textContent = (vB - vA).toFixed(3) + ' m/s';
+  elDV.classList.toggle('neg', (vB - vA) < 0);
+  elE.textContent = emf.toFixed(3) + ' V';
+  elE.classList.toggle('neg', emf < 0);
+  elI.textContent = current.toFixed(3) + ' A';
+  elI.classList.toggle('neg', current < 0);
+  elFA.textContent = fmagA.toFixed(3) + ' N';
+  elFA.classList.toggle('neg', fmagA < 0);
+  elFB.textContent = fmagB.toFixed(3) + ' N';
+  elFB.classList.toggle('neg', fmagB < 0);
+}
+
+const lSlider  = document.getElementById('lSlider');
+const bSlider  = document.getElementById('bSlider');
+const r1Slider = document.getElementById('r1Slider');
+const r2Slider = document.getElementById('r2Slider');
+const faSlider = document.getElementById('faSlider');
+const fbSlider = document.getElementById('fbSlider');
+const lVal  = document.getElementById('lVal');
+const bVal  = document.getElementById('bVal');
+const r1Val = document.getElementById('r1Val');
+const r2Val = document.getElementById('r2Val');
+const faVal = document.getElementById('faVal');
+const fbVal = document.getElementById('fbVal');
+
+function syncParams() {
+  const newL = parseFloat(lSlider.value);
+  const lenCh = Math.abs(newL - params.L) > 1e-6;
+  params.L  = newL;
+  params.B  = parseFloat(bSlider.value);
+  params.R1 = parseFloat(r1Slider.value);
+  params.R2 = parseFloat(r2Slider.value);
+  params.FA = parseFloat(faSlider.value);
+  params.FB = parseFloat(fbSlider.value);
+
+  lVal.textContent  = params.L.toFixed(2) + ' m';
+  bVal.textContent  = params.B.toFixed(2) + ' T ' + (Bsign > 0 ? '↓' : '↑');
+  r1Val.textContent = params.R1.toFixed(2) + ' Ω';
+  r2Val.textContent = params.R2.toFixed(2) + ' Ω';
+
+  const aA = params.FA > 0 ? '→' : (params.FA < 0 ? '←' : '');
+  faVal.textContent = (params.FA >= 0 ? '+' : '') + params.FA.toFixed(2) + ' N ' + aA;
+  const aB = params.FB > 0 ? '→' : (params.FB < 0 ? '←' : '');
+  fbVal.textContent = (params.FB >= 0 ? '+' : '') + params.FB.toFixed(2) + ' N ' + aB;
+
+  if (lenCh) updateForLength();
+}
+lSlider.addEventListener('input', syncParams);
+bSlider.addEventListener('input', syncParams);
+r1Slider.addEventListener('input', syncParams);
+r2Slider.addEventListener('input', syncParams);
+faSlider.addEventListener('input', syncParams);
+fbSlider.addEventListener('input', syncParams);
+
+const flipFieldBtn = document.getElementById('flipFieldBtn');
+const flipFieldIcon = flipFieldBtn.querySelector('.icon');
+flipFieldBtn.addEventListener('click', () => {
+  Bsign = -Bsign;
+  flipFieldIcon.textContent = Bsign > 0 ? '↓' : '↑';
+  labelBDown.visible = (Bsign > 0);
+  labelBUp.visible = (Bsign < 0);
+  applyField(); syncParams();
+  fieldMat.emissiveIntensity = 3.0;
+  setTimeout(() => { fieldMat.emissiveIntensity = 1.4; }, 180);
+});
+
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('click', () => {
+  running = !running;
+  playBtn.textContent = running ? '⏸ إيقاف' : '▶ تشغيل';
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  xA = -2.5; xB = 2.5; vA = 0; vB = 0;
+  current = 0; emf = 0; fmagA = 0; fmagB = 0;
+  phase = 0; endTimer = 0;
+});
+
+/* ===== الوضع الليلي/النهاري ===== */
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light'){
+  document.body.classList.add('light-mode');
+  themeToggle.textContent = '☀️';
+  scene.background = new THREE.Color(0xdbe6f5);
+  scene.fog = new THREE.Fog(0xdbe6f5, 18, 45);
+  ground.material.color.setHex(0xc8d3e0);
+}
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  themeToggle.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  const bg = isLight ? 0xdbe6f5 : 0x080b12;
+  scene.background = new THREE.Color(bg);
+  scene.fog = new THREE.Fog(bg, 18, 45);
+  ground.material.color.setHex(isLight ? 0xc8d3e0 : 0x0e131d);
+});
+
+updateForLength();
+syncParams();
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (running) physicsStep(dt);
+  updateScene(dt);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

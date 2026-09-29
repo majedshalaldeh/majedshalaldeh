@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>موصل عمودي مع بطارية (2D) | الأستاذ ماجد شلالدة</title>
+<style>
+  :root{
+    --bg-color:#0b1329; --main-card-bg:#1c2541; --sub-card-bg:#3a506b;
+    --text-color:#ffffff; --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8; --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --panel-bg:rgba(18,22,32,0.92);
+    --panel-border:rgba(255,255,255,0.10);
+    --accent:#5b8cff; --accent2:#ffb545;
+    --text:#eef1f7; --muted:#9aa3b5;
+    --panel-width:320px; --panel-right:18px;
+    --scene-bg:#0b0e14;
+  }
+  body.light-mode{
+    --main-card-bg:#ffffff; --sub-card-bg:#e8eef5;
+    --text-color:#1a202c; --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --panel-bg:rgba(255,255,255,0.94);
+    --panel-border:rgba(0,0,0,0.12);
+    --accent:#2563eb; --accent2:#c2410c;
+    --text:#0f172a; --muted:#475569;
+    --scene-bg:#dbe6f5;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;
+    background:var(--scene-bg);font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+    color:var(--text);transition:background .3s,color .3s;}
+  #canvasHost{position:fixed;inset:0;z-index:1;}
+  #canvasHost canvas{display:block;}
+
+  #navbar{position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;height:56px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);}
+  body.light-mode #navbar{background:rgba(255,255,255,0.92);}
+  .nav-brand{font-size:1.05rem;font-weight:bold;color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;}
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:8px;font-size:.88rem;transition:.2s;}
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+  .theme-toggle{background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.1rem;width:36px;height:36px;
+    border-radius:50%;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;transition:.2s;}
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  #breadcrumb{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:40;
+    display:flex;align-items:center;gap:8px;padding:8px 18px;font-size:12px;
+    color:var(--muted);background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:10px;backdrop-filter:blur(8px);white-space:nowrap;}
+  #breadcrumb a{color:var(--accent);text-decoration:none;}
+  #breadcrumb .sep{opacity:.5;}
+  #breadcrumb .cur{color:var(--text);font-weight:600;}
+
+  #siteHeader{position:fixed;top:105px;left:0;right:0;height:60px;
+    padding:8px 20px 0;text-align:center;z-index:25;pointer-events:none;}
+  #titleBlock{max-width:900px;margin:0 auto;text-align:center;}
+  #titleBlock h1{margin:0;font-size:18px;line-height:1.4;color:var(--accent2);
+    text-shadow:0 2px 8px rgba(0,0,0,.15);}
+  #titleBlock .credit{font-size:11px;color:var(--muted);margin-top:3px;}
+
+  #hud{position:fixed;top:175px;left:18px;width:290px;
+    max-height:calc(100% - 255px);overflow-y:auto;
+    background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:14px;padding:16px 18px;backdrop-filter:blur(10px);z-index:35;}
+  #hud::-webkit-scrollbar{width:5px;}
+  #hud::-webkit-scrollbar-thumb{background:rgba(128,128,128,.4);border-radius:3px;}
+  #hud h3{margin:0 0 10px;font-size:13.5px;color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);padding-bottom:6px;}
+  .hudRow{display:flex;justify-content:space-between;font-size:12px;
+    margin:5px 0;color:var(--muted);}
+  .hudRow b{color:var(--text);direction:ltr;font-family:'Courier New',monospace;}
+  .hudRow b.warm{color:#ffb457;} .hudRow b.hot{color:#ff7a7a;}
+  .hudRow b.cool{color:#8effa8;} .hudRow b.cyan{color:#7ee6ff;}
+  .hudRow b.orange{color:#ffb088;} .hudRow b.pink{color:#ffb0e0;}
+  .hudRow b.beige{color:#e8d9b0;} .hudRow b.neg{color:#ff66cc;}
+
+  #logoWrap{position:fixed;top:88px;right:var(--panel-right);
+    width:var(--panel-width);height:145px;
+    display:flex;justify-content:center;align-items:center;z-index:30;pointer-events:none;}
+  #logoWrap img{width:130px;height:130px;border-radius:50%;background:#fff;
+    object-fit:cover;box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);
+    border:3px solid rgba(255,255,255,.2);}
+  body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);
+    border-color:rgba(0,0,0,.1);}
+  #logoFallback{display:none;width:130px;height:130px;border-radius:50%;
+    background:linear-gradient(135deg,#f77f00,#00b4d8);
+    align-items:center;justify-content:center;font-size:3.8rem;color:#fff;}
+
+  #panel{position:fixed;top:245px;right:var(--panel-right);
+    width:var(--panel-width);max-height:calc(100% - 295px);
+    overflow-y:auto;overflow-x:hidden;
+    scrollbar-width:none;-ms-overflow-style:none;
+    background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:16px;padding:10px 12px 8px;backdrop-filter:blur(10px);z-index:35;}
+  #panel::-webkit-scrollbar{display:none;width:0;height:0;}
+  #panel h3{margin:0 0 6px;font-size:13px;color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);padding-bottom:5px;}
+
+  .ctrlGroup{margin-bottom:6px;padding:6px 9px;border-radius:9px;
+    background:rgba(128,128,128,.06);}
+  .ctrlGroup .title{font-size:11px;font-weight:bold;margin-bottom:3px;
+    display:flex;align-items:center;gap:6px;}
+  .ctrlGroup .title .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .ctrlGroup.c-cyan .title{color:#5bc0eb;} .ctrlGroup.c-cyan .title .dot{background:#5bc0eb;}
+  .ctrlGroup.c-gold .title{color:#ffd166;} .ctrlGroup.c-gold .title .dot{background:#ffd166;}
+  .ctrlGroup.c-green .title{color:#4dff9b;} .ctrlGroup.c-green .title .dot{background:#4dff9b;}
+  .ctrlGroup.c-orange .title{color:#ffb088;} .ctrlGroup.c-orange .title .dot{background:#ffb088;}
+  .ctrlGroup.c-pink .title{color:#ffb0e0;} .ctrlGroup.c-pink .title .dot{background:#ffb0e0;}
+  .ctrlGroup.c-purple .title{color:#c4a8ff;} .ctrlGroup.c-purple .title .dot{background:#c4a8ff;}
+  .ctrlGroup.c-beige .title{color:#e8d9b0;} .ctrlGroup.c-beige .title .dot{background:#e8d9b0;}
+
+  .ctrlRow{display:flex;justify-content:space-between;font-size:11px;margin:2px 0 1px;}
+  .ctrlRow span{color:var(--muted);}
+  .ctrlRow b{color:var(--text);direction:ltr;font-family:'Courier New',monospace;font-size:11px;}
+  .ctrlRow b.warm{color:#ffb457;} .ctrlRow b.cool{color:#8effa8;}
+  .ctrlRow b.highlight{color:#ffd54a;} .ctrlRow b.cyan{color:#7ee6ff;}
+  .ctrlRow b.orange{color:#ffb088;} .ctrlRow b.pink{color:#ffb0e0;}
+  .ctrlRow b.purple{color:#c4a8ff;} .ctrlRow b.beige{color:#e8d9b0;}
+
+  input[type=range]{width:100%;accent-color:var(--accent);margin:1px 0 3px;height:12px;}
+
+  .btn-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .btn{flex:1;padding:7px 8px;border-radius:8px;border:1px solid var(--panel-border);
+    background:rgba(128,128,128,.08);color:var(--text);font-size:11.5px;
+    font-weight:bold;cursor:pointer;font-family:inherit;transition:.2s;}
+  .btn:hover{background:rgba(128,128,128,.18);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .flipBtn{width:100%;margin-top:6px;padding:9px;display:flex;
+    align-items:center;justify-content:center;gap:8px;border-radius:9px;
+    font-weight:bold;letter-spacing:.3px;font-size:11.5px;cursor:pointer;
+    font-family:inherit;transition:.2s;}
+  #flipFieldBtn{border:1px solid rgba(180,140,255,.45);
+    background:linear-gradient(135deg,rgba(80,40,160,.55),rgba(40,60,140,.55));
+    color:#e5d6ff;}
+  #flipFieldBtn:hover{background:linear-gradient(135deg,rgba(110,60,200,.70),rgba(55,85,180,.70));
+    border-color:rgba(200,170,255,.8);box-shadow:0 0 20px rgba(140,100,255,.45);}
+  #flipBattBtn{border:1px solid rgba(255,140,220,.45);
+    background:linear-gradient(135deg,rgba(140,40,120,.55),rgba(90,30,90,.55));
+    color:#ffd8f0;}
+  #flipBattBtn:hover{background:linear-gradient(135deg,rgba(180,60,160,.70),rgba(120,40,120,.70));
+    border-color:rgba(255,180,240,.8);box-shadow:0 0 20px rgba(220,100,200,.45);}
+  #flipBattBtn:disabled{opacity:.35;cursor:not-allowed;}
+  #battBtn{border:1px solid rgba(255,176,136,.45);
+    background:linear-gradient(135deg,rgba(160,80,40,.55),rgba(120,60,30,.55));
+    color:#ffe0cc;}
+  #battBtn:hover{background:linear-gradient(135deg,rgba(200,110,60,.70),rgba(150,80,40,.70));
+    border-color:rgba(255,200,160,.8);box-shadow:0 0 20px rgba(255,150,80,.45);}
+  #battBtn.off{border-color:rgba(100,100,100,.5);
+    background:linear-gradient(135deg,rgba(60,60,80,.55),rgba(40,40,60,.55));
+    color:#999;}
+  #battBtn:disabled{opacity:.4;cursor:not-allowed;}
+  #battVisBtn{border:1px solid rgba(160,200,255,.45);
+    background:linear-gradient(135deg,rgba(40,90,160,.55),rgba(30,60,120,.55));
+    color:#d8e8ff;}
+  #battVisBtn:hover{background:linear-gradient(135deg,rgba(60,120,200,.70),rgba(40,80,160,.70));
+    border-color:rgba(180,220,255,.8);box-shadow:0 0 20px rgba(120,180,255,.45);}
+  #battVisBtn.hidden{border-color:rgba(100,100,100,.5);
+    background:linear-gradient(135deg,rgba(60,60,80,.55),rgba(40,40,60,.55));
+    color:#999;}
+  .flipBtn .icon{font-size:15px;line-height:1;}
+
+  #footer{position:fixed;bottom:0;left:0;right:0;padding:8px 20px;
+    text-align:center;font-size:11px;color:var(--muted);
+    background:linear-gradient(0deg,var(--panel-bg) 0%,transparent 100%);
+    pointer-events:none;z-index:20;}
+  #footer strong{color:var(--accent2);}
+
+  #hint{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);
+    color:var(--muted);font-size:12px;background:var(--panel-bg);
+    padding:6px 14px;border-radius:20px;border:1px solid var(--panel-border);
+    pointer-events:none;z-index:5;}
+
+  #formula{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+    padding:7px 18px;background:var(--panel-bg);backdrop-filter:blur(12px);
+    border:1px solid var(--panel-border);border-radius:11px;
+    color:var(--muted);font-size:12px;direction:ltr;
+    font-family:'Cambria Math','Times New Roman',serif;letter-spacing:.5px;
+    z-index:10;white-space:nowrap;}
+  #formula b{color:#ffd54a;font-weight:700;}
+  #formula em{color:#ffb088;font-style:normal;font-weight:700;}
+  #formula i{color:#e8d9b0;font-style:normal;font-weight:700;}
+
+  @media(max-width:900px){
+    :root{--panel-width:280px;--panel-right:10px;}
+    #titleBlock h1{font-size:15px;}
+    #siteHeader{padding:8px 10px 0;top:100px;height:55px;}
+    #hud{width:250px;top:165px;}
+    #logoWrap{top:85px;height:120px;}
+    #logoWrap img{width:105px;height:105px;}
+    #logoFallback{width:105px;height:105px;font-size:3.2rem;}
+    #panel{top:220px;max-height:calc(100% - 265px);padding:9px 10px 7px;}
+  }
+  @media(max-width:650px){
+    #hud{display:none;}
+    #siteHeader{position:static;height:auto;padding:70px 10px 0;}
+    #titleBlock h1{font-size:13px;padding:0 4px;}
+    #breadcrumb{top:60px;font-size:10px;padding:5px 12px;max-width:calc(100vw - 20px);}
+    #logoWrap{top:auto;bottom:16px;left:8px;right:auto;width:90px;height:90px;}
+    #logoWrap img{width:80px;height:80px;}
+    #logoFallback{width:80px;height:80px;font-size:2.8rem;}
+    #panel{top:auto;bottom:16px;right:8px;left:auto;
+      width:calc(100vw - 116px);max-width:320px;max-height:62vh;padding:9px 10px 7px;}
+    #hint{display:none;} #formula{font-size:10px;padding:5px 10px;bottom:8px;}
+    #footer{font-size:9.5px;padding:5px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="canvasHost">
+  <canvas id="sim"></canvas>
+</div>
+
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+</nav>
+
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+  <span class="sep">›</span>
+  <a href="induction.html">🌀 الحث الكهرومغناطيسي</a>
+  <span class="sep">›</span>
+  <span class="cur">🎬 موصل عمودي مع بطارية (2D)</span>
+</div>
+
+<div id="siteHeader">
+  <div id="titleBlock">
+    <h1>موصل على سكة عمودية مع خطوط مجال متمركزة — 2D</h1>
+    <div class="credit">إعداد وتطوير: الأستاذ ماجد شلالده &nbsp;|&nbsp; 0599870176</div>
+  </div>
+</div>
+
+<div id="hud">
+  <h3>📊 القراءات اللحظية</h3>
+  <div class="hudRow"><span>الموضع y</span><b class="cyan" id="rY">0.600 m</b></div>
+  <div class="hudRow"><span>السرعة v</span><b class="cool" id="rV">0.000 m/s</b></div>
+  <div class="hudRow"><span>حالة الدارة</span><b id="rCircuit" style="color:#8effa8;">مغلقة</b></div>
+  <div class="hudRow"><span>الوزن mg</span><b class="pink" id="rW">0.490 N</b></div>
+  <div class="hudRow"><span>ε<sub>ind</sub></span><b class="warm" id="rEind">0.000 V</b></div>
+  <div class="hudRow"><span>ε<sub>bat</sub></span><b class="orange" id="rEbat">0.000 V</b></div>
+  <div class="hudRow"><span>التيار I</span><b class="warm" id="rI">0.000 A</b></div>
+  <div class="hudRow"><span>F<sub>mag</sub></span><b class="hot" id="rF">0.000 N</b></div>
+  <div class="hudRow"><span>جهد التعليق</span><b class="orange" id="rVf">1.225 V</b></div>
+  <div class="hudRow"><span>السرعة الحدية v<sub>t</sub></span><b id="rVt">0.000 m/s</b></div>
+</div>
+
+<div id="logoWrap">
+  <img src="../../logo.png" alt="الشعار"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+  <div id="logoFallback">⚛️</div>
+</div>
+
+<div id="panel">
+  <h3>🎛️ لوحة التحكم</h3>
+
+  <div class="ctrlGroup c-gold">
+    <div class="title"><span class="dot"></span>هندسة السكة</div>
+    <div class="ctrlRow"><span>المسافة بين السكتين L</span><b class="highlight" id="lVal">0.80 m</b></div>
+    <input type="range" id="lSlider" min="0.5" max="1.5" step="0.05" value="0.8">
+    <div class="ctrlRow"><span>شدة المجال B</span><b class="cyan" id="bVal">0.50 T ⊗</b></div>
+    <input type="range" id="bSlider" min="0" max="1.5" step="0.05" value="0.5">
+  </div>
+
+  <div class="ctrlGroup c-pink">
+    <div class="title"><span class="dot"></span>خصائص الموصل</div>
+    <div class="ctrlRow"><span>الكتلة m</span><b class="pink" id="mVal">50.0 g</b></div>
+    <input type="range" id="mSlider" min="5" max="500" step="5" value="50">
+    <div class="ctrlRow"><span>تسارع الجاذبية g</span><b class="purple" id="gVal">9.80 m/s²</b></div>
+    <input type="range" id="gSlider" min="0" max="20" step="0.1" value="9.8">
+  </div>
+
+  <div class="ctrlGroup c-beige">
+    <div class="title"><span class="dot"></span>الدارة الكهربائية</div>
+    <div class="ctrlRow"><span>المقاومة R</span><b class="beige" id="rVal">1.00 Ω</b></div>
+    <input type="range" id="rSlider" min="0.2" max="10" step="0.1" value="1.0">
+    <div class="ctrlRow"><span>القوة الدافعة V<sub>bat</sub></span><b class="orange" id="vVal">0.80 V</b></div>
+    <input type="range" id="vSlider" min="0" max="3" step="0.05" value="0.8">
+  </div>
+
+  <button class="flipBtn" id="battBtn" style="border:1px solid rgba(255,176,136,.45);background:linear-gradient(135deg,rgba(160,80,40,.55),rgba(120,60,30,.55));color:#ffe0cc;">
+    <span class="icon">🔋</span>
+    <span class="text">البطارية: متصلة</span>
+  </button>
+  <button class="flipBtn" id="battVisBtn" style="border:1px solid rgba(160,200,255,.45);background:linear-gradient(135deg,rgba(40,90,160,.55),rgba(30,60,120,.55));color:#d8e8ff;">
+    <span class="icon">👁</span>
+    <span class="text">إخفاء البطارية (يستبدلها بسلك)</span>
+  </button>
+  <button class="flipBtn" id="flipBattBtn">
+    <span class="icon">↻</span>
+    <span class="text">عكس أقطاب البطارية</span>
+  </button>
+  <button class="flipBtn" id="flipFieldBtn">
+    <span class="icon">⊗</span>
+    <span class="text">عكس اتجاه المجال المغناطيسي</span>
+  </button>
+
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="btn primary" id="playBtn">⏸ إيقاف</button>
+    <button class="btn" id="resetBtn">↺ إعادة</button>
+  </div>
+</div>
+
+<div id="formula">ε<sub>tot</sub> = BL·v + ε<sub>bat</sub> &nbsp;|&nbsp; I = ε<sub>tot</sub>/<i>R</i> &nbsp;|&nbsp; m·dv/dt = mg − B·I·L</div>
+
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد
+  <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<div id="hint">🎯 لوحة التحكم على اليمين • القراءات على اليسار</div>
+
+<script>
+'use strict';
+
+const Y_MIN = 0.30, Y_MAX = 4.70;
+const RAIL_LEN = 5.0;
+
+const params = {
+  L: 0.8, B: 0.5, R: 1.0, Vbat: 0.8,
+  MASS: 0.05, GRAV: 9.8,
+  batteryOn: true, batteryVisible: true, battSign: 1
+};
+let Binto = true;
+let yRod = 0.6, vRod = 0;
+let emfInd = 0, emfBat = 0, current = 0, fmag = 0;
+let circuitClosed = true;
+let running = true, phase = 0, endTimer = 0, flashT = 0;
+
+/* ✅ ثوابت معاملات طول الأسهم (px/unit) */
+const K_MG   = 100;   // px per Newton
+const K_V    = 50;    // px per (m/s)
+const K_FMAG = 100;   // px per Newton
+const ARROW_CAP = 150; // أقصى طول بالبكسل
+
+const canvas = document.getElementById('sim');
+const ctx = canvas.getContext('2d');
+let W, H, cx, railTopPx, railBotPx, scaleY, scaleX;
+
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  canvas.width  = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  W = w; H = h; cx = w / 2;
+  railTopPx = h * 0.24;
+  railBotPx = h * 0.90;
+  scaleY = (railBotPx - railTopPx) / RAIL_LEN;
+  scaleX = scaleY;
+}
+resize(); addEventListener('resize', resize);
+function Xw(x) { return cx + x * scaleX; }
+function Yw(y) { return railTopPx + y * scaleY; }
+
+const _pt = { x: 0, y: 0 };
+function circuitPoint(s, out) {
+  const halfL = params.L / 2;
+  const lenRod = params.L, lenRail = yRod, lenTop = params.L;
+  const total = lenRod + 2 * lenRail + lenTop;
+  let t = (((s % 1) + 1) % 1) * total;
+  if (t < lenRod) { const u = t / lenRod; out.x = -halfL + u * params.L; out.y = yRod; return out; }
+  t -= lenRod;
+  if (t < lenRail) { const u = t / lenRail; out.x = halfL; out.y = yRod - u * lenRail; return out; }
+  t -= lenRail;
+  if (t < lenTop) { const u = t / lenTop; out.x = halfL - u * params.L; out.y = 0; return out; }
+  t -= lenTop;
+  const u = t / lenRail; out.x = -halfL; out.y = u * lenRail; return out;
+}
+
+function physicsStep(dt) {
+  const sub = 8, h = dt / sub;
+  const BL = params.B * params.L, Rtot = params.R, m = params.MASS, g = params.GRAV;
+  let effBat = 0, closed = true;
+  if (params.batteryVisible) {
+    if (params.batteryOn) effBat = params.Vbat * params.battSign;
+    else closed = false;
+  }
+  circuitClosed = closed;
+  for (let i = 0; i < sub; i++) {
+    const I = closed ? (BL * vRod + effBat) / Rtot : 0;
+    const Fup = BL * I;
+    const a = (m * g - Fup) / m;
+    vRod += a * h; yRod += vRod * h;
+  }
+  emfInd = BL * vRod;
+  emfBat = closed ? effBat : 0;
+  current = closed ? (emfInd + emfBat) / Rtot : 0;
+  fmag = BL * current;
+  if (yRod < Y_MIN) { yRod = Y_MIN; if (vRod < 0) vRod = 0; }
+  if (yRod > Y_MAX) { yRod = Y_MAX; if (vRod > 0) vRod = 0; endTimer += dt;
+    if (endTimer > 1.5) { yRod = 0.6; vRod = 0; endTimer = 0; } }
+  else endTimer = 0;
+}
+
+function updatePhase(dt) {
+  if (Math.abs(current) > 0.005) {
+    phase += current * 0.35 * dt;
+    phase = ((phase % 1) + 1) % 1;
+  }
+}
+
+function draw(time) {
+  const isLight = document.body.classList.contains('light-mode');
+  ctx.fillStyle = isLight ? '#dbe6f5' : '#080b12';
+  ctx.fillRect(0, 0, W, H);
+  drawFieldSymbols(time);
+  drawMidline();
+  drawRails();
+  drawTopWireAndComponents();
+  drawRod();
+  drawCurrentDots();
+  drawArrows();
+  drawFieldLabel();
+}
+
+function drawFieldSymbols(time) {
+  const pulse = 0.42 + 0.10 * Math.sin(time * 0.0018);
+  const flashAdd = flashT > 0 ? flashT * 0.55 : 0;
+  const alpha = Math.min(pulse + flashAdd, 0.95);
+  const color = Binto ? `rgba(77,163,255,${alpha})` : `rgba(180,143,255,${alpha})`;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.7;
+  const r = 8, yT = Yw(-0.10), yB = Yw(RAIL_LEN + 0.02);
+  const spacingUnits = 0.42;
+  const halfWidth = (params.L / 2) + 0.35;
+  const nSide = Math.ceil(halfWidth / spacingUnits);
+  for (let sy = yT; sy < yB; sy += 42) {
+    for (let i = -nSide; i <= nSide; i++) {
+      const xUnit = i * spacingUnits;
+      if (Math.abs(xUnit) > halfWidth) continue;
+      const sx = Xw(xUnit);
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2); ctx.stroke();
+      if (Binto) {
+        const d = r * 0.55;
+        ctx.beginPath();
+        ctx.moveTo(sx - d, sy - d); ctx.lineTo(sx + d, sy + d);
+        ctx.moveTo(sx + d, sy - d); ctx.lineTo(sx - d, sy + d);
+        ctx.stroke();
+      } else {
+        ctx.beginPath(); ctx.arc(sx, sy, r * 0.4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+}
+
+function drawMidline() {
+  const x = Xw(0), yTop = Yw(-0.28), yBot = Yw(RAIL_LEN + 0.06);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(126, 230, 255, 0.35)';
+  ctx.lineWidth = 1.6; ctx.setLineDash([6, 8]);
+  ctx.beginPath(); ctx.moveTo(x, yTop); ctx.lineTo(x, yBot); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = 'bold 11px "Segoe UI", Tahoma, sans-serif';
+  ctx.fillStyle = 'rgba(126, 230, 255, 0.9)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.shadowColor = 'rgba(126, 230, 255, 0.5)'; ctx.shadowBlur = 8;
+  ctx.fillText('وسط السكة', x, yTop - 4); ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(126, 230, 255, 0.55)';
+  for (const yEnd of [yTop, yBot]) {
+    ctx.beginPath(); ctx.arc(x, yEnd, 2.5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawRails() {
+  const xL = Xw(-params.L/2), xR = Xw(params.L/2);
+  const yT = Yw(0), yB = Yw(RAIL_LEN);
+  for (const x of [xL, xR]) {
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(x - 3, yT + 3, 10, yB - yT);
+    const g = ctx.createLinearGradient(x - 5, 0, x + 5, 0);
+    g.addColorStop(0, '#546272'); g.addColorStop(0.5, '#e0e8f2'); g.addColorStop(1, '#546272');
+    ctx.fillStyle = g; ctx.fillRect(x - 5, yT, 10, yB - yT);
+  }
+}
+
+function drawTopWireAndComponents() {
+  const halfL = params.L / 2, y = Yw(0);
+  const resX = -params.L * 0.25, battX = +params.L * 0.25;
+  const resW = 0.28 * scaleX, battHalfPx = 0.10 * scaleX;
+  const seg1L = Xw(-halfL), seg1R = Xw(resX) - resW/2;
+  const seg2L = Xw(resX) + resW/2, seg2R = Xw(battX) - battHalfPx;
+  const seg3L = Xw(battX) + battHalfPx, seg3R = Xw(halfL);
+  ctx.strokeStyle = '#a0b0c8'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(seg1L, y); ctx.lineTo(seg1R, y);
+  ctx.moveTo(seg2L, y); ctx.lineTo(seg2R, y);
+  ctx.moveTo(seg3L, y); ctx.lineTo(seg3R, y);
+  ctx.stroke();
+  drawResistor2D(Xw(resX), y, resW);
+  if (params.batteryVisible) drawBattery2D(Xw(battX), y, battHalfPx);
+  else {
+    ctx.strokeStyle = '#a0b0c8'; ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(Xw(battX) - battHalfPx, y);
+    ctx.lineTo(Xw(battX) + battHalfPx, y);
+    ctx.stroke();
+  }
+}
+
+function drawResistor2D(cxPx, cyPx, w) {
+  const h = 22, xL = cxPx - w / 2, yT = cyPx - h / 2;
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(xL + 2, yT + 3, w, h);
+  const bg = ctx.createLinearGradient(0, yT, 0, yT + h);
+  bg.addColorStop(0, '#8e7f5d'); bg.addColorStop(0.35, '#eee0bb');
+  bg.addColorStop(0.5, '#f8eed0'); bg.addColorStop(0.65, '#eee0bb');
+  bg.addColorStop(1, '#8e7f5d');
+  ctx.fillStyle = bg; ctx.fillRect(xL, yT, w, h);
+  const bands = ['#8b3a2f', '#1f1f1f', '#d4a017', '#2f6b3a'];
+  const bandW = w * 0.11;
+  const relPos = [0.08, 0.25, 0.42, 0.72];
+  for (let i = 0; i < 4; i++) {
+    ctx.fillStyle = bands[i];
+    ctx.fillRect(xL + w * relPos[i], yT, bandW, h);
+  }
+  ctx.strokeStyle = 'rgba(220, 235, 255, 0.7)'; ctx.lineWidth = 1.2;
+  ctx.strokeRect(xL, yT, w, h);
+  ctx.save();
+  ctx.font = 'bold 11.5px Consolas, monospace';
+  ctx.fillStyle = '#e8d9b0'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 6;
+  ctx.fillText(`R = ${params.R.toFixed(2)} Ω`, cxPx, yT - 5);
+  ctx.restore();
+}
+
+function drawBattery2D(cxPx, cyPx, halfWidthPx) {
+  const plateH_long = 32, plateH_short = 18, gap = 8;
+  let plusX, minusX;
+  if (params.battSign > 0) { plusX = cxPx - gap/2 - 1; minusX = cxPx + gap/2 + 1; }
+  else { plusX = cxPx + gap/2 + 1; minusX = cxPx - gap/2 - 1; }
+  ctx.strokeStyle = '#ffc060'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+  ctx.shadowColor = '#ff8020'; ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.moveTo(plusX, cyPx - plateH_long/2); ctx.lineTo(plusX, cyPx + plateH_long/2);
+  ctx.stroke();
+  ctx.strokeStyle = '#80c0ff'; ctx.shadowColor = '#4080ff'; ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.moveTo(minusX, cyPx - plateH_short/2); ctx.lineTo(minusX, cyPx + plateH_short/2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.font = 'bold 18px "Segoe UI", Arial, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#ff8060'; ctx.shadowColor = '#ff8060'; ctx.shadowBlur = 8;
+  ctx.fillText('+', plusX, cyPx - plateH_long/2 - 14);
+  ctx.fillStyle = '#80c0ff'; ctx.shadowColor = '#80c0ff';
+  ctx.fillText('−', minusX, cyPx - plateH_short/2 - 12);
+  ctx.shadowBlur = 0;
+  if (params.batteryOn) {
+    ctx.font = 'bold 11px Consolas, monospace';
+    ctx.fillStyle = '#ffd0a0'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    const val = params.Vbat * params.battSign;
+    ctx.fillText(`${val >= 0 ? '+' : ''}${val.toFixed(2)} V`, cxPx, cyPx + plateH_long/2 + 6);
+  } else {
+    ctx.strokeStyle = '#ff6060'; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cxPx - 12, cyPx - 12); ctx.lineTo(cxPx + 12, cyPx + 12);
+    ctx.moveTo(cxPx + 12, cyPx - 12); ctx.lineTo(cxPx - 12, cyPx + 12);
+    ctx.stroke();
+  }
+}
+
+function drawRod() {
+  const xL = Xw(-params.L/2), xR = Xw(params.L/2), y = Yw(yRod), w = 12;
+  const glow = ctx.createRadialGradient((xL+xR)/2, y, 0, (xL+xR)/2, y, 80);
+  glow.addColorStop(0, 'rgba(255, 190, 90, 0.40)');
+  glow.addColorStop(1, 'rgba(255, 190, 90, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(xL - 60, y - 60, xR - xL + 120, 120);
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(xL - 3, y - w/2 + 3, xR - xL + 6, w);
+  const bg = ctx.createLinearGradient(0, y - w/2, 0, y + w/2);
+  bg.addColorStop(0, '#8a6021'); bg.addColorStop(0.35, '#f0c15c');
+  bg.addColorStop(0.6, '#ffd982'); bg.addColorStop(1, '#8a6021');
+  ctx.fillStyle = bg;
+  ctx.fillRect(xL - 8, y - w/2, xR - xL + 16, w);
+  ctx.strokeStyle = 'rgba(255, 225, 150, 0.9)'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(xL - 8, y - w/2, xR - xL + 16, w);
+}
+
+function drawCurrentDots() {
+  if (Math.abs(current) < 0.005) return;
+  const N = 40;
+  const radius = 3.3 + 1.5 * Math.min(Math.abs(current), 2);
+  const color = current >= 0 ? '#ffe066' : '#ff77dd';
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 12;
+  for (let i = 0; i < N; i++) {
+    const s = ((i / N) + phase) % 1;
+    circuitPoint(s, _pt);
+    ctx.beginPath();
+    ctx.arc(Xw(_pt.x), Yw(_pt.y), radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+}
+
+/* ============================================================
+   ✅ الأسهم — الطول متناسب تماماً مع المقدار (بدون حد أدنى)
+   - mg   : 100 px لكل نيوتن
+   - v    : 50  px لكل m/s
+   - Fmag : 100 px لكل نيوتن
+   ============================================================ */
+function drawArrows() {
+  const xL = Xw(-params.L/2);
+  const xR = Xw(params.L/2);
+  const rodCX = (xL + xR) / 2;
+  const y = Yw(yRod);
+
+  /* 🟢 سهم الجاذبية mg — الطول ∝ mg */
+  const mg = params.MASS * params.GRAV;
+  if (mg > 0.001) {
+    const gLen = Math.min(mg * K_MG, ARROW_CAP);
+    drawArrow(rodCX - 60, y, rodCX - 60, y + gLen, '#4dff9b', 'mg');
+  }
+
+  /* 🟡 سهم السرعة v — الطول ∝ |v| */
+  if (Math.abs(vRod) > 0.005) {
+    const vLen = Math.min(Math.abs(vRod) * K_V, ARROW_CAP);
+    const dir = vRod > 0 ? 1 : -1;
+    drawArrow(rodCX + 60, y, rodCX + 60, y + dir * vLen, '#ffd54a', 'v');
+  }
+
+  /* 🔴 سهم القوة المغناطيسية Fmag — الطول ∝ |Fmag| */
+  if (Math.abs(fmag) > 0.005 && Math.abs(current) > 0.005) {
+    const fLen = Math.min(Math.abs(fmag) * K_FMAG, ARROW_CAP);
+    const dir = fmag > 0 ? -1 : 1;
+    drawArrow(rodCX, y - 25, rodCX, y - 25 + dir * fLen, '#ff5f5f', 'Fmag');
+  }
+}
+
+function drawArrow(x1, y1, x2, y2, color, label) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy); if (len < 3) return;
+  const ang = Math.atan2(dy, dx);
+  const headLen = Math.min(14, len * 0.4);
+  ctx.strokeStyle = color; ctx.fillStyle = color;
+  ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+  ctx.shadowColor = color; ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2 - Math.cos(ang) * headLen * 0.75, y2 - Math.sin(ang) * headLen * 0.75);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - Math.cos(ang - 0.55) * headLen, y2 - Math.sin(ang - 0.55) * headLen);
+  ctx.lineTo(x2 - Math.cos(ang + 0.55) * headLen, y2 - Math.sin(ang + 0.55) * headLen);
+  ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 0;
+  if (label) {
+    ctx.fillStyle = color;
+    ctx.font = 'bold 11px Consolas, monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, (x1 + x2) / 2 + 30, (y1 + y2) / 2);
+  }
+}
+
+function drawFieldLabel() {
+  ctx.save();
+  ctx.font = 'bold 18px Consolas, monospace';
+  ctx.fillStyle = Binto ? '#7fc0ff' : '#c4a8ff';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = Binto ? '#4da3ff' : '#b48fff'; ctx.shadowBlur = 14;
+  ctx.fillText(`B ${Binto ? '⊗' : '⊙'}`, 20, 30);
+  ctx.restore();
+}
+
+const elY = document.getElementById('rY');
+const elV = document.getElementById('rV');
+const elW = document.getElementById('rW');
+const elEind = document.getElementById('rEind');
+const elEbat = document.getElementById('rEbat');
+const elI = document.getElementById('rI');
+const elF = document.getElementById('rF');
+const elVt = document.getElementById('rVt');
+const elVf = document.getElementById('rVf');
+const elCircuit = document.getElementById('rCircuit');
+
+function updateHUD() {
+  const BL = params.B * params.L, m = params.MASS, g = params.GRAV;
+  elY.textContent = yRod.toFixed(3) + ' m';
+  elV.textContent = vRod.toFixed(3) + ' m/s';
+  elV.classList.toggle('neg', vRod < 0);
+  elW.textContent = (m * g).toFixed(3) + ' N';
+  if (!params.batteryVisible) { elCircuit.textContent = 'مغلقة (سلك)'; elCircuit.style.color = '#8effa8'; }
+  else if (params.batteryOn) { elCircuit.textContent = 'مغلقة (بطارية)'; elCircuit.style.color = '#ffb088'; }
+  else { elCircuit.textContent = 'مفتوحة'; elCircuit.style.color = '#ff7a7a'; }
+  elEind.textContent = emfInd.toFixed(3) + ' V';
+  elEind.classList.toggle('neg', emfInd < 0);
+  elEbat.textContent = emfBat.toFixed(3) + ' V';
+  elEbat.classList.toggle('neg', emfBat < 0);
+  elI.textContent = current.toFixed(3) + ' A';
+  elI.classList.toggle('neg', current < 0);
+  elF.textContent = fmag.toFixed(3) + ' N';
+  elF.classList.toggle('neg', fmag < 0);
+  let effBat = 0;
+  if (params.batteryVisible && params.batteryOn) effBat = params.Vbat * params.battSign;
+  const denom = BL * BL;
+  const vt = (!circuitClosed) ? Infinity :
+    (denom > 1e-9 ? (m * g * params.R - BL * effBat) / denom : Infinity);
+  elVt.textContent = isFinite(vt) ? vt.toFixed(3) + ' m/s' : '∞';
+  elVt.classList.toggle('neg', vt < 0);
+  const vf = BL > 1e-9 ? (m * g * params.R) / BL : Infinity;
+  elVf.textContent = isFinite(vf) ? vf.toFixed(3) + ' V' : '∞';
+}
+
+const lSlider = document.getElementById('lSlider');
+const bSlider = document.getElementById('bSlider');
+const rSlider = document.getElementById('rSlider');
+const mSlider = document.getElementById('mSlider');
+const gSlider = document.getElementById('gSlider');
+const vSlider = document.getElementById('vSlider');
+const lVal = document.getElementById('lVal');
+const bVal = document.getElementById('bVal');
+const rVal = document.getElementById('rVal');
+const mVal = document.getElementById('mVal');
+const gVal = document.getElementById('gVal');
+const vVal = document.getElementById('vVal');
+
+function syncParams() {
+  params.L = parseFloat(lSlider.value);
+  params.B = parseFloat(bSlider.value);
+  params.R = parseFloat(rSlider.value);
+  params.MASS = parseFloat(mSlider.value) / 1000;
+  params.GRAV = parseFloat(gSlider.value);
+  params.Vbat = parseFloat(vSlider.value);
+  lVal.textContent = params.L.toFixed(2) + ' m';
+  bVal.textContent = params.B.toFixed(2) + ' T ' + (Binto ? '⊗' : '⊙');
+  rVal.textContent = params.R.toFixed(2) + ' Ω';
+  mVal.textContent = (params.MASS * 1000).toFixed(1) + ' g';
+  gVal.textContent = params.GRAV.toFixed(2) + ' m/s²';
+  vVal.textContent = params.Vbat.toFixed(2) + ' V';
+}
+lSlider.addEventListener('input', syncParams);
+bSlider.addEventListener('input', syncParams);
+rSlider.addEventListener('input', syncParams);
+mSlider.addEventListener('input', syncParams);
+gSlider.addEventListener('input', syncParams);
+vSlider.addEventListener('input', syncParams);
+
+const battBtn = document.getElementById('battBtn');
+battBtn.addEventListener('click', () => {
+  params.batteryOn = !params.batteryOn;
+  battBtn.classList.toggle('off', !params.batteryOn);
+  battBtn.querySelector('.text').textContent = params.batteryOn ? 'البطارية: متصلة' : 'البطارية: مفتوحة';
+});
+
+const battVisBtn = document.getElementById('battVisBtn');
+battVisBtn.addEventListener('click', () => {
+  params.batteryVisible = !params.batteryVisible;
+  battVisBtn.classList.toggle('hidden', !params.batteryVisible);
+  battVisBtn.querySelector('.text').textContent =
+    params.batteryVisible ? 'إخفاء البطارية (يستبدلها بسلك)' : 'إظهار البطارية';
+  battVisBtn.querySelector('.icon').textContent = params.batteryVisible ? '👁' : '🚫';
+  battBtn.disabled = !params.batteryVisible;
+  document.getElementById('flipBattBtn').disabled = !params.batteryVisible;
+});
+
+document.getElementById('flipBattBtn').addEventListener('click', () => {
+  params.battSign = -params.battSign;
+});
+
+const flipFieldBtn = document.getElementById('flipFieldBtn');
+flipFieldBtn.addEventListener('click', () => {
+  Binto = !Binto;
+  flipFieldBtn.querySelector('.icon').textContent = Binto ? '⊗' : '⊙';
+  syncParams(); flashT = 1;
+});
+
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('click', () => {
+  running = !running;
+  playBtn.textContent = running ? '⏸ إيقاف' : '▶ تشغيل';
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  yRod = 0.6; vRod = 0; phase = 0; endTimer = 0;
+});
+
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light') {
+  document.body.classList.add('light-mode');
+  themeToggle.textContent = '☀️';
+}
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  themeToggle.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+});
+
+syncParams();
+
+let lastTime = performance.now();
+function animate(now) {
+  const dt = Math.min((now - lastTime) / 1000, 0.05);
+  lastTime = now;
+  if (running) physicsStep(dt);
+  updatePhase(dt);
+  if (flashT > 0) flashT = Math.max(0, flashT - dt * 2);
+  draw(now);
+  updateHUD();
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

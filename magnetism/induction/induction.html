@@ -4,223 +4,281 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الحث الكهرومغناطيسي | الأستاذ ماجد شلالدة</title>
-
 <style>
-:root{
-    --bg:#0b1329;
-    --card:#1c2541;
-    --card2:#3a506b;
-    --text:#fff;
-    --gold:#ffd166;
-    --cyan:#00b4d8;
-    --green:#06d6a0;
-}
+  :root{
+    --bg-color:#0b1329; --main-card-bg:#1c2541; --sub-card-bg:#3a506b;
+    --text-color:#ffffff; --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8; --accent-orange:#f77f00;
+    --accent-gold:#ffd166;
+    --border-soft:rgba(255,255,255,0.08);
+    --panel-bg:rgba(18,22,32,0.92);
+    --panel-border:rgba(255,255,255,0.10);
+    --accent:#5b8cff; --accent2:#ffb545;
+    --text:#eef1f7; --muted:#9aa3b5;
+  }
+  body.light-mode{
+    --main-card-bg:#ffffff; --sub-card-bg:#e8eef5;
+    --text-color:#1a202c; --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --panel-bg:rgba(255,255,255,0.94);
+    --panel-border:rgba(0,0,0,0.12);
+    --accent:#2563eb; --accent2:#c2410c;
+    --text:#0f172a; --muted:#475569;
+  }
+  *{box-sizing:border-box;}
 
-*{box-sizing:border-box}
-
-body{
-    margin:0;
-    min-height:100vh;
-    font-family:Tahoma, Arial, sans-serif;
+  body{
+    margin:0; min-height:100vh;
+    font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
     color:var(--text);
     background:
-        radial-gradient(circle at 20% 20%, rgba(0,180,216,.12), transparent 30%),
-        radial-gradient(circle at 80% 80%, rgba(255,209,102,.10), transparent 30%),
-        var(--bg);
-    padding:30px 18px;
+      radial-gradient(circle at 20% 20%, rgba(0,180,216,.10), transparent 35%),
+      radial-gradient(circle at 80% 80%, rgba(255,209,102,.08), transparent 35%),
+      var(--bg-color);
+    padding:0;
     position:relative;
-}
+    transition:background .3s,color .3s;
+  }
+  body.light-mode{
+    background:
+      radial-gradient(circle at 20% 20%, rgba(37,99,235,.08), transparent 35%),
+      radial-gradient(circle at 80% 80%, rgba(194,65,12,.06), transparent 35%),
+      #e8eef5;
+  }
 
-.watermark{
-    position:fixed;
-    inset:0;
-    background-image:url('logo.png');
+  /* ===== العلامة المائية ===== */
+  .watermark{
+    position:fixed; inset:0;
+    background-image:url('../../logo.png');
     background-repeat:repeat;
     background-size:180px;
     opacity:.025;
     transform:rotate(-12deg) scale(1.15);
     pointer-events:none;
     z-index:0;
-}
+  }
 
-.container{
+  /* ===== شريط التنقل ===== */
+  #navbar{position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;height:56px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);}
+  body.light-mode #navbar{background:rgba(255,255,255,0.92);}
+  .nav-brand{font-size:1.05rem;font-weight:bold;color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;}
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:8px;font-size:.88rem;transition:.2s;}
+  body.light-mode .nav-links a{color:#1a202c;}
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+  .theme-toggle{background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.1rem;width:36px;height:36px;
+    border-radius:50%;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;transition:.2s;}
+  body.light-mode .theme-toggle{color:#1a202c;}
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  /* ===== مسار التنقل ===== */
+  #breadcrumb{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:40;
+    display:flex;align-items:center;gap:8px;padding:8px 18px;font-size:12px;
+    color:var(--muted);background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:10px;backdrop-filter:blur(8px);white-space:nowrap;}
+  body.light-mode #breadcrumb{color:#475569;}
+  #breadcrumb a{color:var(--accent);text-decoration:none;}
+  #breadcrumb a:hover{text-decoration:underline;}
+  #breadcrumb .sep{opacity:.5;}
+  #breadcrumb .cur{color:var(--text);font-weight:600;}
+  body.light-mode #breadcrumb .cur{color:#0f172a;}
+
+  /* ===== العنوان ===== */
+  #siteHeader{position:relative;z-index:20;
+    text-align:center;padding:110px 20px 10px;}
+  #titleBlock{max-width:900px;margin:0 auto;}
+  #titleBlock h1{margin:0;font-size:26px;line-height:1.4;color:var(--accent2);
+    text-shadow:0 2px 8px rgba(0,0,0,.2);}
+  body.light-mode #titleBlock h1{text-shadow:none;color:#c2410c;}
+  #titleBlock .subtitle{color:var(--text-muted);font-size:15px;
+    line-height:1.8;margin-top:10px;}
+  #titleBlock .credit{font-size:12px;color:var(--muted);margin-top:8px;}
+
+  /* ===== الحاوية ===== */
+  .container{
     position:relative;
     z-index:1;
     max-width:1050px;
-    margin:auto;
-}
+    margin:0 auto;
+    padding:20px 18px 60px;
+  }
 
-header{
-    text-align:center;
-    margin-bottom:38px;
-}
-
-.logo{
-    width:120px;
-    height:120px;
-    object-fit:contain;
-    border-radius:50%;
-    box-shadow:0 0 25px rgba(0,180,216,.22);
-}
-
-h1{
-    color:var(--gold);
-    font-size:clamp(2rem,5vw,3rem);
-    margin:18px 0 8px;
-}
-
-.subtitle{
-    color:#d9e2ec;
-    font-size:1.15rem;
-    line-height:1.8;
-}
-
-.teacher{
-    color:var(--cyan);
-    font-size:1.15rem;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-.contents{
-    background:rgba(28,37,65,.94);
-    border:1px solid rgba(255,255,255,.08);
+  /* ===== قسم الفهرس ===== */
+  .contents{
+    background:var(--main-card-bg);
+    border:1px solid var(--border-soft);
     border-radius:22px;
     padding:30px;
     box-shadow:0 15px 40px rgba(0,0,0,.35);
-}
+    transition:background .3s, border-color .3s;
+  }
+  body.light-mode .contents{box-shadow:0 15px 40px rgba(0,0,0,.08);}
 
-.section-title{
+  .section-title{
     text-align:center;
-    color:var(--gold);
-    margin:0 0 25px;
-    font-size:1.8rem;
-}
+    color:var(--accent2);
+    margin:0 0 28px;
+    font-size:1.7rem;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--border-soft);
+  }
 
-.cards{
+  .cards{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
     gap:22px;
-}
+  }
 
-.card{
+  .card{
     display:block;
     text-decoration:none;
     color:var(--text);
-    background:linear-gradient(145deg,#3a506b,#263653);
-    border:1px solid rgba(255,255,255,.08);
+    background:var(--sub-card-bg);
+    border:1px solid var(--border-soft);
     border-radius:17px;
-    padding:28px;
+    padding:26px;
     min-height:230px;
-    transition:.25s ease;
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
     position:relative;
     overflow:hidden;
-}
-
-.card::after{
+  }
+  body.light-mode .card{
+    background:linear-gradient(145deg, #f1f5f9, #e2e8f0);
+    color:#0f172a;
+  }
+  .card::after{
     content:"";
     position:absolute;
-    width:130px;
-    height:130px;
-    border-radius:50%;
-    left:-35px;
-    bottom:-45px;
+    width:130px;height:130px;border-radius:50%;
+    left:-35px;bottom:-45px;
     background:rgba(255,255,255,.05);
-}
+  }
+  body.light-mode .card::after{background:rgba(0,0,0,.03);}
 
-.card:hover{
+  .card:hover{
     transform:translateY(-7px);
     box-shadow:0 12px 28px rgba(0,0,0,.35);
-    border-color:var(--gold);
-}
+    border-color:var(--accent-gold);
+  }
+  body.light-mode .card:hover{
+    box-shadow:0 12px 28px rgba(0,0,0,.12);
+  }
 
-.icon{
-    font-size:3rem;
-    display:block;
-    margin-bottom:12px;
-}
+  .icon{font-size:3rem;display:block;margin-bottom:12px;}
 
-.card h3{
+  .card h3{
     margin:0 0 12px;
-    font-size:1.45rem;
-    color:var(--gold);
-}
+    font-size:1.4rem;
+    color:var(--accent-gold);
+    line-height:1.5;
+  }
+  body.light-mode .card h3{color:#b45309;}
 
-.card p{
+  .card p{
     margin:0;
-    color:#e4e8ed;
+    color:var(--text-muted);
     line-height:1.9;
-    font-size:1.02rem;
-}
+    font-size:1rem;
+  }
 
-.sim-select{
+  .sim-select{
     display:block;
     width:100%;
     margin-top:16px;
     margin-bottom:16px;
     padding:11px 14px;
     border-radius:10px;
-    border:1px solid rgba(255,255,255,.18);
-    background:#1c2541;
-    color:#fff;
+    border:1px solid var(--panel-border);
+    background:var(--main-card-bg);
+    color:var(--text);
     font-family:inherit;
     font-size:1rem;
     cursor:pointer;
     outline:none;
-}
-
-.sim-select:focus{
-    border-color:var(--gold);
+    transition:.2s;
+  }
+  .sim-select:focus{
+    border-color:var(--accent-gold);
     box-shadow:0 0 0 2px rgba(255,209,102,.15);
-}
+  }
+  .sim-select option{
+    background:var(--main-card-bg);
+    color:var(--text);
+  }
 
-.sim-select option{
-    background:#1c2541;
-    color:#fff;
-}
-
-.go{
+  .go{
     display:inline-block;
-    margin-top:18px;
-    color:var(--cyan);
+    margin-top:14px;
+    color:var(--accent-cyan);
     font-weight:bold;
-}
+    font-size:.95rem;
+  }
 
-.back{
-    position:fixed;
-    top:18px;
-    right:18px;
-    z-index:10;
+  /* ===== زر العودة ===== */
+  .back{
     display:block;
     width:max-content;
-    margin:0;
-    padding:12px 25px;
+    margin:28px auto 0;
+    padding:12px 26px;
     border-radius:12px;
     background:rgba(0,180,216,.12);
     border:1px solid rgba(0,180,216,.35);
-    color:#fff;
+    color:var(--text-color);
     text-decoration:none;
+    font-weight:bold;
     transition:.2s;
-}
-
-.back:hover{
+  }
+  body.light-mode .back{color:#0f172a;}
+  .back:hover{
     background:rgba(0,180,216,.25);
     transform:translateY(-2px);
-}
+  }
 
-footer{
+  /* ===== الفوتر ===== */
+  #footer{
+    position:relative;z-index:1;
+    padding:16px 20px;
     text-align:center;
-    margin-top:28px;
-    color:#9da8b8;
-    font-size:.95rem;
-}
+    font-size:12px;
+    color:var(--muted);
+    border-top:1px solid var(--border-soft);
+    background:linear-gradient(0deg,var(--panel-bg) 0%,transparent 100%);
+  }
+  #footer strong{color:var(--accent2);}
 
-@media(max-width:600px){
-    body{padding:22px 12px}
-    .contents{padding:20px}
-    .card{min-height:210px}
-    .back{position:relative;top:auto;right:auto;margin:18px auto 0}
-}
+  /* ===== التجاوب ===== */
+  @media(max-width:900px){
+    #titleBlock h1{font-size:22px;}
+    #titleBlock .subtitle{font-size:14px;}
+    .contents{padding:22px;}
+  }
+  @media(max-width:650px){
+    #navbar{padding:0 12px;height:48px;}
+    .nav-brand{font-size:12px;}
+    .nav-brand span{display:none;}
+    .nav-links a{padding:5px 8px;font-size:10.5px;}
+    .theme-toggle{width:32px;height:32px;font-size:14px;}
+    #breadcrumb{top:56px;font-size:10px;padding:5px 12px;max-width:calc(100vw - 20px);}
+    #siteHeader{padding:90px 12px 8px;}
+    #titleBlock h1{font-size:18px;}
+    #titleBlock .subtitle{font-size:12.5px;}
+    .contents{padding:16px;border-radius:16px;}
+    .section-title{font-size:1.3rem;}
+    .card{padding:20px;min-height:200px;}
+    .card h3{font-size:1.15rem;}
+    .card p{font-size:.92rem;}
+    .icon{font-size:2.4rem;}
+    .back{font-size:.9rem;padding:10px 20px;}
+  }
 </style>
 </head>
 
@@ -228,67 +286,126 @@ footer{
 
 <div class="watermark"></div>
 
-<div class="container">
+<!-- ══ شريط التنقل ══ -->
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع">🌙</button>
+</nav>
 
-<header>
-    <img src="logo.png" class="logo" alt="شعار الأستاذ ماجد شلالدة">
+<!-- ══ مسار التنقل ══ -->
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+  <span class="sep">›</span>
+  <span class="cur">🌀 الحث الكهرومغناطيسي</span>
+</div>
+
+<!-- ══ العنوان ══ -->
+<div id="siteHeader">
+  <div id="titleBlock">
     <h1>⚡ الحث الكهرومغناطيسي</h1>
-    <div class="subtitle">
-        فهرس تفاعلي لاستكشاف ظاهرة الحث الكهرومغناطيسي وتطبيقاتها
-    </div>
-    <div class="teacher">إعداد وتطوير: الأستاذ ماجد شلالدة</div>
-</header>
+    <div class="subtitle">فهرس تفاعلي لاستكشاف ظاهرة الحث الكهرومغناطيسي وتطبيقاتها</div>
+    <div class="credit">إعداد وتطوير: الأستاذ ماجد شلالده &nbsp;|&nbsp; 0599870176</div>
+  </div>
+</div>
 
-<section class="contents">
-
+<!-- ══ الحاوية ══ -->
+<div class="container">
+  <section class="contents">
     <h2 class="section-title">فهرس التطبيقات والتجارب</h2>
 
     <div class="cards">
 
-        <a href="faraday.html" class="card">
-            <span class="icon">🧲⚡</span>
-            <h3>تجربة فارادي</h3>
-            <p>
-                محاكاة تفاعلية لتجربة فارادي، توضح تولد التيار
-                الكهربائي الحثي نتيجة تغير المجال المغناطيسي خلال الملف،
-                مع إمكانية استكشاف اتجاه التيار الحثي.
-            </p>
-            <span class="go">فتح تجربة فارادي ←</span>
-        </a>
+      <a href="faraday.html" class="card">
+        <span class="icon">🧲⚡</span>
+        <h3>تجربة فارادي</h3>
+        <p>
+          محاكاة تفاعلية لتجربة فارادي، توضح تولد التيار
+          الكهربائي الحثي نتيجة تغير المجال المغناطيسي خلال الملف،
+          مع إمكانية استكشاف اتجاه التيار الحثي.
+        </p>
+        <span class="go">فتح تجربة فارادي ←</span>
+      </a>
 
-        <div class="card">
-            <span class="icon">⚙️⚡</span>
-            <h3>المولد الكهربائي</h3>
+      <div class="card">
+        <span class="icon">⚙️⚡</span>
+        <h3>المولد الكهربائي</h3>
+        <select class="sim-select" aria-label="اختر نوع المولد"
+                onchange="if(this.value) window.location.href=this.value;"
+                onclick="event.stopPropagation();">
+          <option value="">اختر نوع المولد</option>
+          <option value="ac_gen.html">مولد التيار المتردد</option>
+          <option value="con_ac_gen.html">مولد التيار المتردد ثابت القيمة</option>
+          <option value="dc_gen.html">مولد التيار موحد الاتجاه</option>
+          <option value="con_dc_gen.html">مولد التيار المستمر</option>
+        </select>
+        <p>
+          محاكاة مبدأ عمل المولد الكهربائي وتحويل الطاقة
+          الميكانيكية إلى طاقة كهربائية اعتمادًا على الحث
+          الكهرومغناطيسي.
+        </p>
+        <span class="go">اختر نوع المولد من القائمة أعلاه</span>
+      </div>
 
-            <select class="sim-select" aria-label="اختر نوع المولد"
-                    onchange="if(this.value) window.location.href=this.value;"
-                    onclick="event.stopPropagation();">
-                <option value="">اختر نوع المولد</option>
-                <option value="ac_gen.html">مولد التيار المتردد</option>
-                <option value="con_ac_gen.html">مولد التيار المتردد ثابت القيمة</option>
-                <option value="dc_gen.html">مولد التيار موحد الاتجاه</option>
-                <option value="con_dc_gen.html">مولد التيار المستمر</option>
-            </select>
-
-            <p>
-                محاكاة مبدأ عمل المولد الكهربائي وتحويل الطاقة
-                الميكانيكية إلى طاقة كهربائية اعتمادًا على الحث
-                الكهرومغناطيسي.
-            </p>
-            <span class="go">اختر نوع المولد من القائمة أعلاه</span>
-        </div>
+      <div class="card">
+        <span class="icon">🛤️🧲</span>
+        <h3>حركة موصل على سكة معدنية بشكل متعامد مع مجال مغناطيسي</h3>
+        <select class="sim-select" aria-label="اختر حالة المحاكاة"
+                onchange="if(this.value) window.location.href=this.value;"
+                onclick="event.stopPropagation();">
+          <option value="">اختر حالة المحاكاة</option>
+          <option value="rod_res_2d.html">موصل ومقاومة 2d</option>
+          <option value="rod_res_3d.html">موصل ومقاومة 3d</option>
+          <option value="rod_2res_2d.html">موصل ومقاومتين 2d</option>
+          <option value="rod_2res_3d.html">موصل ومقاومتين 3d</option>
+          <option value="two_rods_2res_2d.html">موصلين ومقاومتين 2d</option>
+          <option value="two_rods_2res_3d.html">موصلين ومقاومتين 3d</option>
+          <option value="rod_vertical_2d.html">حركة موصل في المستوى العمودي 2d</option>
+          <option value="rod_vertical_3d.html">حركة موصل في المستوى العمودي 3d</option>
+        </select>
+        <p>
+          محاكاة حركة موصل على سكة معدنية متعامدة مع مجال
+          مغناطيسي، مع دراسة القوة الدافعة الكهربائية الحثية
+          والتيار الحثي والقوة المغناطيسية المؤثرة في الموصل
+          في الحالتين ثنائية وثلاثية الأبعاد.
+        </p>
+        <span class="go">اختر حالة المحاكاة من القائمة أعلاه</span>
+      </div>
 
     </div>
 
-    <a href="../../index.html" class="back">← الرئيسية</a>
-
-</section>
-
-<footer>
-    المنصة التفاعلية للمحاكاة الفيزيائية — الأستاذ ماجد شلالدة
-</footer>
-
+    <a href="../../index.html" class="back">← العودة للرئيسية</a>
+  </section>
 </div>
+
+<!-- ══ الفوتر ══ -->
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد
+  <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<script>
+/* ===== الوضع الليلي/النهاري ===== */
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light'){
+  document.body.classList.add('light-mode');
+  themeToggle.textContent = '☀️';
+}
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  themeToggle.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+});
+</script>
 
 </body>
 </html>

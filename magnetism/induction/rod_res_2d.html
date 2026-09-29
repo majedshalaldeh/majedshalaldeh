@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>موصل على سكة في مجال مغناطيسي — محاكاة 2D | الأستاذ ماجد شلالدة</title>
+<style>
+  /* ═══ نفس CSS الملف الأول ═══ */
+  :root{
+    --bg-color:#0b1329; --main-card-bg:#1c2541; --sub-card-bg:#3a506b;
+    --text-color:#ffffff; --text-muted:#c0c8d8;
+    --accent-cyan:#00b4d8; --accent-orange:#f77f00;
+    --border-soft:rgba(255,255,255,0.08);
+    --panel-bg:rgba(18,22,32,0.92); --panel-border:rgba(255,255,255,0.10);
+    --accent:#5b8cff; --accent2:#ffb545;
+    --text:#eef1f7; --muted:#9aa3b5;
+    --panel-width:320px; --panel-right:18px;
+    --scene-bg:#080b12;
+  }
+  body.light-mode{
+    --main-card-bg:#ffffff; --sub-card-bg:#e8eef5;
+    --text-color:#1a202c; --text-muted:#4a5568;
+    --border-soft:rgba(0,0,0,0.08);
+    --panel-bg:rgba(255,255,255,0.94); --panel-border:rgba(0,0,0,0.12);
+    --accent:#2563eb; --accent2:#c2410c;
+    --text:#0f172a; --muted:#475569;
+    --scene-bg:#dbe6f5;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;
+    background:var(--scene-bg);font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+    color:var(--text);transition:background .3s,color .3s;}
+  #sim{position:fixed;inset:0;display:block;z-index:1;}
+
+  #navbar{position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 24px;height:56px;
+    background:rgba(28,37,65,0.92);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-soft);}
+  body.light-mode #navbar{background:rgba(255,255,255,0.92);}
+  .nav-brand{font-size:1.05rem;font-weight:bold;color:var(--accent-orange);
+    display:flex;align-items:center;gap:8px;}
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-links a{color:var(--text-color);text-decoration:none;
+    padding:8px 14px;border-radius:8px;font-size:.88rem;transition:.2s;}
+  .nav-links a:hover{background:var(--accent-orange);color:#000;}
+  .theme-toggle{background:transparent;border:1px solid var(--border-soft);
+    color:var(--text-color);font-size:1.1rem;width:36px;height:36px;
+    border-radius:50%;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;transition:.2s;}
+  .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg);}
+
+  #breadcrumb{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:40;
+    display:flex;align-items:center;gap:8px;padding:8px 18px;font-size:12px;
+    color:var(--muted);background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:10px;backdrop-filter:blur(8px);}
+  #breadcrumb a{color:var(--accent);text-decoration:none;}
+  #breadcrumb .sep{opacity:.5;}
+  #breadcrumb .cur{color:var(--text);font-weight:600;}
+
+  #siteHeader{position:fixed;top:105px;left:0;right:0;height:60px;
+    padding:8px 20px 0;text-align:center;z-index:25;pointer-events:none;}
+  #titleBlock{max-width:900px;margin:0 auto;text-align:center;}
+  #titleBlock h1{margin:0;font-size:18px;line-height:1.4;color:var(--accent2);
+    text-shadow:0 2px 8px rgba(0,0,0,.15);}
+  #titleBlock .credit{font-size:11px;color:var(--muted);margin-top:3px;}
+
+  #hud{position:fixed;top:175px;left:18px;width:290px;
+    max-height:calc(100% - 255px);overflow-y:auto;
+    background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:14px;padding:16px 18px;backdrop-filter:blur(10px);z-index:35;}
+  #hud::-webkit-scrollbar{width:5px;}
+  #hud::-webkit-scrollbar-thumb{background:rgba(128,128,128,.4);border-radius:3px;}
+  #hud h3{margin:0 0 10px;font-size:13.5px;color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);padding-bottom:6px;}
+  .hudRow{display:flex;justify-content:space-between;font-size:12px;
+    margin:5px 0;color:var(--muted);}
+  .hudRow b{color:var(--text);direction:ltr;font-family:'Courier New',monospace;}
+  .hudRow b.warm{color:#ffb457;} .hudRow b.hot{color:#ff7a7a;}
+  .hudRow b.cool{color:#8effa8;} .hudRow b.neg{color:#ff66cc;}
+
+  #logoWrap{position:fixed;top:120px;right:var(--panel-right);
+    width:var(--panel-width);height:150px;display:flex;
+    justify-content:center;align-items:center;z-index:30;pointer-events:none;}
+  #logoWrap img{width:130px;height:130px;border-radius:50%;background:#fff;
+    object-fit:cover;box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);
+    border:3px solid rgba(255,255,255,.2);}
+  body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);
+    border-color:rgba(0,0,0,.1);}
+  #logoFallback{display:none;width:130px;height:130px;border-radius:50%;
+    background:linear-gradient(135deg,#f77f00,#00b4d8);
+    align-items:center;justify-content:center;font-size:4rem;color:#fff;}
+
+  #panel{position:fixed;top:275px;right:var(--panel-right);
+    width:var(--panel-width);max-height:calc(100% - 330px);
+    overflow-y:auto;overflow-x:hidden;
+    scrollbar-width:none;-ms-overflow-style:none;
+    background:var(--panel-bg);border:1px solid var(--panel-border);
+    border-radius:16px;padding:10px 12px 8px;backdrop-filter:blur(10px);z-index:35;}
+  #panel::-webkit-scrollbar{display:none;width:0;height:0;}
+  #panel h3{margin:0 0 6px;font-size:13px;color:var(--accent2);
+    border-bottom:1px solid var(--panel-border);padding-bottom:5px;}
+
+  .ctrlGroup{margin-bottom:6px;padding:6px 9px;border-radius:9px;
+    background:rgba(128,128,128,.06);}
+  .ctrlGroup .title{font-size:11px;font-weight:bold;margin-bottom:3px;
+    display:flex;align-items:center;gap:6px;}
+  .ctrlGroup .title .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .ctrlGroup.c-cyan .title{color:#5bc0eb;} .ctrlGroup.c-cyan .title .dot{background:#5bc0eb;}
+  .ctrlGroup.c-gold .title{color:#ffd166;} .ctrlGroup.c-gold .title .dot{background:#ffd166;}
+  .ctrlGroup.c-green .title{color:#4dff9b;} .ctrlGroup.c-green .title .dot{background:#4dff9b;}
+
+  .ctrlRow{display:flex;justify-content:space-between;font-size:11px;margin:2px 0 1px;}
+  .ctrlRow span{color:var(--muted);}
+  .ctrlRow b{color:var(--text);direction:ltr;font-family:'Courier New',monospace;font-size:11px;}
+  .ctrlRow b.warm{color:#ffb457;} .ctrlRow b.cool{color:#8effa8;}
+  .ctrlRow b.highlight{color:#ffd54a;} .ctrlRow b.cyan{color:#7ee6ff;}
+
+  input[type=range]{width:100%;accent-color:var(--accent);margin:1px 0 3px;height:12px;}
+
+  .btn-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .btn{flex:1;padding:7px 8px;border-radius:8px;border:1px solid var(--panel-border);
+    background:rgba(128,128,128,.08);color:var(--text);font-size:11.5px;
+    font-weight:bold;cursor:pointer;font-family:inherit;transition:.2s;}
+  .btn:hover{background:rgba(128,128,128,.18);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .flipBtn{width:100%;margin-top:6px;padding:9px;display:flex;
+    align-items:center;justify-content:center;gap:8px;border-radius:9px;
+    font-weight:bold;letter-spacing:.3px;font-size:11.5px;cursor:pointer;
+    font-family:inherit;transition:.2s;}
+  #flipFieldBtn{border:1px solid rgba(180,140,255,.45);
+    background:linear-gradient(135deg,rgba(80,40,160,.55),rgba(40,60,140,.55));
+    color:#e5d6ff;}
+  #flipFieldBtn:hover{background:linear-gradient(135deg,rgba(110,60,200,.70),rgba(55,85,180,.70));
+    border-color:rgba(200,170,255,.8);box-shadow:0 0 20px rgba(140,100,255,.45);}
+  #flipForceBtn{border:1px solid rgba(120,220,150,.45);
+    background:linear-gradient(135deg,rgba(40,140,80,.55),rgba(30,90,70,.55));
+    color:#d6ffe2;}
+  #flipForceBtn:hover{background:linear-gradient(135deg,rgba(50,180,100,.70),rgba(40,120,90,.70));
+    border-color:rgba(140,240,180,.8);box-shadow:0 0 20px rgba(100,220,150,.45);}
+  .flipBtn .icon{font-size:16px;line-height:1;}
+
+  #footer{position:fixed;bottom:0;left:0;right:0;padding:8px 20px;
+    text-align:center;font-size:11px;color:var(--muted);
+    background:linear-gradient(0deg,var(--panel-bg) 0%,transparent 100%);
+    pointer-events:none;z-index:20;}
+  #footer strong{color:var(--accent2);}
+
+  #hint{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);
+    color:var(--muted);font-size:12px;background:var(--panel-bg);
+    padding:6px 14px;border-radius:20px;border:1px solid var(--panel-border);
+    pointer-events:none;z-index:5;}
+
+  #formula{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+    padding:7px 18px;background:var(--panel-bg);backdrop-filter:blur(12px);
+    border:1px solid var(--panel-border);border-radius:11px;
+    color:var(--muted);font-size:12px;direction:ltr;
+    font-family:'Cambria Math','Times New Roman',serif;letter-spacing:.5px;
+    z-index:10;white-space:nowrap;}
+  #formula b{color:#ffd54a;font-weight:700;}
+
+  @media(max-width:900px){
+    :root{--panel-width:280px;--panel-right:10px;}
+    #titleBlock h1{font-size:15px;}
+    #siteHeader{padding:8px 10px 0;top:100px;height:55px;}
+    #hud{width:250px;top:165px;}
+    #logoWrap{top:105px;height:130px;}
+    #logoWrap img{width:115px;height:115px;}
+    #panel{top:245px;max-height:calc(100% - 300px);padding:9px 10px 7px;}
+  }
+  @media(max-width:650px){
+    #hud{display:none;}
+    #siteHeader{position:static;height:auto;padding:70px 10px 0;}
+    #titleBlock h1{font-size:13px;padding:0 4px;}
+    #breadcrumb{top:60px;font-size:10px;padding:5px 12px;max-width:calc(100vw - 20px);}
+    #logoWrap{top:auto;bottom:16px;left:8px;right:auto;width:90px;height:90px;}
+    #logoWrap img{width:80px;height:80px;}
+    #panel{top:auto;bottom:16px;right:8px;left:auto;
+      width:calc(100vw - 116px);max-width:320px;max-height:62vh;padding:9px 10px 7px;}
+    #hint{display:none;} #formula{font-size:10px;padding:5px 10px;bottom:8px;}
+    #footer{font-size:9.5px;padding:5px 10px;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="sim"></canvas>
+
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle">🌙</button>
+</nav>
+
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+  <span class="sep">›</span>
+  <a href="induction.html">🌀 الحث الكهرومغناطيسي</a>
+  <span class="sep">›</span>
+  <span class="cur">🎬 موصل على سكة (2D)</span>
+</div>
+
+<div id="siteHeader">
+  <div id="titleBlock">
+    <h1>موصل على سكة في مجال مغناطيسي — محاكاة ثنائية الأبعاد</h1>
+    <div class="credit">إعداد وتطوير: الأستاذ ماجد شلالده &nbsp;|&nbsp; 0599870176</div>
+  </div>
+</div>
+
+<div id="hud">
+  <h3>📊 القراءات اللحظية</h3>
+  <div class="hudRow"><span>الطول الفعّال L</span><b id="rL">1.60 m</b></div>
+  <div class="hudRow"><span>السرعة v</span><b class="cool" id="rV">0.000 m/s</b></div>
+  <div class="hudRow"><span>القوة الدافعة ε = BLv</span><b class="warm" id="rE">0.000 V</b></div>
+  <div class="hudRow"><span>التيار I = ε/R</span><b class="warm" id="rI">0.000 A</b></div>
+  <div class="hudRow"><span>القوة المعاكسة F = BIL</span><b class="hot" id="rF">0.000 N</b></div>
+  <div class="hudRow"><span>السرعة الحدية v<sub>t</sub></span><b id="rVt">0.000 m/s</b></div>
+</div>
+
+<div id="logoWrap">
+  <img src="../../logo.png" alt="الشعار"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+  <div id="logoFallback">⚛️</div>
+</div>
+
+<div id="panel">
+  <h3>🎛️ لوحة التحكم</h3>
+
+  <div class="ctrlGroup c-gold">
+    <div class="title"><span class="dot"></span>هندسة الموصل</div>
+    <div class="ctrlRow"><span>طول الموصل الفعّال L</span><b class="highlight" id="lVal">1.60 m</b></div>
+    <input type="range" id="lSlider" min="0.6" max="2.4" step="0.05" value="1.6">
+  </div>
+
+  <div class="ctrlGroup c-cyan">
+    <div class="title"><span class="dot"></span>المجال والمقاومة</div>
+    <div class="ctrlRow"><span>شدة المجال B</span><b class="cyan" id="bVal">0.60 T ⊗</b></div>
+    <input type="range" id="bSlider" min="0.2" max="2" step="0.05" value="0.6">
+    <div class="ctrlRow"><span>المقاومة الكلية R</span><b id="rVal">1.20 Ω</b></div>
+    <input type="range" id="rSlider" min="0.2" max="5" step="0.1" value="1.2">
+  </div>
+
+  <div class="ctrlGroup c-green">
+    <div class="title"><span class="dot"></span>القوة الخارجية</div>
+    <div class="ctrlRow"><span>القوة المؤثرة F</span><b class="cool" id="fVal">+1.00 N →</b></div>
+    <input type="range" id="fSlider" min="0" max="3" step="0.05" value="1">
+  </div>
+
+  <button class="flipBtn" id="flipForceBtn">
+    <span class="icon">→</span>
+    <span class="text">عكس اتجاه القوة الخارجية</span>
+  </button>
+  <button class="flipBtn" id="flipFieldBtn">
+    <span class="icon">⊗</span>
+    <span class="text">عكس اتجاه المجال المغناطيسي</span>
+  </button>
+
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="btn primary" id="playBtn">⏸ إيقاف</button>
+    <button class="btn" id="resetBtn">↺ إعادة</button>
+  </div>
+</div>
+
+<div id="formula">ε = B·L·v &nbsp;|&nbsp; I = ε/R &nbsp;|&nbsp; F<sub>mag</sub> = B·I·L = <b>B²L²v/R</b></div>
+
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد
+  <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<div id="hint">🖱️ اسحب للتدوير • 🖲️ عجلة الماوس للتقريب</div>
+
+<script>
+'use strict';
+
+/* ===== ثوابت ===== */
+const MASS = 1.0;
+const RAIL_X0 = -4.5, RAIL_X1 = 4.5;
+const RES_X = -4.25;
+const X_MIN = -3.5, X_MAX = 3.5;
+
+/* ===== الحالة ===== */
+const params = { L:1.6, B:0.6, R:1.2, F:1.0 };
+let Binto = true, Fsign = 1;
+let xRod = X_MIN, vel = 0, emf = 0, current = 0, fmagX = 0;
+let running = true, phase = 0, endTimer = 0, flashT = 0;
+
+const canvas = document.getElementById('sim');
+const ctx = canvas.getContext('2d');
+let W, H, cx, cy, scale, dpr;
+
+function resize(){
+  const w = innerWidth, h = innerHeight;
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  W = w; H = h; cx = w/2; cy = h/2 + 10;
+  const zSpan = params.L/2 + 1.2;
+  scale = Math.min(w/14, h/(2*zSpan), 110);
+}
+resize();
+addEventListener('resize', resize);
+function X(x){ return cx + x*scale; }
+function Y(z){ return cy + z*scale; }
+
+/* ===== مسار الدارة ===== */
+const _pt = { x:0, z:0 };
+function circuitPoint(s, xRodPos, out){
+  const halfZ = params.L/2;
+  const segRod = 2*halfZ, segRail = Math.max(xRodPos - RES_X, 0.001), segRes = 2*halfZ;
+  const total = segRod + 2*segRail + segRes;
+  let t = (((s%1)+1)%1) * total;
+  if (t < segRod){ const u = t/segRod; out.x = xRodPos; out.z = -halfZ + u*2*halfZ; return out; }
+  t -= segRod;
+  if (t < segRail){ const u = t/segRail; out.x = xRodPos - u*(xRodPos-RES_X); out.z = halfZ; return out; }
+  t -= segRail;
+  if (t < segRes){ const u = t/segRes; out.x = RES_X; out.z = halfZ - u*2*halfZ; return out; }
+  t -= segRes;
+  const u = t/segRail; out.x = RES_X + u*(xRodPos-RES_X); out.z = -halfZ; return out;
+}
+
+/* ===== الفيزياء ===== */
+function physicsStep(dt){
+  const sub = 8, h = dt/sub;
+  const Bz = params.B * (Binto ? -1 : 1);
+  const L = params.L;
+  const k = Bz*Bz*L*L / params.R;
+  const Fapp = params.F * Fsign;
+  for (let i=0; i<sub; i++){
+    const FmagX = -k * vel;
+    const a = (Fapp + FmagX) / MASS;
+    vel += a*h; xRod += vel*h;
+  }
+  emf = Bz*L*vel; current = emf/params.R; fmagX = -k*vel;
+  const xStart = Fsign > 0 ? X_MIN : X_MAX;
+  if (xRod >= X_MAX){ xRod=X_MAX; vel=0; endTimer+=dt;
+    if (endTimer>1.2){ xRod=xStart; vel=0; endTimer=0; } }
+  else if (xRod <= X_MIN){ xRod=X_MIN; vel=0; endTimer+=dt;
+    if (endTimer>1.2){ xRod=xStart; vel=0; endTimer=0; } }
+  else endTimer = 0;
+}
+function updatePhase(dt){
+  if (Math.abs(current) > 0.008){
+    phase += current * 0.35 * dt;
+    phase = ((phase%1)+1)%1;
+  }
+}
+
+/* ===== الرسم ===== */
+function draw(time){
+  const isLight = document.body.classList.contains('light-mode');
+  ctx.fillStyle = isLight ? '#dbe6f5' : '#080b12';
+  ctx.fillRect(0, 0, W, H);
+  drawFieldSymbols(time);
+  drawRails();
+  drawResistor();
+  drawRod();
+  drawCurrentDots();
+  drawArrows();
+  drawFieldLabel();
+}
+
+function drawFieldSymbols(time){
+  const pulse = 0.42 + 0.10 * Math.sin(time*0.0018);
+  const flashAdd = flashT > 0 ? flashT*0.55 : 0;
+  const alpha = Math.min(pulse + flashAdd, 0.95);
+  const color = Binto ? `rgba(77,163,255,${alpha})` : `rgba(180,143,255,${alpha})`;
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.7;
+  const r = 9, halfZ = params.L/2;
+  const nZ = Math.max(2, Math.ceil((halfZ + 0.9)/0.85));
+  for (let zi=-nZ; zi<=nZ; zi++){
+    const z = zi*0.85;
+    for (let xi=-5; xi<=5; xi++){
+      const sx = X(xi*1.0), sy = Y(z);
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI*2); ctx.stroke();
+      if (Binto){
+        const d = r*0.55;
+        ctx.beginPath();
+        ctx.moveTo(sx-d, sy-d); ctx.lineTo(sx+d, sy+d);
+        ctx.moveTo(sx+d, sy-d); ctx.lineTo(sx-d, sy+d);
+        ctx.stroke();
+      } else { ctx.beginPath(); ctx.arc(sx, sy, r*0.38, 0, Math.PI*2); ctx.fill(); }
+    }
+  }
+}
+function drawRails(){
+  const x1 = X(RAIL_X0), x2 = X(RAIL_X1);
+  const halfZ = params.L/2;
+  for (const y of [Y(-halfZ), Y(halfZ)]){
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x1+3, y-3, x2-x1, 10);
+    const g = ctx.createLinearGradient(0, y-5, 0, y+5);
+    g.addColorStop(0, '#e0e8f2'); g.addColorStop(0.45, '#a5b3c4'); g.addColorStop(1, '#546272');
+    ctx.fillStyle = g; ctx.fillRect(x1, y-5, x2-x1, 10);
+    ctx.strokeStyle = 'rgba(200,220,245,0.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x1, y-5); ctx.lineTo(x2, y-5); ctx.stroke();
+  }
+}
+function drawResistor(){
+  const sx = X(RES_X);
+  const halfZ = params.L/2;
+  const yTop = Y(-halfZ), yBot = Y(halfZ), w = 24;
+  const bodyTop = yTop + 14, bodyBot = yBot - 14;
+  ctx.fillStyle = '#c8ccd4';
+  ctx.fillRect(sx-4, yTop-5, 8, bodyTop-yTop+5);
+  ctx.fillRect(sx-4, bodyBot, 8, yBot-bodyBot+5);
+  const g = ctx.createLinearGradient(sx-w/2, 0, sx+w/2, 0);
+  g.addColorStop(0, '#8e7f5d'); g.addColorStop(0.5, '#eee0bb'); g.addColorStop(1, '#8e7f5d');
+  ctx.fillStyle = g; ctx.fillRect(sx-w/2, bodyTop, w, bodyBot-bodyTop);
+  const bands = ['#8b3a2f', '#1f1f1f', '#d4a017', '#2f6b3a'];
+  const bodyH = bodyBot - bodyTop;
+  for (let i=0; i<4; i++){
+    const by = bodyTop + bodyH*(0.15 + i*0.20);
+    ctx.fillStyle = bands[i]; ctx.fillRect(sx-w/2, by, w, 7);
+  }
+  ctx.strokeStyle = 'rgba(180,200,230,0.55)'; ctx.lineWidth = 1.2;
+  ctx.strokeRect(sx-w/2, bodyTop, w, bodyBot-bodyTop);
+}
+function drawRod(){
+  const sx = X(xRod);
+  const halfZ = params.L/2;
+  const overhang = Math.max(6, scale*0.06);
+  const y1 = Y(-halfZ) - overhang, y2 = Y(halfZ) + overhang, w = 11;
+  const glowR = 70 + halfZ*20;
+  const grad = ctx.createRadialGradient(sx, (y1+y2)/2, 0, sx, (y1+y2)/2, glowR);
+  grad.addColorStop(0, 'rgba(255,190,90,0.35)');
+  grad.addColorStop(1, 'rgba(255,190,90,0)');
+  ctx.fillStyle = grad; ctx.fillRect(sx-glowR, y1-30, glowR*2, y2-y1+60);
+  ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(sx-w/2+3, y1+3, w, y2-y1);
+  const bodyGrad = ctx.createLinearGradient(sx-w/2, 0, sx+w/2, 0);
+  bodyGrad.addColorStop(0, '#8a6021'); bodyGrad.addColorStop(0.35, '#f0c15c');
+  bodyGrad.addColorStop(0.6, '#ffd982'); bodyGrad.addColorStop(1, '#8a6021');
+  ctx.fillStyle = bodyGrad; ctx.fillRect(sx-w/2, y1, w, y2-y1);
+  ctx.strokeStyle = 'rgba(255,225,150,0.9)'; ctx.lineWidth = 1.2;
+  ctx.strokeRect(sx-w/2, y1, w, y2-y1);
+  ctx.save();
+  ctx.font = 'bold 11px Consolas, monospace';
+  ctx.fillStyle = 'rgba(255,215,120,0.85)';
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillText(`L = ${params.L.toFixed(2)} m`, sx-14, (y1+y2)/2);
+  ctx.restore();
+}
+function drawCurrentDots(){
+  if (Math.abs(current) < 0.008) return;
+  const color = current >= 0 ? '#ffe066' : '#ff77dd';
+  const N = 34;
+  const radius = 3.5 + 1.6*Math.min(Math.abs(current), 2);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 12;
+  for (let i=0; i<N; i++){
+    const s = ((i/N) + phase) % 1;
+    circuitPoint(s, xRod, _pt);
+    ctx.beginPath();
+    ctx.arc(X(_pt.x), Y(_pt.z), radius, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+}
+function drawArrows(){
+  const sx = X(xRod); const halfZ = params.L/2;
+  if (Math.abs(vel) > 0.02){
+    const length = Math.min(Math.abs(vel)*28, 130);
+    const dir = vel >= 0 ? 1 : -1;
+    const yA = Y(-halfZ) - 38;
+    drawArrow(sx, yA, sx + dir*length, yA, '#ffd54a', 'v');
+  }
+  if (params.F > 0.02){
+    const length = Math.min(params.F*30, 130);
+    const yA = Y(-halfZ) - 16;
+    drawArrow(sx, yA, sx + Fsign*length, yA, '#4dff9b', 'F');
+  }
+  const fmagMag = Math.abs(fmagX);
+  if (fmagMag > 0.02 && Math.abs(vel) > 0.01){
+    const length = Math.min(fmagMag*30, 130);
+    const dir = -Math.sign(vel);
+    const yA = Y(0);
+    drawArrow(sx, yA, sx + dir*length, yA, '#ff5f5f', 'F mag');
+  }
+}
+function drawArrow(x1, y1, x2, y2, color, label){
+  const dx = x2-x1, dy = y2-y1;
+  const len = Math.hypot(dx, dy); if (len < 5) return;
+  const ang = Math.atan2(dy, dx);
+  const headLen = Math.min(15, len*0.4);
+  ctx.strokeStyle = color; ctx.fillStyle = color;
+  ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+  ctx.shadowColor = color; ctx.shadowBlur = 14;
+  ctx.beginPath(); ctx.moveTo(x1, y1);
+  ctx.lineTo(x2-Math.cos(ang)*headLen*0.75, y2-Math.sin(ang)*headLen*0.75);
+  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, y2);
+  ctx.lineTo(x2-Math.cos(ang-0.55)*headLen, y2-Math.sin(ang-0.55)*headLen);
+  ctx.lineTo(x2-Math.cos(ang+0.55)*headLen, y2-Math.sin(ang+0.55)*headLen);
+  ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 0;
+  if (label){
+    ctx.fillStyle = color; ctx.font = 'bold 12px Consolas, monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, (x1+x2)/2, (y1+y2)/2 - 14);
+  }
+}
+function drawFieldLabel(){
+  const x0 = X(-4.9); const y0 = Y(-params.L/2 - 0.75);
+  ctx.save();
+  ctx.font = 'bold 18px Consolas, monospace';
+  ctx.fillStyle = Binto ? '#7fc0ff' : '#c4a8ff';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = Binto ? '#4da3ff' : '#b48fff'; ctx.shadowBlur = 14;
+  ctx.fillText(`B ${Binto ? '⊗' : '⊙'}`, x0, y0);
+  ctx.restore();
+}
+
+/* ===== HUD ===== */
+const elL = document.getElementById('rL');
+const elV = document.getElementById('rV');
+const elE = document.getElementById('rE');
+const elI = document.getElementById('rI');
+const elF = document.getElementById('rF');
+const elVt = document.getElementById('rVt');
+function updateHUD(){
+  elL.textContent = params.L.toFixed(2) + ' m';
+  elV.textContent = vel.toFixed(3) + ' m/s';
+  elV.classList.toggle('neg', vel < 0);
+  elE.textContent = emf.toFixed(3) + ' V';
+  elE.classList.toggle('neg', emf < 0);
+  elI.textContent = current.toFixed(3) + ' A';
+  elI.classList.toggle('neg', current < 0);
+  elF.textContent = Math.abs(fmagX).toFixed(3) + ' N';
+  const BL2 = params.B*params.B*params.L*params.L;
+  const Fapp = params.F * Fsign;
+  const vt = BL2 > 1e-9 ? (Fapp*params.R)/BL2 : Infinity;
+  elVt.textContent = isFinite(vt) ? vt.toFixed(3) + ' m/s' : '∞';
+  elVt.classList.toggle('neg', vt < 0);
+}
+
+/* ===== التحكم ===== */
+const lSlider = document.getElementById('lSlider');
+const bSlider = document.getElementById('bSlider');
+const rSlider = document.getElementById('rSlider');
+const fSlider = document.getElementById('fSlider');
+const lVal = document.getElementById('lVal');
+const bVal = document.getElementById('bVal');
+const rVal = document.getElementById('rVal');
+const fVal = document.getElementById('fVal');
+
+function syncParams(){
+  const newL = parseFloat(lSlider.value);
+  const lengthChanged = Math.abs(newL - params.L) > 1e-6;
+  params.L = newL; params.B = parseFloat(bSlider.value);
+  params.R = parseFloat(rSlider.value); params.F = parseFloat(fSlider.value);
+  lVal.textContent = params.L.toFixed(2) + ' m';
+  bVal.textContent = params.B.toFixed(2) + ' T ' + (Binto ? '⊗' : '⊙');
+  rVal.textContent = params.R.toFixed(2) + ' Ω';
+  fVal.textContent = (Fsign>0 ? '+' : '−') + params.F.toFixed(2) + ' N ' + (Fsign>0 ? '→' : '←');
+  if (lengthChanged) resize();
+}
+lSlider.addEventListener('input', syncParams);
+bSlider.addEventListener('input', syncParams);
+rSlider.addEventListener('input', syncParams);
+fSlider.addEventListener('input', syncParams);
+syncParams();
+
+const flipFieldBtn = document.getElementById('flipFieldBtn');
+flipFieldBtn.addEventListener('click', () => {
+  Binto = !Binto;
+  flipFieldBtn.querySelector('.icon').textContent = Binto ? '⊗' : '⊙';
+  syncParams(); flashT = 1;
+});
+const flipForceBtn = document.getElementById('flipForceBtn');
+flipForceBtn.addEventListener('click', () => {
+  Fsign = -Fsign;
+  flipForceBtn.querySelector('.icon').textContent = Fsign > 0 ? '→' : '←';
+  xRod = Fsign > 0 ? X_MIN : X_MAX;
+  vel = 0; current = 0; emf = 0; fmagX = 0; phase = 0; endTimer = 0;
+  syncParams();
+});
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('click', () => {
+  running = !running;
+  playBtn.textContent = running ? '⏸ إيقاف' : '▶ تشغيل';
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  xRod = Fsign > 0 ? X_MIN : X_MAX;
+  vel = 0; current = 0; emf = 0; fmagX = 0; phase = 0; endTimer = 0;
+});
+
+/* ===== الوضع الليلي/النهاري ===== */
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light'){
+  document.body.classList.add('light-mode');
+  themeToggle.textContent = '☀️';
+}
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  themeToggle.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+});
+
+/* ===== حلقة الرسم ===== */
+let lastTime = performance.now();
+function animate(now){
+  const dt = Math.min((now - lastTime)/1000, 0.05);
+  lastTime = now;
+  if (running) physicsStep(dt);
+  updatePhase(dt);
+  if (flashT > 0) flashT = Math.max(0, flashT - dt*2);
+  draw(now);
+  updateHUD();
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
