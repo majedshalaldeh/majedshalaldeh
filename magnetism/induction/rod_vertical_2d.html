@@ -346,11 +346,11 @@ let emfInd = 0, emfBat = 0, current = 0, fmag = 0;
 let circuitClosed = true;
 let running = true, phase = 0, endTimer = 0, flashT = 0;
 
-/* ✅ ثوابت معاملات طول الأسهم (px/unit) */
-const K_MG   = 100;   // px per Newton
-const K_V    = 50;    // px per (m/s)
-const K_FMAG = 100;   // px per Newton
-const ARROW_CAP = 150; // أقصى طول بالبكسل
+/* ثوابت معاملات طول الأسهم */
+const K_MG   = 100;
+const K_V    = 50;
+const K_FMAG = 100;
+const ARROW_CAP = 150;
 
 const canvas = document.getElementById('sim');
 const ctx = canvas.getContext('2d');
@@ -387,9 +387,14 @@ function circuitPoint(s, out) {
   const u = t / lenRail; out.x = -halfL; out.y = u * lenRail; return out;
 }
 
+/* ══════════════════════════════════════════════════════
+   ✅ الفيزياء — الإصلاح: BL تشمل Binto لكي ينعكس التيار
+   ══════════════════════════════════════════════════════ */
 function physicsStep(dt) {
   const sub = 8, h = dt / sub;
-  const BL = params.B * params.L, Rtot = params.R, m = params.MASS, g = params.GRAV;
+  const Bs = Binto ? 1 : -1;                      /* ← الإصلاح */
+  const BL = params.B * Bs * params.L;            /* ← الإصلاح */
+  const Rtot = params.R, m = params.MASS, g = params.GRAV;
   let effBat = 0, closed = true;
   if (params.batteryVisible) {
     if (params.batteryOn) effBat = params.Vbat * params.battSign;
@@ -613,33 +618,24 @@ function drawCurrentDots() {
   ctx.shadowBlur = 0;
 }
 
-/* ============================================================
-   ✅ الأسهم — الطول متناسب تماماً مع المقدار (بدون حد أدنى)
-   - mg   : 100 px لكل نيوتن
-   - v    : 50  px لكل m/s
-   - Fmag : 100 px لكل نيوتن
-   ============================================================ */
 function drawArrows() {
   const xL = Xw(-params.L/2);
   const xR = Xw(params.L/2);
   const rodCX = (xL + xR) / 2;
   const y = Yw(yRod);
 
-  /* 🟢 سهم الجاذبية mg — الطول ∝ mg */
   const mg = params.MASS * params.GRAV;
   if (mg > 0.001) {
     const gLen = Math.min(mg * K_MG, ARROW_CAP);
     drawArrow(rodCX - 60, y, rodCX - 60, y + gLen, '#4dff9b', 'mg');
   }
 
-  /* 🟡 سهم السرعة v — الطول ∝ |v| */
   if (Math.abs(vRod) > 0.005) {
     const vLen = Math.min(Math.abs(vRod) * K_V, ARROW_CAP);
     const dir = vRod > 0 ? 1 : -1;
     drawArrow(rodCX + 60, y, rodCX + 60, y + dir * vLen, '#ffd54a', 'v');
   }
 
-  /* 🔴 سهم القوة المغناطيسية Fmag — الطول ∝ |Fmag| */
   if (Math.abs(fmag) > 0.005 && Math.abs(current) > 0.005) {
     const fLen = Math.min(Math.abs(fmag) * K_FMAG, ARROW_CAP);
     const dir = fmag > 0 ? -1 : 1;
@@ -694,8 +690,11 @@ const elVt = document.getElementById('rVt');
 const elVf = document.getElementById('rVf');
 const elCircuit = document.getElementById('rCircuit');
 
+/* ✅ في updateHUD أيضاً نستخدم Binto */
 function updateHUD() {
-  const BL = params.B * params.L, m = params.MASS, g = params.GRAV;
+  const Bs = Binto ? 1 : -1;                     /* ← الإصلاح */
+  const BL = params.B * Bs * params.L;           /* ← الإصلاح */
+  const m = params.MASS, g = params.GRAV;
   elY.textContent = yRod.toFixed(3) + ' m';
   elV.textContent = vRod.toFixed(3) + ' m/s';
   elV.classList.toggle('neg', vRod < 0);
@@ -718,7 +717,7 @@ function updateHUD() {
     (denom > 1e-9 ? (m * g * params.R - BL * effBat) / denom : Infinity);
   elVt.textContent = isFinite(vt) ? vt.toFixed(3) + ' m/s' : '∞';
   elVt.classList.toggle('neg', vt < 0);
-  const vf = BL > 1e-9 ? (m * g * params.R) / BL : Infinity;
+  const vf = BL > 1e-9 ? (m * g * params.R) / Math.abs(BL) : Infinity;
   elVf.textContent = isFinite(vf) ? vf.toFixed(3) + ' V' : '∞';
 }
 
