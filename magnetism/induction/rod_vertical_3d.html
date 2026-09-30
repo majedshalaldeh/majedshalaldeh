@@ -346,11 +346,11 @@ const RES_WIDTH = 0.28;
 const BATT_PLATE_GAP = 0.06;
 const BATT_HALF = 0.10;
 
-/* ✅ ثوابت معاملات طول الأسهم — الطول = المقدار × المعامل */
-const K_MG   = 0.5;    // وحدة عالمية لكل نيوتن (mg)
-const K_V    = 0.3;    // وحدة عالمية لكل m/s
-const K_FMAG = 0.5;    // وحدة عالمية لكل نيوتن (Fmag)
-const ARROW_CAP = 1.0; // أقصى طول (وحدة عالمية)
+/* ثوابت معاملات طول الأسهم */
+const K_MG   = 0.5;
+const K_V    = 0.3;
+const K_FMAG = 0.5;
+const ARROW_CAP = 1.0;
 
 const params = {
   L: 0.8, B: 0.5, R: 1.0, Vbat: 0.8,
@@ -658,9 +658,13 @@ function updateCircuit() {
   labelB.position.x = -halfL - 0.5;
 }
 
+/* ══════════════════════════════════════════════════════
+   ✅ الفيزياء — الإصلاح: BL تشمل Bsign لكي ينعكس التيار
+   ══════════════════════════════════════════════════════ */
 function physicsStep(dt) {
   const sub = 8, h = dt / sub;
-  const BL = params.B * params.L, Rtot = params.R;
+  const BL = params.B * Bsign * params.L;   /* ← الإصلاح */
+  const Rtot = params.R;
   const m = params.MASS, g = params.GRAV;
   let effBat = 0, closed = true;
   if (params.batteryVisible) {
@@ -689,7 +693,6 @@ function updateScene(dt) {
   rod.position.y = rodY;
   rodGlow.position.y = rodY + 0.2;
 
-  /* 🟢 سهم mg — الطول ∝ mg */
   const mg = params.MASS * params.GRAV;
   if (mg > 0.001) {
     gArrow.position.set(-params.L/2 - 0.15, rodY, 0);
@@ -698,7 +701,6 @@ function updateScene(dt) {
     gArrow.rotation.z = -Math.PI / 2;
   } else gArrow.visible = false;
 
-  /* 🟡 سهم v — الطول ∝ |v| */
   if (Math.abs(vRod) > 0.005) {
     vArrow.position.set(params.L/2 + 0.2, rodY, 0);
     vArrow.visible = true;
@@ -706,7 +708,6 @@ function updateScene(dt) {
     vArrow.rotation.z = vRod > 0 ? -Math.PI / 2 : Math.PI / 2;
   } else vArrow.visible = false;
 
-  /* 🔴 سهم Fmag — الطول ∝ |Fmag| */
   if (Math.abs(fmag) > 0.005 && Math.abs(current) > 0.005) {
     fMagArrow.position.set(0, rodY + 0.15, 0);
     fMagArrow.visible = true;
@@ -752,8 +753,10 @@ const elVt = document.getElementById('rVt');
 const elVf = document.getElementById('rVf');
 const elCircuit = document.getElementById('rCircuit');
 
+/* ✅ في updateHUD أيضاً نستخدم Bsign */
 function updateHUD() {
-  const BL = params.B * params.L, m = params.MASS, g = params.GRAV;
+  const BL = params.B * Bsign * params.L;   /* ← الإصلاح */
+  const m = params.MASS, g = params.GRAV;
   elY.textContent = yRod.toFixed(3) + ' m';
   elV.textContent = vRod.toFixed(3) + ' m/s';
   elV.classList.toggle('neg', vRod < 0);
@@ -776,7 +779,7 @@ function updateHUD() {
     (denom > 1e-9 ? (m * g * params.R - BL * effBat) / denom : Infinity);
   elVt.textContent = isFinite(vt) ? vt.toFixed(3) + ' m/s' : '∞';
   elVt.classList.toggle('neg', vt < 0);
-  const vf = BL > 1e-9 ? (m * g * params.R) / BL : Infinity;
+  const vf = BL > 1e-9 ? (m * g * params.R) / Math.abs(BL) : Infinity;
   elVf.textContent = isFinite(vf) ? vf.toFixed(3) + ' V' : '∞';
 }
 
