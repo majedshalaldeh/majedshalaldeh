@@ -336,6 +336,37 @@
   scene.add(grid);
 
   /* ============================================================
+     ✅ الشعار على الأرضية (مُعاد)
+     ============================================================ */
+  const logoTexture = new THREE.TextureLoader().load('../../logo.png');
+  const logoMesh = new THREE.Mesh(
+    new THREE.CircleGeometry(4.5, 96),
+    new THREE.MeshBasicMaterial({
+      map: logoTexture,
+      transparent: true,
+      opacity: 0.35,
+      depthWrite: false
+    })
+  );
+  logoMesh.rotation.x = -Math.PI/2;
+  logoMesh.position.y = -5.98;
+  scene.add(logoMesh);
+
+  const logoGlow = new THREE.Mesh(
+    new THREE.RingGeometry(4.3, 5.3, 96),
+    new THREE.MeshBasicMaterial({
+      color: 0x1c3352,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    })
+  );
+  logoGlow.rotation.x = -Math.PI/2;
+  logoGlow.position.y = -5.99;
+  scene.add(logoGlow);
+
+  /* ============================================================
      محور الدوران
      ============================================================ */
   const axisPivot = new THREE.Group();
