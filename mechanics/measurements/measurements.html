@@ -507,7 +507,7 @@
   <!-- ===== الهيدر ===== -->
   <header class="page-header">
     <h1>📏 القياس بالأدوات الدقيقة</h1>
-    <p class="subtitle">محاكاة تفاعلية للفرجار (الورنية) والميكرومتر — اسحب مباشرة على الرسم لتغيير القياس وقراءة النتيجة</p>
+    <p class="subtitle">محاكاة تفاعلية للورنية والميكرومتر — اسحب مباشرة على الرسم لتغيير القياس وقراءة النتيجة</p>
 
     <div class="logo-circle">
       <img src="../../logo.png" alt="شعار الأستاذ ماجد شلالدة"
@@ -522,17 +522,17 @@
 
   <!-- ===== مفتاح التبديل ===== -->
   <div class="tool-toggle" id="toolToggle">
-    <button data-tool="vernier" class="active">📐 الفرجار (الورنية)</button>
+    <button data-tool="vernier" class="active">📐 الورنية</button>
     <button data-tool="micrometer">🔬 الميكرومتر</button>
   </div>
 
   <!-- ===== لوحة المحاكاة ===== -->
   <div class="simulation-panel">
 
-    <!-- ================= الفرجار ================= -->
+    <!-- ================= الورنية ================= -->
     <div class="tool-view active" id="view-vernier">
       <div class="panel-header">
-        <h2>📐 الفرجار (الورنية)</h2>
+        <h2>📐 الورنية</h2>
         <p>اسحب بالماوس مباشرة على الرسم، أو استخدم الشريط أدناه، لإغلاق الفكّين على الجسم ومشاهدة القراءة بالسنتيمتر.</p>
       </div>
 
@@ -545,7 +545,7 @@
         </div>
         <div class="card">
           <div class="val secondary" id="vVernVal">؟</div>
-          <div class="lbl">تدريج الورنية (× 0.01 cm)</div>
+          <div class="lbl">تدريج المنزلقة× 0.01 cm)</div>
         </div>
         <div class="card">
           <div class="val main" id="vTotalVal">؟</div>
@@ -630,7 +630,7 @@
     <h3>📖 كيف تُقرأ الأداة؟</h3>
     <div class="formula-list">
       <div class="formula-item">
-        <code>الفرجار = MSR + (VC × 0.01)</code>
+        <code>الورنية= MSR + (VC × 0.01)</code>
         <div>القراءة الرئيسية بالسنتيمتر + (رقم خط الورنية المنطبق × دقة الجهاز 0.01 cm)</div>
       </div>
       <div class="formula-item">
@@ -642,8 +642,8 @@
         <div>لأن أسطوانة الميكرومتر مقسّمة إلى 50 قسمًا</div>
       </div>
       <div class="formula-item">
-        <code>دقة الفرجار = 0.01 cm = 0.1 mm</code>
-        <div>لأن ورنية الفرجار مقسّمة إلى 10 أقسام على طول 0.9 cm</div>
+        <code>دقة المنزلقة= 0.01 cm = 0.1 mm</code>
+        <div>لأن ورنية المنزلقة مقسّمة إلى 10 أقسام على طول 0.9 cm</div>
       </div>
     </div>
   </div>
@@ -697,7 +697,7 @@
 })();
 
 /* ============================================================
-   2) الفرجار (Vernier Caliper) — التدريج بالسنتيمتر
+   2) الورنية (Vernier Caliper) — التدريج بالسنتيمتر
    ============================================================ */
 (function(){
   const PX_PER_CM = 150;        // 150 بكسل لكل 1 cm  (أي 15 بكسل لكل 1 mm)
