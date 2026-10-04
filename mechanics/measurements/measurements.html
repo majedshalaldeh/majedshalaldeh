@@ -304,6 +304,24 @@
     margin-top:2px;font-weight:600;
   }
 
+  /* ============ زر إظهار/إخفاء القراءات ============ */
+  .toggle-readings{
+    display:block;margin:10px auto 0;
+    background:var(--sub-card-bg);
+    color:var(--text-color);
+    border:1px solid var(--border-soft);
+    border-radius:9px;
+    padding:8px 22px;
+    font-family:inherit;font-weight:700;font-size:13px;
+    cursor:pointer;
+    transition:all .18s;
+  }
+  .toggle-readings:hover{
+    background:var(--accent-orange);
+    color:#000;
+    border-color:var(--accent-orange);
+  }
+
   /* ============ شريط التمرير ============ */
   .slider-row{
     display:flex;align-items:center;gap:14px;
@@ -515,36 +533,38 @@
     <div class="tool-view active" id="view-vernier">
       <div class="panel-header">
         <h2>📐 الفرجار (الورنية)</h2>
-        <p>اسحب بالماوس مباشرة على الرسم، أو استخدم الشريط أدناه، لإغلاق الفكّين على الجسم ومشاهدة القراءة.</p>
+        <p>اسحب بالماوس مباشرة على الرسم، أو استخدم الشريط أدناه، لإغلاق الفكّين على الجسم ومشاهدة القراءة بالسنتيمتر.</p>
       </div>
 
-      <svg id="svgVernier" viewBox="0 0 1050 210" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg id="svgVernier" viewBox="0 0 1120 210" xmlns="http://www.w3.org/2000/svg"></svg>
 
       <div class="reading">
         <div class="card">
-          <div class="val secondary" id="vMainVal">0</div>
-          <div class="lbl">القراءة الرئيسية (mm)</div>
+          <div class="val secondary" id="vMainVal">؟</div>
+          <div class="lbl">القراءة الرئيسية (cm)</div>
         </div>
         <div class="card">
-          <div class="val secondary" id="vVernVal">0</div>
-          <div class="lbl">تدريج الورنية</div>
+          <div class="val secondary" id="vVernVal">؟</div>
+          <div class="lbl">تدريج الورنية (× 0.01 cm)</div>
         </div>
         <div class="card">
-          <div class="val main" id="vTotalVal">0.0</div>
-          <div class="lbl">القياس الكلي (mm)</div>
+          <div class="val main" id="vTotalVal">؟</div>
+          <div class="lbl">القياس الكلي (cm)</div>
         </div>
       </div>
+
+      <button id="toggleVernierReadings" class="toggle-readings">👁️ إظهار القراءات</button>
 
       <div class="slider-row">
         <span>0</span>
-        <input type="range" id="sliderVernier" min="0" max="60" step="0.1" value="23.4">
-        <span>60 mm</span>
+        <input type="range" id="sliderVernier" min="0" max="6" step="0.01" value="2.34">
+        <span>6 cm</span>
       </div>
 
       <div class="obj-select" data-group="vernier">
-        <button data-w="12.3">قطعة صغيرة 12.3 mm</button>
-        <button data-w="23.4" class="active">قطعة متوسطة 23.4 mm</button>
-        <button data-w="41.7">قطعة كبيرة 41.7 mm</button>
+        <button data-w="1.23">قطعة صغيرة 1.23 cm</button>
+        <button data-w="2.34" class="active">قطعة متوسطة 2.34 cm</button>
+        <button data-w="4.17">قطعة كبيرة 4.17 cm</button>
       </div>
 
       <div class="hint">💡 اضغط واسحب على الجسم أو أي مكان في الرسم لتحريك الفك مباشرة</div>
@@ -567,18 +587,20 @@
 
       <div class="reading">
         <div class="card">
-          <div class="val secondary" id="mSleeveVal">0.0</div>
+          <div class="val secondary" id="mSleeveVal">؟</div>
           <div class="lbl">قراءة الجلبة الرئيسية (mm)</div>
         </div>
         <div class="card">
-          <div class="val secondary" id="mThimbleVal">0</div>
+          <div class="val secondary" id="mThimbleVal">؟</div>
           <div class="lbl">قراءة الجلبة الدوارة</div>
         </div>
         <div class="card">
-          <div class="val main" id="mTotalVal">0.00</div>
+          <div class="val main" id="mTotalVal">؟</div>
           <div class="lbl">القياس الكلي (mm)</div>
         </div>
       </div>
+
+      <button id="toggleMicrometerReadings" class="toggle-readings">👁️ إظهار القراءات</button>
 
       <div class="slider-row">
         <span>0</span>
@@ -608,8 +630,8 @@
     <h3>📖 كيف تُقرأ الأداة؟</h3>
     <div class="formula-list">
       <div class="formula-item">
-        <code>الفرجار = MSR + (VC × LC)</code>
-        <div>القراءة الرئيسية + (رقم خط الورنية المنطبق × دقة الجهاز 0.1 مم)</div>
+        <code>الفرجار = MSR + (VC × 0.01)</code>
+        <div>القراءة الرئيسية بالسنتيمتر + (رقم خط الورنية المنطبق × دقة الجهاز 0.01 cm)</div>
       </div>
       <div class="formula-item">
         <code>الميكرومتر = Sleeve + (Thimble × 0.01)</code>
@@ -620,8 +642,8 @@
         <div>لأن أسطوانة الميكرومتر مقسّمة إلى 50 قسمًا</div>
       </div>
       <div class="formula-item">
-        <code>دقة الفرجار = 0.1 mm</code>
-        <div>لأن ورنية الفرجار مقسّمة إلى 10 أقسام</div>
+        <code>دقة الفرجار = 0.01 cm = 0.1 mm</code>
+        <div>لأن ورنية الفرجار مقسّمة إلى 10 أقسام على طول 0.9 cm</div>
       </div>
     </div>
   </div>
@@ -675,55 +697,90 @@
 })();
 
 /* ============================================================
-   2) الفرجار (Vernier Caliper)
+   2) الفرجار (Vernier Caliper) — التدريج بالسنتيمتر
    ============================================================ */
 (function(){
-  const PX_PER_MM = 15;
-  const RULER_LEN_MM = 65;
+  const PX_PER_CM = 150;        // 150 بكسل لكل 1 cm  (أي 15 بكسل لكل 1 mm)
+  const RULER_LEN_CM = 6.5;     // طول المسطرة المرسومة
   const originX = 55, rulerY = 150;
-  const VB_W = 1050, VB_H = 210;
+  const VB_W = 1120, VB_H = 210;
 
   const svg = document.getElementById('svgVernier');
   const slider = document.getElementById('sliderVernier');
   const mainVal = document.getElementById('vMainVal');
   const vernVal = document.getElementById('vVernVal');
   const totalVal = document.getElementById('vTotalVal');
+  const toggleBtn = document.getElementById('toggleVernierReadings');
 
+  // حالة إظهار القراءات: مخفية افتراضياً
+  let readingsVisible = false;
+
+  /* ---- المسطرة الرئيسية: أرقام بالسنتيمتر + تقسيمات 1 mm ---- */
   function buildStatic(){
     let s = '';
-    s += `<line x1="${originX}" y1="${rulerY}" x2="${originX + RULER_LEN_MM * PX_PER_MM}" y2="${rulerY}" stroke="var(--steel-dark)" stroke-width="2.5"/>`;
-    for (let mm = 0; mm <= RULER_LEN_MM; mm++) {
-      const x = originX + mm * PX_PER_MM;
+    const rulerEndX = originX + RULER_LEN_CM * PX_PER_CM;
+
+    s += `<line x1="${originX}" y1="${rulerY}" x2="${rulerEndX}" y2="${rulerY}"
+             stroke="var(--steel-dark)" stroke-width="2.5"/>`;
+
+    const totalMM = Math.round(RULER_LEN_CM * 10);
+    for (let mm = 0; mm <= totalMM; mm++) {
+      const x = originX + mm * (PX_PER_CM / 10);
       const isCm = mm % 10 === 0;
-      const h = isCm ? 26 : (mm % 5 === 0 ? 18 : 11);
-      s += `<line x1="${x}" y1="${rulerY}" x2="${x}" y2="${rulerY - h}" stroke="#c7d0da" stroke-width="${isCm ? 1.6 : 0.9}"/>`;
+      const isHalf = mm % 5 === 0;
+      const h = isCm ? 26 : (isHalf ? 18 : 11);
+
+      s += `<line x1="${x}" y1="${rulerY}" x2="${x}" y2="${rulerY - h}"
+               stroke="#c7d0da" stroke-width="${isCm ? 1.6 : 0.9}"/>`;
+
       if (isCm) {
-        s += `<text x="${x}" y="${rulerY - 34}" font-size="14" fill="#c7d0da" text-anchor="middle">${mm}</text>`;
+        // الرقم بالسنتيمتر: 1 ، 2 ، 3 ...
+        s += `<text x="${x}" y="${rulerY - 34}" font-size="14" fill="#c7d0da"
+                 text-anchor="middle">${mm / 10}</text>`;
       }
     }
+
+    // وحدة القياس
+    s += `<text x="${rulerEndX - 10}" y="${rulerY - 48}" font-size="15"
+             font-weight="bold" fill="#ffb347" text-anchor="end">cm</text>`;
+
     return s;
   }
   const staticScale = buildStatic();
 
-  function render(valMM){
-    const vernZeroX = originX + valMM * PX_PER_MM;
-    const mainReading = Math.floor(valMM);
-    const fraction = +(valMM - mainReading).toFixed(2);
-    const vernDiv = Math.round(fraction * 10);
-    const carry = vernDiv === 10 ? 1 : 0;
-    const mainR = mainReading + carry;
-    const vd = carry ? 0 : vernDiv;
-    const total = (mainR + vd * 0.1).toFixed(1);
+  /* ---- الرسم الديناميكي ---- */
+  function render(valCM){
+    valCM = Math.max(0, Math.min(RULER_LEN_CM, valCM));
 
-    mainVal.textContent = mainR;
-    vernVal.textContent = vd;
-    totalVal.textContent = total;
+    const vernZeroX = originX + valCM * PX_PER_CM;
+
+    // القراءة الرئيسية = آخر تدريج 0.1 cm (أي 1 mm) تجاوزه صفر الورنية
+    let mainR = Math.floor(valCM * 10 + 1e-6) / 10;
+    let vernDiv = Math.round((valCM - mainR) * 100);
+
+    if (vernDiv >= 10) {           // احتياط ضد أخطاء التقريب
+      vernDiv = 0;
+      mainR = +(mainR + 0.1).toFixed(1);
+    }
+
+    const total = (mainR + vernDiv * 0.01).toFixed(2);
+
+    // إظهار أو إخفاء القراءات
+    if (readingsVisible) {
+      mainVal.textContent = mainR.toFixed(1);
+      vernVal.textContent = vernDiv;
+      totalVal.textContent = total;
+    } else {
+      mainVal.textContent = '؟';
+      vernVal.textContent = '؟';
+      totalVal.textContent = '؟';
+    }
 
     let s = '';
 
     // الجسم المقاس — مرفوع فوق المسطرة
     const objTop = 15, objH = 42, objBottom = objTop + objH;
-    s += `<rect x="${originX + 3}" y="${objTop}" width="${Math.max(valMM * PX_PER_MM - 6, 0)}" height="${objH}"
+    s += `<rect x="${originX + 3}" y="${objTop}" width="${Math.max(valCM * PX_PER_CM - 6, 0)}" height="${objH}"
              fill="#2f6f8f" stroke="#5fb3d9" stroke-width="1.8" rx="4" opacity="0.9"/>`;
 
     // ذراعا الفكين
@@ -734,40 +791,49 @@
     // المسطرة الرئيسية
     s += staticScale;
 
-    // لوحة الورنية
-    s += `<rect x="${vernZeroX - 6}" y="${rulerY + 6}" width="${9 * PX_PER_MM + 12}" height="38" rx="4" fill="#20303f" stroke="#33475a"/>`;
+    // لوحة الورنية (10 أقسام تغطي 0.9 cm)
+    const vStep = 0.09 * PX_PER_CM;               // 13.5 بكسل لكل قسم ورنية
+    const plateW = 9 * vStep + 12;
+    s += `<rect x="${vernZeroX - 6}" y="${rulerY + 6}" width="${plateW}" height="38"
+             rx="4" fill="#20303f" stroke="#33475a"/>`;
+
     for (let i = 0; i <= 10; i++) {
-      const x = vernZeroX + i * (0.9 * PX_PER_MM);
-      const highlight = (i === vd);
-      s += `<line x1="${x}" y1="${rulerY + 9}" x2="${x}" y2="${rulerY + 23}" stroke="${highlight ? '#ffb347' : '#8fa3b8'}" stroke-width="${highlight ? 2.6 : 1.1}"/>`;
-      s += `<text x="${x}" y="${rulerY + 39}" font-size="12" fill="${highlight ? '#ffb347' : '#8fa3b8'}" text-anchor="middle">${i}</text>`;
+      const x = vernZeroX + i * vStep;
+      const highlight = (i === vernDiv);
+      s += `<line x1="${x}" y1="${rulerY + 9}" x2="${x}" y2="${rulerY + 23}"
+               stroke="${highlight ? '#ffb347' : '#8fa3b8'}" stroke-width="${highlight ? 2.6 : 1.1}"/>`;
+      s += `<text x="${x}" y="${rulerY + 39}" font-size="12"
+               fill="${highlight ? '#ffb347' : '#8fa3b8'}"
+               text-anchor="middle">${i}</text>`;
     }
 
     svg.innerHTML = s;
   }
 
+  /* ---- تحويل موضع المؤشر إلى قيمة بالسنتيمتر ---- */
   function valueFromClientX(clientX){
     const rect = svg.getBoundingClientRect();
     const scaleX = VB_W / rect.width;
     const svgX = (clientX - rect.left) * scaleX;
-    let mm = (svgX - originX) / PX_PER_MM;
-    mm = Math.max(0, Math.min(60, mm));
-    return Math.round(mm * 10) / 10;
+    let cm = (svgX - originX) / PX_PER_CM;
+    cm = Math.max(0, Math.min(6, cm));
+    return Math.round(cm * 100) / 100;
   }
 
+  /* ---- التفاعل ---- */
   let dragging = false;
   svg.addEventListener('pointerdown', e => {
     dragging = true;
     svg.setPointerCapture(e.pointerId);
-    const mm = valueFromClientX(e.clientX);
-    slider.value = mm;
-    render(mm);
+    const cm = valueFromClientX(e.clientX);
+    slider.value = cm;
+    render(cm);
   });
   svg.addEventListener('pointermove', e => {
     if (!dragging) return;
-    const mm = valueFromClientX(e.clientX);
-    slider.value = mm;
-    render(mm);
+    const cm = valueFromClientX(e.clientX);
+    slider.value = cm;
+    render(cm);
   });
   svg.addEventListener('pointerup', () => dragging = false);
   svg.addEventListener('pointercancel', () => dragging = false);
@@ -784,11 +850,18 @@
     });
   });
 
+  // زر إظهار/إخفاء القراءات
+  toggleBtn.addEventListener('click', () => {
+    readingsVisible = !readingsVisible;
+    toggleBtn.textContent = readingsVisible ? '🙈 إخفاء القراءات' : '👁️ إظهار القراءات';
+    render(+slider.value);
+  });
+
   render(+slider.value);
 })();
 
 /* ============================================================
-   3) الميكرومتر (Micrometer)
+   3) الميكرومتر (Micrometer) — يبقى تدريجه بالملمتر
    ============================================================ */
 (function(){
   const PX_PER_MM = 28;
@@ -801,6 +874,10 @@
   const sleeveVal = document.getElementById('mSleeveVal');
   const thimbleVal = document.getElementById('mThimbleVal');
   const totalVal = document.getElementById('mTotalVal');
+  const toggleBtn = document.getElementById('toggleMicrometerReadings');
+
+  // حالة إظهار القراءات: مخفية افتراضياً
+  let readingsVisible = false;
 
   function decompose(value){
     let v = Math.round(value * 100) / 100;
@@ -871,9 +948,17 @@
 
   function render(valMM){
     const d = decompose(valMM);
-    sleeveVal.textContent = d.half.toFixed(1);
-    thimbleVal.textContent = d.frac;
-    totalVal.textContent = d.total.toFixed(2);
+
+    // إظهار أو إخفاء القراءات
+    if (readingsVisible) {
+      sleeveVal.textContent = d.half.toFixed(1);
+      thimbleVal.textContent = d.frac;
+      totalVal.textContent = d.total.toFixed(2);
+    } else {
+      sleeveVal.textContent = '؟';
+      thimbleVal.textContent = '؟';
+      totalVal.textContent = '؟';
+    }
 
     const thimbleEdgeX = originX + d.total * PX_PER_MM;
 
@@ -931,6 +1016,13 @@
       slider.value = btn.dataset.w;
       render(+btn.dataset.w);
     });
+  });
+
+  // زر إظهار/إخفاء القراءات
+  toggleBtn.addEventListener('click', () => {
+    readingsVisible = !readingsVisible;
+    toggleBtn.textContent = readingsVisible ? '🙈 إخفاء القراءات' : '👁️ إظهار القراءات';
+    render(+slider.value);
   });
 
   render(+slider.value);
