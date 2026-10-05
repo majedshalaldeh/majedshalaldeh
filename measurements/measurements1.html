@@ -116,14 +116,17 @@
 
   /* ============ الحاوية ============ */
   .container{
-    max-width:1250px;margin:0 auto;padding:20px;
+    max-width:1850px;margin:0 auto;padding:16px 24px;
     position:relative;z-index:1;
   }
 
-  /* ============ Breadcrumb ============ */
+  /* ============ Breadcrumb (متمركز فوق العنوان) ============ */
   .breadcrumb{
-    display:flex;align-items:center;gap:8px;
-    padding:12px 0;font-size:0.9rem;
+    display:flex;align-items:center;
+    justify-content:center;        /* ← تمت إضافة هذا السطر للتوسيط */
+    gap:8px;
+    padding:6px 0 4px;             /* تقليل المسافة السفلية ليقترب من العنوان */
+    font-size:0.9rem;
     color:var(--text-muted);flex-wrap:wrap;
   }
   .breadcrumb a{
@@ -137,21 +140,21 @@
   /* ============ الهيدر + الشعار الدائري ============ */
   header.page-header{
     text-align:center;
-    padding:20px 20px 30px;
-    position:relative;               /* مرجع للشعار المطلق */
+    padding:4px 20px 22px;         /* حشوة علوية صغيرة جداً ليقترب العنوان من الأزرار */
+    position:relative;
   }
-  /* تم تصغير العنوان الرئيسي */
+  /* العنوان الرئيسي مصغّر */
   header.page-header h1{
-    font-size:1.9rem;                /* كان 2.3rem */
+    font-size:1.5rem;
     color:var(--accent-orange);
-    margin:0 0 10px 0;line-height:1.3;
+    margin:0 0 8px 0;line-height:1.3;
   }
   header.page-header .subtitle{
-    color:var(--text-muted);font-size:1.05rem;
-    margin:0 auto 26px;max-width:720px;
+    color:var(--text-muted);font-size:0.95rem;
+    margin:0 auto 14px;max-width:720px;
   }
 
-  /* الشعار: مكبّر 1.3× (110 × 1.3 = 143) وفي الزاوية اليمنى العليا */
+  /* الشعار: مكبّر 1.3× وفي الزاوية اليمنى العليا */
   .logo-circle{
     width:143px;height:143px;
     position:absolute;
@@ -197,24 +200,24 @@
       0 15px 40px rgba(0,0,0,0.5);
   }
 
-  /* تم نقل رقم الهاتف بجوار الاسم */
+  /* الاسم ورقم الهاتف بجوار بعضهما */
   .teacher-info{
     display:flex;
-    flex-direction:row;               /* أصبحا بجوار بعضهما */
+    flex-direction:row;
     flex-wrap:wrap;
     justify-content:center;
     align-items:center;
     gap:12px;
-    margin-top:14px;
+    margin-top:8px;
   }
   .teacher-name{
-    color:var(--accent-gold);font-weight:700;font-size:1.1rem;
+    color:var(--accent-gold);font-weight:700;font-size:1.05rem;
   }
   .teacher-phone{
-    color:var(--text-muted);font-size:0.95rem;
+    color:var(--text-muted);font-size:0.9rem;
     font-family:'Courier New',monospace;direction:ltr;
     display:inline-flex;align-items:center;gap:6px;
-    padding:5px 16px;border-radius:20px;
+    padding:4px 14px;border-radius:20px;
     background:var(--sub-card-bg);
     border:1px solid var(--border-soft);
     transition:background var(--transition-fast);
@@ -228,14 +231,14 @@
     border:1px solid var(--border-soft);
     border-radius:var(--radius-md);
     padding:6px;gap:6px;
-    margin:0 auto 20px;
-    max-width:640px;
+    margin:0 auto 18px;
+    max-width:840px;
     box-shadow:var(--shadow-soft);
   }
   .tool-toggle button{
     flex:1;
-    font:inherit;font-weight:700;font-size:0.95rem;
-    padding:12px 20px;border-radius:9px;
+    font:inherit;font-weight:700;font-size:1rem;
+    padding:14px 20px;border-radius:9px;
     border:none;background:transparent;
     color:var(--text-muted);cursor:pointer;
     transition:all .2s;white-space:nowrap;
@@ -253,7 +256,7 @@
     background:var(--main-card-bg);
     border:1px solid var(--border-soft);
     border-radius:var(--radius-lg);
-    padding:22px 20px 26px;
+    padding:22px 22px 26px;
     box-shadow:var(--shadow-soft);
     margin-bottom:20px;
     transition:background var(--transition-normal);
@@ -261,10 +264,10 @@
 
   .panel-header{
     text-align:center;
-    margin-bottom:18px;
+    margin-bottom:14px;
   }
   .panel-header h2{
-    font-size:1.35rem;
+    font-size:1.4rem;
     color:var(--accent-cyan);
     margin:0 0 6px;
   }
@@ -272,7 +275,7 @@
     font-size:0.92rem;
     color:var(--text-muted);
     margin:0;
-    max-width:560px;
+    max-width:640px;
     margin-inline:auto;
   }
 
@@ -281,51 +284,54 @@
   .tool-view.active{display:block;}
 
   svg{
-    display:block;width:100%;height:auto;
+    display:block;
+    width:100%;
+    height:auto;
+    max-width:100%;
     cursor:grab;touch-action:none;
     background:var(--instrument-bg);
     border-radius:var(--radius-md);
-    padding:8px;
+    padding:6px;
     transition:background var(--transition-normal);
   }
   svg:active{cursor:grabbing;}
 
   /* ============ لوحة القراءات ============ */
   .reading{
-    display:flex;justify-content:center;gap:16px;
-    margin:18px 0 10px;flex-wrap:wrap;
+    display:flex;justify-content:center;gap:18px;
+    margin:20px 0 10px;flex-wrap:wrap;
   }
   .card{
     background:var(--instrument-bg);
     border:1px solid var(--border-soft);
     border-radius:var(--radius-md);
-    padding:12px 22px;text-align:center;
-    min-width:140px;
+    padding:14px 28px;text-align:center;
+    min-width:170px;
     transition:border-color .25s,transform .25s;
   }
   .card:hover{border-color:var(--read-accent);}
   .card .val{
-    font-size:26px;font-weight:800;
+    font-size:32px;font-weight:800;
     color:var(--read-accent);
     font-variant-numeric:tabular-nums;
     letter-spacing:-.5px;
   }
   .card .val.secondary{color:var(--read-accent2);}
-  .card .val.main{color:var(--accent-gold);font-size:28px;}
+  .card .val.main{color:var(--accent-gold);font-size:36px;}
   .card .lbl{
-    font-size:11px;color:var(--text-muted);
-    margin-top:2px;font-weight:600;
+    font-size:12px;color:var(--text-muted);
+    margin-top:3px;font-weight:600;
   }
 
   /* ============ زر إظهار/إخفاء القراءات ============ */
   .toggle-readings{
-    display:block;margin:10px auto 0;
+    display:block;margin:12px auto 0;
     background:var(--sub-card-bg);
     color:var(--text-color);
     border:1px solid var(--border-soft);
     border-radius:9px;
-    padding:8px 22px;
-    font-family:inherit;font-weight:700;font-size:13px;
+    padding:10px 26px;
+    font-family:inherit;font-weight:700;font-size:14px;
     cursor:pointer;
     transition:all .18s;
   }
@@ -339,22 +345,24 @@
   .slider-row{
     display:flex;align-items:center;gap:14px;
     margin-top:14px;padding:0 8px;
+    max-width:1000px;
+    margin-inline:auto;
   }
   .slider-row span{
-    font-size:12px;color:var(--text-muted);
+    font-size:13px;color:var(--text-muted);
     font-weight:600;white-space:nowrap;
   }
   input[type=range]{
     flex:1;
     -webkit-appearance:none;appearance:none;
-    height:6px;border-radius:99px;
+    height:8px;border-radius:99px;
     background:var(--sub-card-bg);
     outline:none;direction:ltr;
     accent-color:var(--read-accent);
   }
   input[type=range]::-webkit-slider-thumb{
     -webkit-appearance:none;
-    width:20px;height:20px;border-radius:50%;
+    width:22px;height:22px;border-radius:50%;
     background:var(--read-accent);
     border:3px solid var(--main-card-bg);
     cursor:grab;
@@ -362,14 +370,14 @@
     transition:background .25s;
   }
   input[type=range]::-moz-range-thumb{
-    width:14px;height:14px;border-radius:50%;
+    width:16px;height:16px;border-radius:50%;
     background:var(--read-accent);
     border:3px solid var(--main-card-bg);cursor:grab;
   }
 
   /* ============ أزرار القطع الجاهزة ============ */
   .obj-select{
-    display:flex;gap:8px;margin-top:16px;
+    display:flex;gap:10px;margin-top:16px;
     flex-wrap:wrap;justify-content:center;
   }
   .obj-select button{
@@ -377,7 +385,7 @@
     color:var(--text-color);
     border:1px solid var(--border-soft);
     border-radius:9px;
-    padding:8px 16px;font-size:13px;
+    padding:10px 20px;font-size:13.5px;
     cursor:pointer;font-family:inherit;
     font-weight:600;
     transition:all .18s;
@@ -394,26 +402,26 @@
 
   /* ============ التلميح ============ */
   .hint{
-    font-size:12px;color:var(--text-muted);
+    font-size:12.5px;color:var(--text-muted);
     margin-top:12px;text-align:center;
     padding:10px;background:var(--sub-card-bg);
     border-radius:var(--radius-sm);
     border-right:3px solid var(--accent-cyan);
-    max-width:640px;margin-inline:auto;
+    max-width:720px;margin-inline:auto;
   }
 
   /* ============ المفاتيح ============ */
   .legend{
-    font-size:11.5px;color:var(--text-muted);
+    font-size:12px;color:var(--text-muted);
     margin-top:16px;
-    display:flex;gap:20px;flex-wrap:wrap;
+    display:flex;gap:24px;flex-wrap:wrap;
     justify-content:center;
   }
   .legend span{
     display:inline-flex;align-items:center;gap:6px;
   }
   .dot{
-    width:11px;height:11px;border-radius:3px;
+    width:12px;height:12px;border-radius:3px;
     display:inline-block;
     box-shadow:0 0 6px currentColor;
   }
@@ -435,7 +443,7 @@
   }
   .formula-list{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
     gap:10px;
   }
   .formula-item{
@@ -467,26 +475,26 @@
 
   /* ============ التجاوب ============ */
   @media (max-width:768px){
-    header.page-header h1{font-size:1.6rem;}   /* تصغير إضافي للشاشات الصغيرة */
-    header.page-header .subtitle{font-size:0.95rem;}
-    .logo-circle{width:117px;height:117px;}   /* 90 × 1.3 */
+    header.page-header h1{font-size:1.3rem;}
+    header.page-header .subtitle{font-size:0.88rem;}
+    .logo-circle{width:117px;height:117px;}
     .navbar{padding:10px 15px;flex-wrap:wrap;gap:10px;}
     .nav-links{order:3;width:100%;justify-content:center;}
     .nav-links a{padding:6px 10px;font-size:0.82rem;}
-    .container{padding:14px;}
-    .simulation-panel{padding:16px 14px 18px;}
+    .container{padding:12px;}
+    .simulation-panel{padding:14px 12px 16px;}
     .tool-toggle{flex-direction:column;}
     .reading{gap:10px;}
     .card{min-width:110px;padding:10px 14px;}
-    .card .val{font-size:20px;}
-    .card .val.main{font-size:22px;}
+    .card .val{font-size:22px;}
+    .card .val.main{font-size:24px;}
     .card .lbl{font-size:10px;}
   }
 
   @media (max-width:480px){
     .nav-brand span{display:none;}
-    header.page-header h1{font-size:1.3rem;}   /* تصغير إضافي للهواتف */
-    .logo-circle{width:104px;height:104px;}   /* 80 × 1.3 */
+    header.page-header h1{font-size:1.1rem;}
+    .logo-circle{width:104px;height:104px;}
   }
 </style>
 </head>
@@ -508,7 +516,7 @@
 
 <div class="container">
 
-  <!-- ===== Breadcrumb ===== -->
+  <!-- ===== Breadcrumb (متمركز فوق العنوان مباشرة) ===== -->
   <div class="breadcrumb">
     <a href="../../index.html">🏠 الرئيسية</a>
     <span class="separator">›</span>
@@ -517,7 +525,7 @@
     <span class="current">📏 أدوات القياس الدقيقة</span>
   </div>
 
-  <!-- ===== الهيدر ===== -->
+  <!-- ===== الهيدر (العنوان + الاسم + الشعار) ===== -->
   <header class="page-header">
     <h1>📏 القياس بالأدوات الدقيقة</h1>
     <p class="subtitle">محاكاة تفاعلية للورنية والميكرومتر — اسحب مباشرة على الرسم لتغيير القياس وقراءة النتيجة</p>
@@ -549,7 +557,7 @@
         <p>اسحب بالماوس مباشرة على الرسم، أو استخدم الشريط أدناه، لإغلاق الفكّين على الجسم ومشاهدة القراءة بالسنتيمتر.</p>
       </div>
 
-      <svg id="svgVernier" viewBox="0 0 1120 210" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg id="svgVernier" viewBox="0 0 1120 265" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
 
       <div class="reading">
         <div class="card">
@@ -558,7 +566,7 @@
         </div>
         <div class="card">
           <div class="val secondary" id="vVernVal">؟</div>
-          <div class="lbl">تدريج المنزلقة× 0.01 cm)</div>
+          <div class="lbl">تدريج المنزلقة (× 0.01 cm)</div>
         </div>
         <div class="card">
           <div class="val main" id="vTotalVal">؟</div>
@@ -584,7 +592,7 @@
 
       <div class="legend">
         <span><span class="dot" style="background:#c98a3f;color:#c98a3f"></span> الفك المتحرك</span>
-        <span><span class="dot" style="background:#ffb347;color:#ffb347"></span> خط المنزلفة المنطبق</span>
+        <span><span class="dot" style="background:#ffb347;color:#ffb347"></span> خط المنزلقة المنطبق</span>
         <span><span class="dot" style="background:#2f6f8f;color:#2f6f8f"></span> الجسم المقاس</span>
       </div>
     </div>
@@ -596,7 +604,7 @@
         <p>اسحب بالماوس على الرسم أو استخدم الشريط لإدارة الأسطوانة، وتابع كيف يتحدد القياس من قراءة الجلبة الرئيسية + قراءة الجلبة الدوارة عند خط الفهرس.</p>
       </div>
 
-      <svg id="svgMicrometer" viewBox="0 0 840 430" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg id="svgMicrometer" viewBox="0 0 840 520" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg>
 
       <div class="reading">
         <div class="card">
@@ -713,10 +721,10 @@
    2) الورنية (Vernier Caliper) — التدريج بالسنتيمتر
    ============================================================ */
 (function(){
-  const PX_PER_CM = 150;        // 150 بكسل لكل 1 cm  (أي 15 بكسل لكل 1 mm)
-  const RULER_LEN_CM = 6.5;     // طول المسطرة المرسومة
-  const originX = 55, rulerY = 150;
-  const VB_W = 1120, VB_H = 210;
+  const PX_PER_CM = 150;
+  const RULER_LEN_CM = 6.5;
+  const originX = 55, rulerY = 185;
+  const VB_W = 1120, VB_H = 265;
 
   const svg = document.getElementById('svgVernier');
   const slider = document.getElementById('sliderVernier');
@@ -725,60 +733,53 @@
   const totalVal = document.getElementById('vTotalVal');
   const toggleBtn = document.getElementById('toggleVernierReadings');
 
-  // حالة إظهار القراءات: مخفية افتراضياً
   let readingsVisible = false;
 
-  /* ---- المسطرة الرئيسية: أرقام بالسنتيمتر + تقسيمات 1 mm ---- */
   function buildStatic(){
     let s = '';
     const rulerEndX = originX + RULER_LEN_CM * PX_PER_CM;
 
     s += `<line x1="${originX}" y1="${rulerY}" x2="${rulerEndX}" y2="${rulerY}"
-             stroke="var(--steel-dark)" stroke-width="2.5"/>`;
+             stroke="var(--steel-dark)" stroke-width="2.8"/>`;
 
     const totalMM = Math.round(RULER_LEN_CM * 10);
     for (let mm = 0; mm <= totalMM; mm++) {
       const x = originX + mm * (PX_PER_CM / 10);
       const isCm = mm % 10 === 0;
       const isHalf = mm % 5 === 0;
-      const h = isCm ? 26 : (isHalf ? 18 : 11);
+      const h = isCm ? 30 : (isHalf ? 21 : 13);
 
       s += `<line x1="${x}" y1="${rulerY}" x2="${x}" y2="${rulerY - h}"
-               stroke="#c7d0da" stroke-width="${isCm ? 1.6 : 0.9}"/>`;
+               stroke="#c7d0da" stroke-width="${isCm ? 1.8 : 1.0}"/>`;
 
       if (isCm) {
-        // الرقم بالسنتيمتر: 1 ، 2 ، 3 ...
-        s += `<text x="${x}" y="${rulerY - 34}" font-size="14" fill="#c7d0da"
-                 text-anchor="middle">${mm / 10}</text>`;
+        s += `<text x="${x}" y="${rulerY - 38}" font-size="16" fill="#c7d0da"
+                 text-anchor="middle" font-weight="600">${mm / 10}</text>`;
       }
     }
 
-    // وحدة القياس
-    s += `<text x="${rulerEndX - 10}" y="${rulerY - 48}" font-size="15"
+    s += `<text x="${rulerEndX - 10}" y="${rulerY - 54}" font-size="17"
              font-weight="bold" fill="#ffb347" text-anchor="end">cm</text>`;
 
     return s;
   }
   const staticScale = buildStatic();
 
-  /* ---- الرسم الديناميكي ---- */
   function render(valCM){
     valCM = Math.max(0, Math.min(RULER_LEN_CM, valCM));
 
     const vernZeroX = originX + valCM * PX_PER_CM;
 
-    // القراءة الرئيسية = آخر تدريج 0.1 cm (أي 1 mm) تجاوزه صفر الورنية
     let mainR = Math.floor(valCM * 10 + 1e-6) / 10;
     let vernDiv = Math.round((valCM - mainR) * 100);
 
-    if (vernDiv >= 10) {           // احتياط ضد أخطاء التقريب
+    if (vernDiv >= 10) {
       vernDiv = 0;
       mainR = +(mainR + 0.1).toFixed(1);
     }
 
     const total = (mainR + vernDiv * 0.01).toFixed(2);
 
-    // إظهار أو إخفاء القراءات
     if (readingsVisible) {
       mainVal.textContent = mainR.toFixed(1);
       vernVal.textContent = vernDiv;
@@ -791,39 +792,37 @@
 
     let s = '';
 
-    // الجسم المقاس — مرفوع فوق المسطرة
-    const objTop = 15, objH = 42, objBottom = objTop + objH;
+    const objTop = 18, objH = 58, objBottom = objTop + objH;
     s += `<rect x="${originX + 3}" y="${objTop}" width="${Math.max(valCM * PX_PER_CM - 6, 0)}" height="${objH}"
-             fill="#2f6f8f" stroke="#5fb3d9" stroke-width="1.8" rx="4" opacity="0.9"/>`;
+             fill="#2f6f8f" stroke="#5fb3d9" stroke-width="2" rx="5" opacity="0.9"/>`;
 
-    // ذراعا الفكين
-    const armTop = objBottom - 4;
-    s += `<rect x="${originX - 4}" y="${armTop}" width="8" height="${rulerY - armTop}" fill="#465469"/>`;
-    s += `<rect x="${vernZeroX - 4}" y="${armTop}" width="8" height="${rulerY - armTop}" fill="#c98a3f"/>`;
+    const armTop = objBottom - 5;
+    s += `<rect x="${originX - 5}" y="${armTop}" width="9" height="${rulerY - armTop}" fill="#465469"/>`;
+    s += `<rect x="${vernZeroX - 5}" y="${armTop}" width="9" height="${rulerY - armTop}" fill="#c98a3f"/>`;
 
-    // المسطرة الرئيسية
     s += staticScale;
 
-    // لوحة الورنية (10 أقسام تغطي 0.9 cm)
-    const vStep = 0.09 * PX_PER_CM;               // 13.5 بكسل لكل قسم ورنية
-    const plateW = 9 * vStep + 12;
-    s += `<rect x="${vernZeroX - 6}" y="${rulerY + 6}" width="${plateW}" height="38"
-             rx="4" fill="#20303f" stroke="#33475a"/>`;
+    const vStep = 0.09 * PX_PER_CM;
+    const plateW = 9 * vStep + 14;
+    const plateY = rulerY + 8;
+    const plateH = 52;
+
+    s += `<rect x="${vernZeroX - 7}" y="${plateY}" width="${plateW}" height="${plateH}"
+             rx="5" fill="#20303f" stroke="#33475a"/>`;
 
     for (let i = 0; i <= 10; i++) {
       const x = vernZeroX + i * vStep;
       const highlight = (i === vernDiv);
-      s += `<line x1="${x}" y1="${rulerY + 9}" x2="${x}" y2="${rulerY + 23}"
-               stroke="${highlight ? '#ffb347' : '#8fa3b8'}" stroke-width="${highlight ? 2.6 : 1.1}"/>`;
-      s += `<text x="${x}" y="${rulerY + 39}" font-size="12"
+      s += `<line x1="${x}" y1="${plateY + 5}" x2="${x}" y2="${plateY + 28}"
+               stroke="${highlight ? '#ffb347' : '#8fa3b8'}" stroke-width="${highlight ? 3 : 1.2}"/>`;
+      s += `<text x="${x}" y="${plateY + 45}" font-size="13"
                fill="${highlight ? '#ffb347' : '#8fa3b8'}"
-               text-anchor="middle">${i}</text>`;
+               text-anchor="middle" font-weight="${highlight ? 700 : 500}">${i}</text>`;
     }
 
     svg.innerHTML = s;
   }
 
-  /* ---- تحويل موضع المؤشر إلى قيمة بالسنتيمتر ---- */
   function valueFromClientX(clientX){
     const rect = svg.getBoundingClientRect();
     const scaleX = VB_W / rect.width;
@@ -833,7 +832,6 @@
     return Math.round(cm * 100) / 100;
   }
 
-  /* ---- التفاعل ---- */
   let dragging = false;
   svg.addEventListener('pointerdown', e => {
     dragging = true;
@@ -863,7 +861,6 @@
     });
   });
 
-  // زر إظهار/إخفاء القراءات
   toggleBtn.addEventListener('click', () => {
     readingsVisible = !readingsVisible;
     toggleBtn.textContent = readingsVisible ? '🙈 إخفاء القراءات' : '👁️ إظهار القراءات';
@@ -874,13 +871,13 @@
 })();
 
 /* ============================================================
-   3) الميكرومتر (Micrometer) — يبقى تدريجه بالملمتر
+   3) الميكرومتر (Micrometer)
    ============================================================ */
 (function(){
   const PX_PER_MM = 28;
   const SLEEVE_LEN_MM = 25;
-  const originX = 55, rulerY = 140;
-  const VB_W = 840, VB_H = 430;
+  const originX = 55, rulerY = 165;
+  const VB_W = 840, VB_H = 520;
 
   const svg = document.getElementById('svgMicrometer');
   const slider = document.getElementById('sliderMicrometer');
@@ -889,7 +886,6 @@
   const totalVal = document.getElementById('mTotalVal');
   const toggleBtn = document.getElementById('toggleMicrometerReadings');
 
-  // حالة إظهار القراءات: مخفية افتراضياً
   let readingsVisible = false;
 
   function decompose(value){
@@ -903,40 +899,38 @@
   function buildSleeve(thimbleEdgeX){
     let s = '';
     const sleeveEndX = originX + SLEEVE_LEN_MM * PX_PER_MM;
-    s += `<line x1="${originX}" y1="${rulerY}" x2="${sleeveEndX}" y2="${rulerY}" stroke="var(--steel-dark)" stroke-width="2.5"/>`;
+    s += `<line x1="${originX}" y1="${rulerY}" x2="${sleeveEndX}" y2="${rulerY}" stroke="var(--steel-dark)" stroke-width="2.8"/>`;
 
     for (let mm = 0; mm <= SLEEVE_LEN_MM; mm++) {
       const x = originX + mm * PX_PER_MM;
       const isMajor = mm % 5 === 0;
-      const h = isMajor ? 28 : 18;
-      s += `<line x1="${x}" y1="${rulerY}" x2="${x}" y2="${rulerY - h}" stroke="#c7d0da" stroke-width="${isMajor ? 1.6 : 1}"/>`;
+      const h = isMajor ? 32 : 20;
+      s += `<line x1="${x}" y1="${rulerY}" x2="${x}" y2="${rulerY - h}" stroke="#c7d0da" stroke-width="${isMajor ? 1.8 : 1.1}"/>`;
       if (isMajor) {
-        s += `<text x="${x}" y="${rulerY - 34}" font-size="14" fill="#c7d0da" text-anchor="middle">${mm}</text>`;
+        s += `<text x="${x}" y="${rulerY - 40}" font-size="16" fill="#c7d0da" text-anchor="middle" font-weight="600">${mm}</text>`;
       }
       if (mm < SLEEVE_LEN_MM) {
         const xh = x + PX_PER_MM / 2;
-        s += `<line x1="${xh}" y1="${rulerY}" x2="${xh}" y2="${rulerY + 12}" stroke="#8fa3b8" stroke-width="1"/>`;
+        s += `<line x1="${xh}" y1="${rulerY}" x2="${xh}" y2="${rulerY + 14}" stroke="#8fa3b8" stroke-width="1.1"/>`;
       }
     }
 
-    // ظل الأسطوانة الدوارة
-    s += `<rect x="${thimbleEdgeX}" y="${rulerY - 30}" width="${sleeveEndX - thimbleEdgeX + 30}" height="52" rx="10"
+    s += `<rect x="${thimbleEdgeX}" y="${rulerY - 34}" width="${sleeveEndX - thimbleEdgeX + 32}" height="58" rx="11"
              fill="#3a4756" opacity="0.55"/>`;
 
-    // خط الفهرس
-    s += `<line x1="${thimbleEdgeX}" y1="${rulerY - 36}" x2="${thimbleEdgeX}" y2="${rulerY + 22}" stroke="#4fb3a9" stroke-width="3"/>`;
+    s += `<line x1="${thimbleEdgeX}" y1="${rulerY - 42}" x2="${thimbleEdgeX}" y2="${rulerY + 26}" stroke="#4fb3a9" stroke-width="3.4"/>`;
 
     return s;
   }
 
   function buildThimbleWindow(fracHundredths){
     const winX = originX + (SLEEVE_LEN_MM * PX_PER_MM) / 2;
-    const winCenterY = rulerY + 150;
-    const winW = 210, winH = 230;
+    const winCenterY = rulerY + 175;
+    const winW = 240, winH = 250;
     const rowSpacing = 19;
     let s = '';
 
-    s += `<rect x="${winX - winW / 2}" y="${winCenterY - winH / 2}" width="${winW}" height="${winH}" rx="10" fill="#0c141c" stroke="#253141"/>`;
+    s += `<rect x="${winX - winW / 2}" y="${winCenterY - winH / 2}" width="${winW}" height="${winH}" rx="11" fill="#0c141c" stroke="#253141"/>`;
     s += `<clipPath id="thimbleClip"><rect x="${winX - winW / 2 + 4}" y="${winCenterY - winH / 2 + 4}" width="${winW - 8}" height="${winH - 8}"/></clipPath>`;
     s += `<g clip-path="url(#thimbleClip)">`;
 
@@ -945,16 +939,15 @@
       const y = winCenterY + i * rowSpacing;
       const highlight = i === 0;
       const major = divIndex % 5 === 0;
-      const lineLen = major ? 70 : 40;
-      s += `<line x1="${winX - lineLen / 2}" y1="${y}" x2="${winX + lineLen / 2}" y2="${y}" stroke="${highlight ? '#e0913a' : '#8fa3b8'}" stroke-width="${highlight ? 2.8 : 1.3}"/>`;
+      const lineLen = major ? 78 : 44;
+      s += `<line x1="${winX - lineLen / 2}" y1="${y}" x2="${winX + lineLen / 2}" y2="${y}" stroke="${highlight ? '#e0913a' : '#8fa3b8'}" stroke-width="${highlight ? 3 : 1.4}"/>`;
       if (major || highlight) {
-        s += `<text x="${winX + lineLen / 2 + 16}" y="${y + 4}" font-size="13" fill="${highlight ? '#e0913a' : '#8fa3b8'}" text-anchor="start">${divIndex}</text>`;
+        s += `<text x="${winX + lineLen / 2 + 18}" y="${y + 4}" font-size="14" fill="${highlight ? '#e0913a' : '#8fa3b8'}" text-anchor="start" font-weight="${highlight ? 700 : 500}">${divIndex}</text>`;
       }
     }
     s += `</g>`;
 
-    // سهم الفهرس
-    s += `<polygon points="${winX - winW / 2 - 14},${winCenterY - 7} ${winX - winW / 2 - 14},${winCenterY + 7} ${winX - winW / 2 - 2},${winCenterY}" fill="#e0913a"/>`;
+    s += `<polygon points="${winX - winW / 2 - 16},${winCenterY - 8} ${winX - winW / 2 - 16},${winCenterY + 8} ${winX - winW / 2 - 2},${winCenterY}" fill="#e0913a"/>`;
 
     return s;
   }
@@ -962,7 +955,6 @@
   function render(valMM){
     const d = decompose(valMM);
 
-    // إظهار أو إخفاء القراءات
     if (readingsVisible) {
       sleeveVal.textContent = d.half.toFixed(1);
       thimbleVal.textContent = d.frac;
@@ -977,15 +969,13 @@
 
     let s = '';
 
-    // الجسم المقاس
-    const objTop = 15, objH = 40, objBottom = objTop + objH;
+    const objTop = 18, objH = 52, objBottom = objTop + objH;
     s += `<rect x="${originX + 3}" y="${objTop}" width="${Math.max(d.total * PX_PER_MM - 6, 0)}" height="${objH}"
-             fill="#2f6f8f" stroke="#5fb3d9" stroke-width="1.8" rx="4" opacity="0.9"/>`;
+             fill="#2f6f8f" stroke="#5fb3d9" stroke-width="2" rx="5" opacity="0.9"/>`;
 
-    // الأذرع
-    const armTop = objBottom - 4;
-    s += `<rect x="${originX - 4}" y="${armTop}" width="8" height="${rulerY - 38 - armTop}" fill="#465469"/>`;
-    s += `<rect x="${thimbleEdgeX - 4}" y="${armTop}" width="8" height="${rulerY - 38 - armTop}" fill="#4fb3a9"/>`;
+    const armTop = objBottom - 5;
+    s += `<rect x="${originX - 5}" y="${armTop}" width="9" height="${rulerY - 44 - armTop}" fill="#465469"/>`;
+    s += `<rect x="${thimbleEdgeX - 5}" y="${armTop}" width="9" height="${rulerY - 44 - armTop}" fill="#4fb3a9"/>`;
 
     s += buildSleeve(thimbleEdgeX);
     s += buildThimbleWindow(d.frac);
@@ -1031,7 +1021,6 @@
     });
   });
 
-  // زر إظهار/إخفاء القراءات
   toggleBtn.addEventListener('click', () => {
     readingsVisible = !readingsVisible;
     toggleBtn.textContent = readingsVisible ? '🙈 إخفاء القراءات' : '👁️ إظهار القراءات';
