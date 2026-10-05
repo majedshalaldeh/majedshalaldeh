@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>محاكاة ميكانيكا الكم | الأستاذ ماجد شلالدة</title>
+<style>
+:root{
+  --bg-color:#0b1329; --main-card-bg:#1c2541; --sub-card-bg:#3a506b;
+  --accent-orange:#f77f00; --accent-gold:#ffd166;
+  --border-soft:rgba(255,255,255,0.08);
+  --shadow-soft:0 10px 30px rgba(0,0,0,0.3);
+  /* متغيرات المحاكاة (تقرؤها الرسومات) */
+  --bg:#0b1329; --panel:#1c2541; --ink:#eef1f7; --mute:#c0c8d8; --line:rgba(255,255,255,0.16);
+  --a:#ffb454; --b:#6ea8ff; --c:#ff7aa8;
+  --accent:#f77f00; --accent-text:#ffd166;
+}
+body.light-mode{
+  --bg-color:#f0f4f8; --main-card-bg:#ffffff; --sub-card-bg:#e8eef5;
+  --border-soft:rgba(0,0,0,0.08);
+  --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+  --bg:#f0f4f8; --panel:#ffffff; --ink:#1a202c; --mute:#4a5568; --line:#d6dbe7;
+  --a:#b85c00; --b:#1f5fd6; --c:#c2255c;
+  --accent:#f77f00; --accent-text:#b45309;
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;position:relative;
+  background:var(--bg-color);color:var(--ink);
+  font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+  line-height:1.7;transition:background .3s,color .3s;
+}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ===== شريط التنقل ===== */
+#navbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 24px;padding-top:calc(12px + env(safe-area-inset-top,0px));
+  min-height:56px;
+  background:rgba(28,37,65,0.92);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border-soft);
+}
+body.light-mode #navbar{background:rgba(255,255,255,0.92)}
+.nav-brand{font-size:1.05rem;font-weight:bold;color:var(--accent);display:flex;align-items:center;gap:8px}
+body.light-mode .nav-brand{color:#c2410c}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap}
+.nav-links a{color:var(--ink);text-decoration:none;padding:8px 14px;border-radius:8px;font-size:.88rem;transition:.2s}
+.nav-links a:hover{background:var(--accent);color:#000}
+.theme-toggle{
+  background:transparent;border:1px solid var(--border-soft);color:var(--ink);
+  font-size:1.1rem;width:36px;height:36px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg)}
+
+/* ===== مسار التنقل ===== */
+#breadcrumb{
+  align-self:center;margin:14px 12px 0;
+  display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;
+  padding:8px 18px;font-size:12px;color:var(--mute);
+  background:var(--main-card-bg);border:1px solid var(--border-soft);border-radius:10px;
+}
+#breadcrumb a{color:var(--accent-text);text-decoration:none}
+body.light-mode #breadcrumb a{color:#c2410c}
+#breadcrumb .sep{opacity:.5}
+#breadcrumb .cur{color:var(--ink);font-weight:600}
+
+/* ===== الترويسة ===== */
+#siteHeader{display:flex;align-items:center;justify-content:center;padding:14px 20px 4px}
+#logoWrap{position:absolute;top:calc(70px + env(safe-area-inset-top,0px));right:18px;z-index:30;display:flex;justify-content:center;align-items:center}
+#logoWrap img{
+  width:192px;height:192px;border-radius:50%;background:#fff;object-fit:cover;
+  box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);
+  border:3px solid rgba(255,255,255,.2);
+}
+body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
+#logoFallback{
+  display:none;width:192px;height:192px;border-radius:50%;
+  background:linear-gradient(135deg,#f77f00,#00b4d8);
+  align-items:center;justify-content:center;font-size:6.08rem;color:#fff;
+}
+#titleBlock{text-align:center}
+#titleBlock h1{margin:0;font-size:20px;line-height:1.4;color:var(--accent-text)}
+.sub{color:var(--mute);margin:2px 0 0;font-size:13px}
+
+/* ===== سطر إعداد وتطوير ===== */
+.author-line{margin:6px 0 0;font-size:12.5px;color:var(--mute);line-height:1.6}
+.author-line .lbl{color:var(--accent-text)}
+.author-line strong{color:var(--ink);font-weight:700}
+.author-line .sep{opacity:.4;margin:0 6px}
+.author-line .num{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;display:inline-block}
+
+/* ===== التبويبات ===== */
+.tabs{display:flex;gap:8px;justify-content:center;align-items:center;padding:12px 16px 10px;flex-wrap:wrap}
+.tabs button{
+  font:inherit;font-size:13px;font-weight:bold;padding:8px 22px;border-radius:20px;
+  border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);
+  cursor:pointer;transition:.2s;
+}
+.tabs button:hover{background:var(--sub-card-bg)}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#000}
+
+/* ===== منطقة المحاكاة ===== */
+main{flex:1 1 auto;display:flex;flex-direction:column;margin:0 18px;min-height:0}
+section{display:none;background:var(--panel);border:1px solid var(--border-soft);border-radius:16px;padding:16px;box-shadow:var(--shadow-soft)}
+section.on{display:flex;flex-direction:column;flex:1}
+.wrap{position:relative;flex:1;min-height:320px}
+p.note{margin:0 0 10px;color:var(--mute)}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:8px;background:var(--bg)}
+.ctl{display:flex;align-items:center;gap:10px;margin:12px 0 4px;flex-wrap:wrap}
+.ctl label{min-width:150px;font-weight:600}
+.ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.ctl output{min-width:90px;direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.read div{border:1px solid var(--border-soft);background:var(--sub-card-bg);border-radius:8px;padding:8px 10px}
+body:not(.light-mode) .read div{background:rgba(255,255,255,0.04)}
+.read small{display:block;color:var(--mute)}
+.read b{direction:ltr;display:inline-block;font-variant-numeric:tabular-nums}
+.btn{font:inherit;font-weight:bold;padding:8px 16px;border-radius:20px;border:1px solid var(--accent);background:var(--accent);color:#000;cursor:pointer;margin-inline-end:8px}
+.btn.alt{background:transparent;color:var(--accent-text)}
+body.light-mode .btn.alt{color:#c2410c}
+.key{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0;color:var(--mute);font-size:.9rem}
+.key i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-inline-end:6px}
+
+/* ===== التذييل ===== */
+#footer{
+  padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));
+  text-align:center;font-size:11px;color:var(--mute);
+}
+#footer strong{color:var(--accent)}
+body.light-mode #footer strong{color:#c2410c}
+
+/* ===== ضبط الشعار على الشاشات المتوسطة ===== */
+@media(max-width:1000px){
+  #logoWrap img,#logoFallback{width:140px;height:140px}
+  #logoFallback{font-size:4.4rem}
+}
+
+@media(max-width:650px){
+  #navbar{flex-wrap:wrap;gap:10px;padding:10px 15px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .nav-links{order:3;width:100%;justify-content:center}
+  .nav-links a{padding:6px 10px;font-size:.8rem}
+  .nav-brand span{display:none}
+  #breadcrumb{font-size:10px;padding:5px 12px}
+  #logoWrap{position:static}
+  #siteHeader{flex-direction:column;gap:8px;padding:12px 12px 2px}
+  #logoWrap img,#logoFallback{width:154px;height:154px}
+  #logoFallback{font-size:4.8rem}
+  #titleBlock h1{font-size:16px}
+  .author-line{font-size:11.5px}
+  main{margin:0 8px}
+  section{padding:12px}
+  .ctl label{min-width:100%}
+  #footer{font-size:9.5px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع الليلي/النهاري" title="تبديل الوضع">🌙</button>
+</nav>
+
+<div id="breadcrumb">
+  <a href="../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../index.html#modern">🔬 الفيزياء الحديثة</a>
+  <span class="sep">›</span>
+  <span class="cur">⚛️ ميكانيكا الكم</span>
+</div>
+
+<header id="siteHeader">
+  <div id="logoWrap">
+    <img src="../logo.png" alt="شعار الأستاذ ماجد شلالدة"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div id="logoFallback">⚛️</div>
+  </div>
+  <div id="titleBlock">
+    <h1>محاكاة ميكانيكا الكم</h1>
+    <p class="sub">الطبيعة المزدوجة للضوء والمادة، وفرضية بلانك، وتأثير كومبتون</p>
+    <p class="author-line"><span class="lbl">إعداد وتطوير:</span> <strong>الأستاذ ماجد شلالده</strong> <span class="sep">|</span> <span class="num">0599870176</span></p>
+  </div>
+</header>
+
+<div class="tabs" role="tablist">
+<button role="tab" aria-selected="true" data-t="planck">فرضية بلانك</button>
+<button role="tab" aria-selected="false" data-t="compton">تأثير كومبتون</button>
+<button role="tab" aria-selected="false" data-t="duality">الطبيعة المزدوجة</button>
+</div>
+
+<main id="stage">
+<section id="planck" class="on">
+<p class="note">طيف إشعاع الجسم الأسود. الفيزياء الكلاسيكية (رايلي–جينز) تتنبأ بطاقة لا نهائية في الأطوال القصيرة، وفرضية بلانك (E = hν) تحل المشكلة.</p>
+<div class="wrap"><canvas id="cP"></canvas></div>
+<div class="key"><span><i style="border-color:var(--a)"></i>بلانك</span><span><i style="border-color:var(--c);border-top-style:dashed"></i>كلاسيكي (رايلي–جينز)</span><span>المنطقة الملوّنة: الضوء المرئي</span></div>
+<div class="ctl"><label for="sT">درجة الحرارة</label><input id="sT" type="range" min="1000" max="8000" step="50" value="5000"><output id="oT"></output></div>
+<div class="read"><div><small>الطول الموجي الأعظمي (فين)</small><b id="rPk"></b></div><div><small>الطاقة الكلية النسبية (σT⁴)</small><b id="rTot"></b></div><div><small>لون الجسم تقريبًا</small><b id="rCol" style="direction:rtl"></b></div></div>
+</section>
+
+<section id="compton">
+<p class="note">يصطدم فوتون بإلكترون ساكن فيتشتت بزاوية θ ويفقد جزءًا من طاقته، فيزداد طوله الموجي: Δλ = λc(1 − cos θ).</p>
+<div class="wrap"><canvas id="cC"></canvas></div>
+<div class="ctl"><label for="sE">طاقة الفوتون الساقط</label><input id="sE" type="range" min="10" max="1000" step="10" value="200"><output id="oE"></output></div>
+<div class="ctl"><label for="sA">زاوية التشتت θ</label><input id="sA" type="range" min="0" max="180" step="1" value="90"><output id="oA"></output></div>
+<div class="read"><div><small>λ الساقط</small><b id="rL0"></b></div><div><small>λ المتشتت</small><b id="rL1"></b></div><div><small>Δλ</small><b id="rDl"></b></div><div><small>طاقة الفوتون بعد التشتت</small><b id="rE1"></b></div><div><small>طاقة حركة الإلكترون</small><b id="rKe"></b></div></div>
+</section>
+
+<section id="duality">
+<p class="note">تجربة الشق المزدوج بالإلكترونات. كل إلكترون يصل نقطة واحدة، لكن تراكم النقاط يرسم نمط تداخل موجي، وطوله الموجي λ = h/p (دي برولي).</p>
+<div class="wrap"><canvas id="cD"></canvas></div>
+<div class="ctl"><label for="sV">فرق الجهد المُسرِّع</label><input id="sV" type="range" min="10" max="1000" step="10" value="100"><output id="oV"></output></div>
+<div style="margin-top:10px"><button class="btn" id="fire">أطلق ٢٠٠ إلكترون</button><button class="btn alt" id="reset">مسح الشاشة</button></div>
+<div class="read"><div><small>الطول الموجي (دي برولي)</small><b id="rLd"></b></div><div><small>سرعة الإلكترون</small><b id="rVel"></b></div><div><small>عدد الإلكترونات على الشاشة</small><b id="rN">0</b></div></div>
+</section>
+</main>
+
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد
+  <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<script>
+const h=6.626e-34,c=2.998e8,k=1.381e-23,me=9.109e-31,qe=1.602e-19,lamC=2.426;
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.body).getPropertyValue(n).trim();
+function setup(cv){const d=window.devicePixelRatio||1,w=cv.clientWidth,hh=cv.clientHeight;cv.width=w*d;cv.height=hh*d;const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,w,hh);return{x,w,h:hh}}
+function axes(x,w,H,m,xl,yl){x.strokeStyle=css('--line');x.lineWidth=1;x.beginPath();x.moveTo(m.l,m.t);x.lineTo(m.l,H-m.b);x.lineTo(w-m.r,H-m.b);x.stroke();x.fillStyle=css('--mute');x.font='12px sans-serif';x.textAlign='center';x.fillText(xl,(w+m.l)/2,H-6);x.save();x.translate(12,(H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore()}
+
+/* ---- Planck ---- */
+function planck(l,T){const e=h*c/(l*k*T);return 2*h*c*c/Math.pow(l,5)/(Math.exp(e)-1)}
+function drawP(){
+ const T=+$('sT').value;$('oT').textContent=T+' K';
+ const{x,w,h:H}=setup($('cP'));const m={l:34,r:24,t:10,b:38};const L=3000;
+ const px=v=>m.l+(w-m.l-m.r)*v/L;
+ const lp=2.898e6/T;const top=planck(lp*1e-9,T)*1.3;const py=v=>H-m.b-(H-m.t-m.b)*v/top;
+ const g=x.createLinearGradient(px(380),0,px(750),0);['#7a1fff','#2a5bff','#12c25a','#f2d600','#ff8a00','#e0201b'].forEach((cl,i)=>g.addColorStop(i/5,cl));
+ x.globalAlpha=.4;x.fillStyle=g;x.fillRect(px(380),m.t,px(750)-px(380),H-m.t-m.b);x.globalAlpha=1;
+ axes(x,w,H,m,'الطول الموجي (نانومتر)','شدة الإشعاع');
+ x.fillStyle=css('--mute');x.textAlign='center';[0,500,1000,1500,2000,2500,3000].forEach(v=>x.fillText(v,px(v),H-m.b+14));
+ const curve=(f,col,dash)=>{x.beginPath();x.strokeStyle=col;x.lineWidth=2.5;x.setLineDash(dash);let s=false;for(let v=20;v<=L;v+=6){const y=f(v*1e-9);if(y>top*1.02){if(s)break;continue}x.lineTo(px(v),py(y));s=true}x.stroke();x.setLineDash([])};
+ x.beginPath();x.strokeStyle=css('--c');x.lineWidth=2;x.setLineDash([6,5]);let st=false;
+ for(let v=20;v<=L;v+=4){const y=2*c*k*T/Math.pow(v*1e-9,4);const yy=py(Math.min(y,top*1.02));if(!st){x.moveTo(px(v),yy);st=true}else x.lineTo(px(v),yy)}x.stroke();x.setLineDash([]);
+ x.beginPath();x.strokeStyle=css('--a');x.lineWidth=3;for(let v=20;v<=L;v+=4){const y=planck(v*1e-9,T);v==20?x.moveTo(px(v),py(y)):x.lineTo(px(v),py(y))}x.stroke();
+ $('rPk').textContent=Math.round(lp)+' nm';
+ $('rTot').textContent=(Math.pow(T/5000,4)).toFixed(2)+' ×';
+ $('rCol').textContent=T<1800?'أحمر معتم':T<3000?'برتقالي':T<4500?'أصفر برتقالي':T<6500?'أبيض مصفرّ':'أبيض مزرق';
+}
+
+/* ---- Compton ---- */
+function wave(x,x0,y0,x1,y1,wl,amp,col){const dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len;x.beginPath();x.strokeStyle=col;x.lineWidth=2.5;for(let s=0;s<=len;s+=2){const o=amp*Math.sin(2*Math.PI*s/wl);const X=x0+ux*s-uy*o,Y=y0+uy*s+ux*o;s?x.lineTo(X,Y):x.moveTo(X,Y)}x.stroke();const ax=x1,ay=y1;x.beginPath();x.fillStyle=col;x.moveTo(ax,ay);x.lineTo(ax-ux*10+uy*5,ay-uy*10-ux*5);x.lineTo(ax-ux*10-uy*5,ay-uy*10+ux*5);x.fill()}
+function drawC(){
+ const E=+$('sE').value,th=+$('sA').value*Math.PI/180;
+ $('oE').textContent=E+' keV';$('oA').textContent=$('sA').value+'°';
+ const l0=1239.84/E,l1=l0+lamC*(1-Math.cos(th)),E1=1239.84/l1,Ke=E-E1;
+ const a=E/511;let phi=th<1e-3?Math.PI/2:Math.atan2(1,(1+a)*Math.tan(th/2));
+ const{x,w,h:H}=setup($('cC'));const cx=w*.5,cy=H*.5,R=Math.min(w*.4,140);
+ const v0=4+3*Math.sqrt(l0),v1=4+3*Math.sqrt(l1);
+ wave(x,cx-R*1.2,cy,cx-8,cy,v0,6,css('--b'));
+ wave(x,cx+8*Math.cos(th),cy-8*Math.sin(th),cx+R*Math.cos(th),cy-R*Math.sin(th),v1,6,css('--a'));
+ if(Ke>0.05){x.beginPath();x.strokeStyle=css('--c');x.lineWidth=3;const rl=Math.max(14,R*Math.min(1,Ke/E*1.6+.15));x.moveTo(cx,cy);x.lineTo(cx+rl*Math.cos(phi),cy+rl*Math.sin(phi));x.stroke()}
+ x.beginPath();x.fillStyle=css('--c');x.arc(cx,cy,7,0,7);x.fill();
+ x.fillStyle=css('--mute');x.font='13px sans-serif';x.textAlign='center';
+ x.fillText('فوتون ساقط',cx-R*.7,cy-14);x.fillText('إلكترون',cx,cy+24);x.fillText('فوتون متشتت',cx+R*Math.cos(th)*.9,cy-R*Math.sin(th)-8);
+ if(Ke>0.05)x.fillText('ارتداد الإلكترون',cx+R*.6*Math.cos(phi),cy+R*.6*Math.sin(phi)+16);
+ const f=v=>v.toFixed(2);
+ $('rL0').textContent=f(l0)+' pm';$('rL1').textContent=f(l1)+' pm';$('rDl').textContent=f(l1-l0)+' pm';
+ $('rE1').textContent=f(E1)+' keV';$('rKe').textContent=f(Ke)+' keV';
+}
+
+/* ---- Duality ---- */
+let dots=[];const D=2e-9,A=.5e-9,TH=.3;
+function lamE(V){return h/Math.sqrt(2*me*qe*V*(1+qe*V/(2*me*c*c)))}
+function Iq(t,lam){const s=Math.sin(t),u=Math.PI*D*s/lam,q=Math.PI*A*s/lam;const sc=Math.abs(q)<1e-9?1:Math.sin(q)/q;return Math.pow(Math.cos(u),2)*sc*sc}
+function drawD(){
+ const V=+$('sV').value,lam=lamE(V);$('oV').textContent=V+' V';
+ $('rLd').textContent=(lam*1e9).toFixed(3)+' nm';
+ $('rVel').textContent=(Math.sqrt(2*qe*V/me)/1e6).toFixed(2)+' ×10⁶ m/s';
+ $('rN').textContent=dots.length;
+ const{x,w,h:H}=setup($('cD'));const sp=H*.58;const px=t=>w/2+(w/2-14)*t/TH;
+ x.strokeStyle=css('--line');x.beginPath();x.moveTo(8,sp);x.lineTo(w-8,sp);x.stroke();
+ x.beginPath();x.strokeStyle=css('--b');x.lineWidth=2.5;
+ for(let i=0;i<=400;i++){const t=-TH+2*TH*i/400,y=sp-6-(sp-24)*Iq(t,lam);i?x.lineTo(px(t),y):x.moveTo(px(t),y)}x.stroke();
+ x.fillStyle=css('--a');
+ for(const d of dots){x.globalAlpha=.8;x.beginPath();x.arc(px(d[0]),sp+12+d[1]*(H-sp-24),1.8,0,7);x.fill()}
+ x.globalAlpha=1;x.fillStyle=css('--mute');x.font='12px sans-serif';x.textAlign='left';x.fillText('منحنى الاحتمال (موجة)',10,16);x.textAlign='right';x.fillText('كل نقطة = إلكترون واحد (جسيم)',w-10,H-6);
+}
+function fire(){const lam=lamE(+$('sV').value);let n=0;while(n<200){const t=(Math.random()*2-1)*TH;if(Math.random()<Iq(t,lam)){dots.push([t,Math.random()]);n++}}drawD()}
+$('fire').onclick=fire;$('reset').onclick=()=>{dots=[];drawD()};
+$('sV').oninput=()=>{dots=[];drawD()};
+$('sT').oninput=drawP;$('sE').oninput=drawC;$('sA').oninput=drawC;
+
+/* ---- tabs ---- */
+const draw={planck:drawP,compton:drawC,duality:drawD};let cur='planck';
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{cur=b.dataset.t;
+ document.querySelectorAll('.tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));
+ document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===cur));draw[cur]()});
+addEventListener('resize',()=>draw[cur]());
+/* ---- الوضع الليلي/النهاري ---- */
+(function(){
+ const t=$('themeToggle');let s=null;
+ try{s=localStorage.getItem('theme')}catch(e){}
+ if(s==='light'){document.body.classList.add('light-mode');t.textContent='☀️'}
+ t.addEventListener('click',()=>{
+  document.body.classList.toggle('light-mode');
+  const l=document.body.classList.contains('light-mode');
+  t.textContent=l?'☀️':'🌙';
+  try{localStorage.setItem('theme',l?'light':'dark')}catch(e){}
+  draw[cur]();
+ });
+})();
+(document.fonts&&document.fonts.ready||Promise.resolve()).then(()=>draw[cur]());
+draw[cur]();
+</script>
+</body>
+</html>

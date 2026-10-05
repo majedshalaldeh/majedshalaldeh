@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>محاكاة الفيزياء الذرية | الأستاذ ماجد شلالدة</title>
+<style>
+:root{
+  --bg-color:#0b1329; --main-card-bg:#1c2541; --sub-card-bg:#3a506b;
+  --accent-orange:#f77f00; --accent-gold:#ffd166;
+  --border-soft:rgba(255,255,255,0.08);
+  --shadow-soft:0 10px 30px rgba(0,0,0,0.3);
+  /* متغيرات المحاكاة (تقرؤها الرسومات) */
+  --bg:#0b1329; --panel:#1c2541; --ink:#eef1f7; --mute:#c0c8d8; --line:rgba(255,255,255,0.16);
+  --a:#ffb454; --b:#6ea8ff; --c:#ff7aa8;
+  --accent:#f77f00; --accent-text:#ffd166;
+}
+body.light-mode{
+  --bg-color:#f0f4f8; --main-card-bg:#ffffff; --sub-card-bg:#e8eef5;
+  --border-soft:rgba(0,0,0,0.08);
+  --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+  --bg:#f0f4f8; --panel:#ffffff; --ink:#1a202c; --mute:#4a5568; --line:#d6dbe7;
+  --a:#b85c00; --b:#1f5fd6; --c:#c2255c;
+  --accent:#f77f00; --accent-text:#b45309;
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;position:relative;
+  background:var(--bg-color);color:var(--ink);
+  font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+  line-height:1.7;transition:background .3s,color .3s;
+}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ===== شريط التنقل ===== */
+#navbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 24px;padding-top:calc(12px + env(safe-area-inset-top,0px));
+  min-height:56px;
+  background:rgba(28,37,65,0.92);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border-soft);
+}
+body.light-mode #navbar{background:rgba(255,255,255,0.92)}
+.nav-brand{font-size:1.05rem;font-weight:bold;color:var(--accent);display:flex;align-items:center;gap:8px}
+body.light-mode .nav-brand{color:#c2410c}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap}
+.nav-links a{color:var(--ink);text-decoration:none;padding:8px 14px;border-radius:8px;font-size:.88rem;transition:.2s}
+.nav-links a:hover{background:var(--accent);color:#000}
+.theme-toggle{
+  background:transparent;border:1px solid var(--border-soft);color:var(--ink);
+  font-size:1.1rem;width:36px;height:36px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg)}
+
+/* ===== مسار التنقل ===== */
+#breadcrumb{
+  align-self:center;margin:14px 12px 0;
+  display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;
+  padding:8px 18px;font-size:12px;color:var(--mute);
+  background:var(--main-card-bg);border:1px solid var(--border-soft);border-radius:10px;
+}
+#breadcrumb a{color:var(--accent-text);text-decoration:none}
+body.light-mode #breadcrumb a{color:#c2410c}
+#breadcrumb .sep{opacity:.5}
+#breadcrumb .cur{color:var(--ink);font-weight:600}
+
+/* ===== الترويسة ===== */
+#siteHeader{display:flex;align-items:center;justify-content:center;padding:14px 20px 4px}
+#logoWrap{position:absolute;top:calc(70px + env(safe-area-inset-top,0px));right:18px;z-index:30;display:flex;justify-content:center;align-items:center}
+#logoWrap img{
+  width:192px;height:192px;border-radius:50%;background:#fff;object-fit:cover;
+  box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);
+  border:3px solid rgba(255,255,255,.2);
+}
+body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
+#logoFallback{
+  display:none;width:192px;height:192px;border-radius:50%;
+  background:linear-gradient(135deg,#f77f00,#00b4d8);
+  align-items:center;justify-content:center;font-size:6.08rem;color:#fff;
+}
+#titleBlock{text-align:center}
+#titleBlock h1{margin:0;font-size:20px;line-height:1.4;color:var(--accent-text)}
+.sub{color:var(--mute);margin:2px 0 0;font-size:13px}
+
+/* ===== سطر إعداد وتطوير ===== */
+.author-line{margin:6px 0 0;font-size:12.5px;color:var(--mute);line-height:1.6}
+.author-line .lbl{color:var(--accent-text)}
+.author-line strong{color:var(--ink);font-weight:700}
+.author-line .sep{opacity:.4;margin:0 6px}
+.author-line .num{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums;display:inline-block}
+
+/* ===== التبويبات ===== */
+.tabs{display:flex;gap:8px;justify-content:center;align-items:center;padding:12px 16px 10px;flex-wrap:wrap}
+.tabs button{
+  font:inherit;font-size:13px;font-weight:bold;padding:8px 22px;border-radius:20px;
+  border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);
+  cursor:pointer;transition:.2s;
+}
+.tabs button:hover{background:var(--sub-card-bg)}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#000}
+
+/* ===== منطقة المحاكاة ===== */
+main{flex:1 1 auto;display:flex;flex-direction:column;margin:0 18px;min-height:0}
+section{display:none;background:var(--panel);border:1px solid var(--border-soft);border-radius:16px;padding:16px;box-shadow:var(--shadow-soft)}
+section.on{display:flex;flex-direction:column;flex:1}
+.wrap{position:relative;flex:1;min-height:320px}
+p.note{margin:0 0 10px;color:var(--mute)}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:8px;background:var(--bg)}
+.ctl{display:flex;align-items:center;gap:10px;margin:12px 0 4px;flex-wrap:wrap}
+.ctl label{min-width:150px;font-weight:600}
+.ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.ctl output{min-width:90px;direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.read div{border:1px solid var(--border-soft);background:var(--sub-card-bg);border-radius:8px;padding:8px 10px}
+body:not(.light-mode) .read div{background:rgba(255,255,255,0.04)}
+.read small{display:block;color:var(--mute)}
+.read b{direction:ltr;display:inline-block;font-variant-numeric:tabular-nums}
+.btn{font:inherit;font-weight:bold;padding:8px 16px;border-radius:20px;border:1px solid var(--accent);background:var(--accent);color:#000;cursor:pointer;margin-inline-end:8px}
+.btn.alt{background:transparent;color:var(--accent-text)}
+body.light-mode .btn.alt{color:#c2410c}
+.key{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0;color:var(--mute);font-size:.9rem}
+.key i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-inline-end:6px}
+
+/* ===== التذييل ===== */
+#footer{
+  padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));
+  text-align:center;font-size:11px;color:var(--mute);
+}
+#footer strong{color:var(--accent)}
+body.light-mode #footer strong{color:#c2410c}
+
+/* ===== ضبط الشعار على الشاشات المتوسطة ===== */
+@media(max-width:1000px){
+  #logoWrap img,#logoFallback{width:140px;height:140px}
+  #logoFallback{font-size:4.4rem}
+}
+
+@media(max-width:650px){
+  #navbar{flex-wrap:wrap;gap:10px;padding:10px 15px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .nav-links{order:3;width:100%;justify-content:center}
+  .nav-links a{padding:6px 10px;font-size:.8rem}
+  .nav-brand span{display:none}
+  #breadcrumb{font-size:10px;padding:5px 12px}
+  #logoWrap{position:static}
+  #siteHeader{flex-direction:column;gap:8px;padding:12px 12px 2px}
+  #logoWrap img,#logoFallback{width:154px;height:154px}
+  #logoFallback{font-size:4.8rem}
+  #titleBlock h1{font-size:16px}
+  .author-line{font-size:11.5px}
+  main{margin:0 8px}
+  section{padding:12px}
+  .ctl label{min-width:100%}
+  #footer{font-size:9.5px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none !important}}
+
+.chips{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:0 16px 10px;font-size:13px;color:var(--mute)}
+.chips button{font:inherit;font-size:12.5px;font-weight:bold;padding:6px 16px;border-radius:20px;border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);cursor:pointer;transition:.2s}
+.chips button:hover{background:var(--sub-card-bg)}
+.chips button.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent-text)}
+body.light-mode .chips button.on{color:#c2410c}
+.read .txt b{direction:rtl;display:block;font-weight:600;font-size:.92rem;line-height:1.6}
+.read.wide{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.ctl .btn{margin:0}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع الليلي/النهاري" title="تبديل الوضع">🌙</button>
+</nav>
+
+<div id="breadcrumb">
+  <a href="../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../index.html#modern">🔬 الفيزياء الحديثة</a>
+  <span class="sep">›</span>
+  <span class="cur">⚛️ الفيزياء الذرية</span>
+</div>
+
+<header id="siteHeader">
+  <div id="logoWrap">
+    <img src="../logo.png" alt="شعار الأستاذ ماجد شلالدة"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div id="logoFallback">⚛️</div>
+  </div>
+  <div id="titleBlock">
+    <h1>محاكاة الفيزياء الذرية</h1>
+    <p class="sub">نماذج الذرة، وأطياف الانبعاث والامتصاص، ومستويات الطاقة</p>
+    <p class="author-line"><span class="lbl">إعداد وتطوير:</span> <strong>الأستاذ ماجد شلالده</strong> <span class="sep">|</span> <span class="num">0599870176</span></p>
+  </div>
+</header>
+
+<div class="tabs" role="tablist">
+<button role="tab" aria-selected="true" data-t="models">نماذج الذرة</button>
+<button role="tab" aria-selected="false" data-t="bohr">نموذج بور</button>
+<button role="tab" aria-selected="false" data-t="levels">مستويات الطاقة</button>
+<button role="tab" aria-selected="false" data-t="spectra">الأطياف</button>
+</div>
+
+<div class="chips" id="zChips" style="display:none">
+<span>الذرة المشابهة للهيدروجين:</span>
+<button class="on" data-z="1">H (Z=1)</button>
+<button data-z="2">He⁺ (Z=2)</button>
+<button data-z="3">Li²⁺ (Z=3)</button>
+</div>
+
+<main id="stage">
+
+<section id="models" class="on">
+<p class="note">تطوّر نموذج الذرة لتفسير نتائج التجارب. اختر نموذجًا لترى كيف يتصرف مع جسيمات ألفا المقذوفة نحوه من اليسار.</p>
+<div class="chips" style="padding:0 0 10px;justify-content:flex-start">
+<button class="on" data-m="thomson">تومسون (1904)</button>
+<button data-m="rutherford">رذرفورد (1911)</button>
+<button data-m="bohr">بور (1913)</button>
+</div>
+<div class="wrap"><canvas id="cM"></canvas></div>
+<div class="key"><span><i style="border-color:var(--b)"></i>مسار جسيم ألفا</span><span><i style="border-color:var(--a)"></i>الإلكترونات</span><span><i style="border-color:var(--c)"></i>الشحنة الموجبة / النواة</span></div>
+<div class="read wide">
+<div class="txt"><small>النموذج</small><b id="mN"></b></div>
+<div class="txt"><small>الفكرة</small><b id="mI"></b></div>
+<div class="txt"><small>الدليل التجريبي</small><b id="mE"></b></div>
+<div class="txt"><small>نقطة الضعف</small><b id="mW"></b></div>
+</div>
+</section>
+
+<section id="bohr">
+<p class="note">يوجد الإلكترون في مدارات مسموحة فقط. حرّك المنزلق لنقله بين المستويات: ينبعث فوتون عند النزول ويُمتص عند الصعود، وطاقته ΔE = hν = hc/λ. (أنصاف الأقطار في الرسم غير مقيسة، والقيم الحقيقية في البطاقات.)</p>
+<div class="wrap"><canvas id="cB"></canvas></div>
+<div class="ctl"><label for="sN">المستوى n</label><input id="sN" type="range" min="1" max="6" step="1" value="1"><output id="oN"></output><button class="btn alt" id="ground">الحالة المستقرة n=1</button></div>
+<div class="read wide">
+<div><small>نصف قطر المدار rₙ</small><b id="rR"></b></div>
+<div><small>طاقة المستوى Eₙ</small><b id="rE"></b></div>
+<div><small>سرعة الإلكترون</small><b id="rV"></b></div>
+<div class="txt"><small>آخر انتقال</small><b id="rT">لا يوجد بعد</b></div>
+<div class="txt"><small>الفوتون</small><b id="rPh">—</b></div>
+</div>
+</section>
+
+<section id="levels">
+<p class="note">مستويات الطاقة Eₙ = −13.6 Z² / n² (eV). فعّل متسلسلة لترى الانتقالات الممكنة إلى مستواها الأدنى؛ لون السهم هو لون الضوء المنبعث.</p>
+<div class="chips" style="padding:0 0 10px;justify-content:flex-start">
+<button class="on" data-s="1">ليمان (إلى n=1)</button>
+<button class="on" data-s="2">بالمر (إلى n=2)</button>
+<button data-s="3">باشن (إلى n=3)</button>
+</div>
+<div class="wrap"><canvas id="cL"></canvas></div>
+<div class="key"><span>الرقم على السهم = الطول الموجي (nm)</span><span>السهم المتقطع = ضوء غير مرئي (فوق بنفسجي أو تحت أحمر)</span></div>
+<div class="read wide">
+<div class="txt"><small>ليمان</small><b id="sL1"></b></div>
+<div class="txt"><small>بالمر</small><b id="sL2"></b></div>
+<div class="txt"><small>باشن</small><b id="sL3"></b></div>
+</div>
+</section>
+
+<section id="spectra">
+<p class="note">لكل ذرة خطوطها المميزة. تظهر خطوط الانبعاث مضيئة على خلفية سوداء، وتظهر خطوط الامتصاص مظلمة في الأطوال الموجية نفسها على الطيف المستمر. (الأطوال محسوبة بنموذج بور.)</p>
+<div class="wrap"><canvas id="cS"></canvas></div>
+<div class="read wide">
+<div><small>عدد الخطوط المرئية</small><b id="rCnt"></b></div>
+<div class="txt"><small>أطوال الخطوط المرئية (nm)</small><b id="rList"></b></div>
+</div>
+</section>
+
+</main>
+
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد
+  <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<script>
+const hc=1239.84,RY=13.6057,a0=0.052918;
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.body).getPropertyValue(n).trim();
+const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function setup(cv){const d=window.devicePixelRatio||1,w=cv.clientWidth,hh=cv.clientHeight;
+ if(cv.width!==Math.round(w*d)||cv.height!==Math.round(hh*d)){cv.width=Math.round(w*d);cv.height=Math.round(hh*d)}
+ const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,w,hh);return{x,w,h:hh}}
+
+let Z=1,cur='models',ang=0;
+const NAMES=['','ليمان','بالمر','باشن','براكيت','فوند'];
+const En=n=>-RY*Z*Z/(n*n);
+const lamb=(m,n)=>hc/(RY*Z*Z*(1/(n*n)-1/(m*m)));
+const B=t=>'<bdi dir="ltr">'+t+'</bdi>';
+const fmt=l=>l>=1000?(l/1000).toFixed(2)+' μm':l.toFixed(1)+' nm';
+const region=l=>l<380?'فوق بنفسجي':l>750?'تحت أحمر':'مرئي';
+function wl2rgb(l){let r=0,g=0,b=0;
+ if(l>=380&&l<440){r=-(l-440)/60;b=1}else if(l<490){g=(l-440)/50;b=1}else if(l<510){g=1;b=-(l-510)/20}
+ else if(l<580){r=(l-510)/70;g=1}else if(l<645){r=1;g=-(l-645)/65}else if(l<=750){r=1}
+ let f=1;if(l<420)f=.3+.7*(l-380)/40;else if(l>700)f=.3+.7*(750-l)/50;
+ return [r,g,b].map(v=>Math.round(255*Math.pow(Math.max(v*f,0),.8)))}
+const colorOf=l=>l<380?'#a78bfa':l>750?'#f87171':'rgb('+wl2rgb(l).join(',')+')';
+
+/* ================= نماذج الذرة ================= */
+let model='thomson';
+const MD={
+ thomson:{n:'نموذج تومسون (1904) — «كعكة الزبيب»',i:'كرة موجبة الشحنة موزّعة بانتظام، والإلكترونات مغروسة فيها وتهتز حول مواضعها.',e:'اكتشاف الإلكترون (تومسون 1897) وأن الذرة متعادلة كهربائيًا.',w:'لا يفسّر انحراف جسيمات ألفا بزوايا كبيرة، ولا الأطياف الخطية.'},
+ rutherford:{n:'نموذج رذرفورد (1911) — النواة',i:'كل الشحنة الموجبة وأغلب الكتلة في نواة صغيرة جدًا، والإلكترونات تدور حولها والذرة في معظمها فراغ.',e:'تجربة غايغر ومارسدن (1909): معظم جسيمات ألفا تنفذ من رقيقة الذهب، وقليل منها ينحرف بزاوية كبيرة أو يرتد.',w:'الإلكترون الدائر يُفترض أن يُشعّ طاقة ويسقط في النواة، ولا يفسّر الأطياف الخطية.'},
+ bohr:{n:'نموذج بور (1913) — المدارات المكمّاة',i:'للإلكترون مدارات مسموحة فقط بطاقات محددة، لا يشعّ فيها، وينتقل بينها بامتصاص أو انبعاث فوتون ΔE = hν.',e:'يفسّر الأطياف الخطية للهيدروجين وثابت ريدبرغ.',w:'ينجح مع الذرات ذات الإلكترون الواحد فقط، ولا يفسّر شدة الخطوط ولا الذرات الأكبر.'}
+};
+function updM(){const d=MD[model];$('mN').textContent=d.n;$('mI').textContent=d.i;$('mE').textContent=d.e;$('mW').textContent=d.w}
+function track(x,x0,y0,bx,by,th,sgn,len,col){
+ x.beginPath();x.strokeStyle=col;x.lineWidth=2;x.moveTo(x0,y0);x.lineTo(bx,by);
+ x.lineTo(bx+len*Math.cos(th),by+sgn*len*Math.sin(th));x.stroke();
+ x.beginPath();x.fillStyle=col;x.arc(x0,y0,3.5,0,7);x.fill()}
+function coul(x,y0,cx,cy,w,H,col){
+ let px=14,py=y0,vx=2,vy=0;const Kc=104,dt=.5;
+ x.beginPath();x.strokeStyle=col;x.lineWidth=2;x.moveTo(px,py);
+ for(let i=0;i<4000;i++){const dx=px-cx,dy=py-cy,r=Math.hypot(dx,dy)||1,a=Kc/(r*r*r);
+  vx+=a*dx*dt;vy+=a*dy*dt;px+=vx*dt;py+=vy*dt;x.lineTo(px,py);if(px<0||px>w||py<0||py>H)break}
+ x.stroke();x.beginPath();x.fillStyle=col;x.arc(14,y0,3.5,0,7);x.fill()}
+function drawM(t){
+ const{x,w,h:H}=setup($('cM'));const cx=w/2,cy=H/2,R0=Math.min(w*.28,H*.38);
+ const cA=css('--a'),cB=css('--b'),cC=css('--c');
+ const len=w*.36;
+ if(model==='thomson'){
+  x.globalAlpha=.2;x.fillStyle=cC;x.beginPath();x.arc(cx,cy,R0,0,7);x.fill();x.globalAlpha=1;
+  x.strokeStyle=cC;x.lineWidth=2;x.beginPath();x.arc(cx,cy,R0,0,7);x.stroke();
+  const pts=[[0,0]];for(let i=0;i<8;i++){const a=i*Math.PI/4+.3;pts.push([.58*R0*Math.cos(a),.58*R0*Math.sin(a)])}
+  x.fillStyle=cA;pts.forEach((p,i)=>{x.beginPath();x.arc(cx+p[0]+3*Math.sin(t/260+i*1.7),cy+p[1]+3*Math.cos(t/310+i*1.3),5,0,7);x.fill()});
+  [-.7,-.35,0,.35,.7].forEach(f=>{const b=f*R0;track(x,14,cy-b,cx,cy-b,.03*Math.sign(b||1)*(b?1:0),b>0?-1:1,len,cB)});
+  x.fillStyle=css('--mute');x.font='12px sans-serif';x.textAlign='center';x.fillText('كرة موجبة',cx,cy-R0-8);
+ }else if(model==='rutherford'){
+  [.45,.75,1].forEach((f,i)=>{const r=R0*f;x.strokeStyle=css('--line');x.lineWidth=1;x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();
+   const a=ang*(1.4-i*.35)+i*2.1;x.fillStyle=cA;x.beginPath();x.arc(cx+r*Math.cos(a),cy-r*Math.sin(a),5,0,7);x.fill()});
+  [-90,-55,-30,-13,-3,3,13,30,55,90].forEach(b=>coul(x,cy-b,cx,cy,w,H,cB));
+  x.fillStyle=cC;x.beginPath();x.arc(cx,cy,5,0,7);x.fill();
+  x.fillStyle=css('--mute');x.font='12px sans-serif';x.textAlign='center';x.fillText('نواة',cx+22,cy+16);
+ }else{
+  [1,2,3].forEach(n=>{const r=R0*n/3;x.strokeStyle=n===2?cA:css('--line');x.lineWidth=n===2?1.6:1;x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();
+   x.fillStyle=css('--mute');x.font='11px sans-serif';x.textAlign='left';x.fillText('n='+n,cx+r*.72+4,cy-r*.72)});
+  const r=R0*2/3;x.fillStyle=cA;x.beginPath();x.arc(cx+r*Math.cos(ang),cy-r*Math.sin(ang),5.5,0,7);x.fill();
+  x.fillStyle=cC;x.beginPath();x.arc(cx,cy,6,0,7);x.fill();
+  [-60,-25,15,50].forEach(b=>coul(x,cy-b,cx,cy,w,H,cB));
+ }
+}
+
+/* ================= نموذج بور ================= */
+let nCur=1,photon=null;
+const bRad=(n,R)=>16+(R-16)*(n*n-1)/35;
+function updB(){
+ $('oN').textContent='n = '+nCur;
+ $('rR').textContent=(a0*nCur*nCur/Z).toFixed(3)+' nm';
+ $('rE').textContent=En(nCur).toFixed(2)+' eV';
+ $('rV').textContent=(2.188*Z/nCur).toFixed(2)+' ×10⁶ m/s';
+}
+function transition(from,to){
+ const hi=Math.max(from,to),lo=Math.min(from,to);const dE=RY*Z*Z*(1/(lo*lo)-1/(hi*hi));const l=hc/dE;
+ const em=to<from;
+ photon={t0:performance.now(),kind:em?'em':'ab',col:colorOf(l),wl:l};
+ $('rT').textContent='من n='+from+' إلى n='+to+(em?' (انبعاث)':' (امتصاص)');
+ $('rPh').innerHTML=B(dE.toFixed(2)+' eV')+' · '+B(fmt(l))+' · '+region(l)+' · '+(NAMES[lo]?'متسلسلة '+NAMES[lo]:B('n='+lo))}
+function drawB(t){
+ const{x,w,h:H}=setup($('cB'));const cx=w/2,cy=H/2,R=Math.min(w,H)/2-14;
+ for(let n=1;n<=6;n++){const r=bRad(n,R);x.beginPath();x.strokeStyle=n===nCur?css('--a'):css('--line');x.lineWidth=n===nCur?2:1;x.arc(cx,cy,r,0,7);x.stroke();
+  x.fillStyle=css('--mute');x.font='11px sans-serif';x.textAlign='left';x.fillText('n='+n,cx+r*.707+3,cy-r*.707-2)}
+ x.fillStyle=css('--c');x.beginPath();x.arc(cx,cy,10,0,7);x.fill();
+ x.fillStyle='#fff';x.font='bold 10px sans-serif';x.textAlign='center';x.fillText(Z+'+',cx,cy+3.5);
+ const r=bRad(nCur,R);x.fillStyle=css('--b');x.beginPath();x.arc(cx+r*Math.cos(ang),cy-r*Math.sin(ang),6,0,7);x.fill();
+ if(photon){const p=(t-photon.t0)/1500;
+  if(p>=1)photon=null;else{
+   const ux=Math.cos(-.55),uy=Math.sin(-.55);const dd=photon.kind==='em'?(.12+p*.95)*R*1.2:(1.07-p*.95)*R*1.2;
+   const L=70,wp=8+10*Math.min(Math.max(photon.wl,100),1200)/1200;
+   x.beginPath();x.strokeStyle=photon.col;x.lineWidth=2.5;
+   for(let s=0;s<=L;s+=2){const env=Math.sin(Math.PI*s/L),off=9*env*Math.sin(2*Math.PI*s/wp);
+    const X=cx+ux*(dd-s)-uy*off,Y=cy+uy*(dd-s)+ux*off;s?x.lineTo(X,Y):x.moveTo(X,Y)}
+   x.stroke()}}
+}
+
+/* ================= مستويات الطاقة ================= */
+const sel={1:true,2:true,3:false};
+function drawL(){
+ const{x,w,h:H}=setup($('cL'));const m={l:84,r:20,t:26,b:16};const top=m.t,bot=H-m.b,NM=7;x.direction='ltr';
+ const y=E=>top+(bot-top)*(-E)/(RY*Z*Z);
+ x.font='11px sans-serif';
+ x.strokeStyle=css('--mute');x.globalAlpha=.5;x.setLineDash([5,4]);x.beginPath();x.moveTo(m.l,y(0));x.lineTo(w-m.r,y(0));x.stroke();x.setLineDash([]);x.globalAlpha=1;
+ x.fillStyle=css('--mute');x.textAlign='right';x.fillText('n=∞ (0 eV)',m.l-6,y(0)+4);
+ for(let n=1;n<=NM;n++){const yy=y(En(n));x.strokeStyle=css('--mute');x.globalAlpha=.65;x.lineWidth=1.5;x.beginPath();x.moveTo(m.l,yy);x.lineTo(w-m.r,yy);x.stroke();x.globalAlpha=1;
+  if(n<=4){x.fillStyle=css('--ink');x.textAlign='right';x.fillText('n='+n,m.l-6,yy+4);if(w>520){x.fillStyle=css('--mute');x.textAlign='left';x.fillText(En(n).toFixed(2)+' eV',w-m.r-78,yy-4)}}}
+ const ar=[];[1,2,3].forEach(s=>{if(sel[s])for(let q=s+1;q<=NM;q++)ar.push({m:q,n:s})});
+ if(ar.length){const step=(w-m.l-m.r-60)/ar.length;
+  ar.forEach((a,k)=>{const xk=m.l+20+step*(k+.5),y1=y(En(a.m)),y2=y(En(a.n)),l=lamb(a.m,a.n),col=colorOf(l);
+   x.strokeStyle=col;x.fillStyle=col;x.lineWidth=2.2;x.setLineDash(l<380||l>750?[6,4]:[]);x.beginPath();x.moveTo(xk,y1);x.lineTo(xk,y2-6);x.stroke();x.setLineDash([]);
+   x.beginPath();x.moveTo(xk,y2);x.lineTo(xk-5,y2-10);x.lineTo(xk+5,y2-10);x.fill();
+   x.save();x.translate(xk-5,(y1+y2)/2);x.rotate(-Math.PI/2);x.fillStyle=css('--ink');x.font='10px sans-serif';x.textAlign='center';x.fillText(Math.round(l),0,0);x.restore()})}
+ [1,2,3].forEach(s=>{$('sL'+s).innerHTML='الخط الأول: '+B(fmt(lamb(s+1,s)))+' · الحدّ: '+B(fmt(hc/(RY*Z*Z/(s*s))))+' · '+region(lamb(s+1,s))});
+}
+
+/* ================= الأطياف ================= */
+function visLines(){const L=[];for(let n=1;n<=8;n++)for(let q=n+1;q<=n+14;q++){const l=lamb(q,n);if(l>=380&&l<=750)L.push({l,m:q,n})}L.sort((a,b)=>b.l-a.l);return L}
+function drawS(){
+ const{x,w,h:H}=setup($('cS'));const m={l:116,r:16,t:10,b:34},gap=10,rh=(H-m.t-m.b-gap*2)/3,W=w-m.l-m.r;
+ const px=l=>m.l+W*(l-380)/370;
+ const cont=y=>{for(let X=0;X<W;X+=1){const l=380+370*X/W;x.fillStyle='rgb('+wl2rgb(l).join(',')+')';x.fillRect(m.l+X,y,2,rh)}};
+ const L=visLines();
+ const y0=m.t,y1=m.t+rh+gap,y2=m.t+2*(rh+gap);
+ cont(y0);
+ x.fillStyle='#000';x.fillRect(m.l,y1,W,rh);
+ x.save();x.lineWidth=2.5;L.forEach(o=>{x.strokeStyle=colorOf(o.l);x.shadowColor=colorOf(o.l);x.shadowBlur=7;x.beginPath();x.moveTo(px(o.l),y1);x.lineTo(px(o.l),y1+rh);x.stroke()});x.restore();
+ cont(y2);
+ x.lineWidth=2.5;x.strokeStyle='rgba(0,0,0,.92)';L.forEach(o=>{x.beginPath();x.moveTo(px(o.l),y2);x.lineTo(px(o.l),y2+rh);x.stroke()});
+ x.fillStyle=css('--mute');x.font='12px sans-serif';x.textAlign='right';
+ [['طيف مستمر',y0],['طيف الانبعاث',y1],['طيف الامتصاص',y2]].forEach(a=>x.fillText(a[0],m.l-8,a[1]+rh/2+4));
+ x.textAlign='center';for(let l=400;l<=750;l+=50){x.fillText(l,px(l),H-m.b+16)}
+ x.fillText('الطول الموجي (nm)',m.l+W/2,H-4);
+ $('rCnt').textContent=L.length;
+ $('rList').innerHTML=L.length?L.slice(0,8).map(o=>B(o.l.toFixed(1)+' ('+o.m+'→'+o.n+')')).join(' · ')+(L.length>8?' …':''):'لا توجد خطوط مرئية';
+}
+
+/* ================= التحكم ================= */
+const draw={models:drawM,bohr:drawB,levels:drawL,spectra:drawS};
+function redraw(){draw[cur](performance.now())}
+$('sN').oninput=()=>{const to=+$('sN').value;if(to!==nCur){const from=nCur;nCur=to;transition(from,to)}updB()};
+$('ground').onclick=()=>{$('sN').value=1;$('sN').oninput()};
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{model=b.dataset.m;document.querySelectorAll('[data-m]').forEach(o=>o.classList.toggle('on',o===b));updM()});
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const s=+b.dataset.s;sel[s]=!sel[s];b.classList.toggle('on',sel[s]);drawL()});
+document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{Z=+b.dataset.z;photon=null;document.querySelectorAll('[data-z]').forEach(o=>o.classList.toggle('on',o===b));updB();redraw()});
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{cur=b.dataset.t;
+ document.querySelectorAll('.tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));
+ document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===cur));
+ $('zChips').style.display=cur==='models'?'none':'flex';redraw()});
+function loop(t){if(cur==='models'||cur==='bohr'){if(!still)ang+=.035/Math.pow(cur==='bohr'?nCur:2,1.5);draw[cur](t)}requestAnimationFrame(loop)}
+addEventListener('resize',redraw);
+
+/* ---- الوضع الليلي/النهاري ---- */
+(function(){
+ const t=$('themeToggle');let s=null;
+ try{s=localStorage.getItem('theme')}catch(e){}
+ if(s==='light'){document.body.classList.add('light-mode');t.textContent='☀️'}
+ t.addEventListener('click',()=>{
+  document.body.classList.toggle('light-mode');
+  const l=document.body.classList.contains('light-mode');
+  t.textContent=l?'☀️':'🌙';
+  try{localStorage.setItem('theme',l?'light':'dark')}catch(e){}
+  redraw();
+ });
+})();
+
+updM();updB();
+requestAnimationFrame(loop);
+redraw();
+</script>
+</body>
+</html>
