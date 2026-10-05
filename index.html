@@ -20,6 +20,7 @@
             --accent-red: #ef476f;
             --border-soft: rgba(255, 255, 255, 0.08);
             --shadow-soft: 0 10px 30px rgba(0,0,0,0.3);
+            --dropdown-bg: rgba(11, 19, 41, 0.45);
         }
 
         /* ===== الوضع النهاري ===== */
@@ -33,6 +34,7 @@
             --text-muted: #4a5568;
             --border-soft: rgba(0, 0, 0, 0.08);
             --shadow-soft: 0 10px 30px rgba(0,0,0,0.08);
+            --dropdown-bg: rgba(255, 255, 255, 0.75);
         }
 
         * { box-sizing: border-box; }
@@ -339,6 +341,83 @@
             line-height: 1.6;
         }
 
+        /* ===== البطاقة ذات القائمة المنسدلة ===== */
+        .dropdown-card { cursor: default; }
+
+        /* إخفاء سهم الرابط لأن البطاقة لم تعد رابطاً */
+        .dropdown-card::after { content: none; }
+
+        .dropdown-toggle {
+            margin-top: 14px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-color);
+            background: var(--dropdown-bg);
+            border: 1px solid var(--border-soft);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .dropdown-toggle:hover,
+        .dropdown-toggle:focus-visible {
+            border-color: var(--accent-cyan);
+            outline: none;
+        }
+
+        .dropdown-toggle .chevron {
+            font-size: 0.85rem;
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-card.open .dropdown-toggle {
+            border-color: var(--accent-cyan);
+        }
+
+        .dropdown-card.open .dropdown-toggle .chevron {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 0;
+            margin-top: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, margin-top 0.35s ease;
+        }
+
+        .dropdown-card.open .dropdown-menu {
+            max-height: 240px;
+            margin-top: 10px;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--dropdown-bg);
+            border: 1px solid var(--border-soft);
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.92rem;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .dropdown-menu a:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            transform: translateX(-4px);
+        }
+
         /* ===== لا توجد نتائج ===== */
         .no-results {
             text-align: center;
@@ -404,110 +483,6 @@
         .fade-in.visible {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        /* ================================================
-           القائمة المنسدلة — القياسات بالأدوات الدقيقة
-           ================================================ */
-        .dropdown-card {
-            padding: 0;
-            cursor: default;
-        }
-
-        .dropdown-card::after { content: none; }
-
-        .dropdown-toggle {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-            padding: 22px;
-            background: transparent;
-            border: none;
-            color: inherit;
-            font-family: inherit;
-            text-align: right;
-            cursor: pointer;
-            position: relative;
-            border-radius: 14px;
-        }
-
-        .dropdown-toggle h3 {
-            margin: 0 0 8px 0;
-            font-size: 1.2rem;
-            line-height: 1.4;
-            color: var(--text-color);
-        }
-
-        .dropdown-toggle p {
-            margin: 0;
-            font-size: 0.92rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        .dropdown-arrow {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 0.95rem;
-            color: var(--accent-cyan);
-            transition: transform 0.3s ease;
-        }
-
-        .dropdown-card.open .dropdown-arrow { transform: rotate(180deg); }
-
-        .dropdown-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            padding: 0 22px;
-            transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.35s ease;
-        }
-
-        .dropdown-card.open .dropdown-menu {
-            max-height: 500px;
-            opacity: 1;
-            padding: 0 22px 20px;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: var(--text-color);
-            background: rgba(0, 0, 0, 0.18);
-            border: 1px solid var(--border-soft);
-            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-        }
-
-        body.light-mode .dropdown-item { background: rgba(0, 0, 0, 0.04); }
-
-        .dropdown-item:hover {
-            background: var(--sub-card-hover);
-            border-color: var(--accent-cyan);
-            transform: translateX(-4px);
-        }
-
-        .dropdown-item .item-icon { font-size: 1.3rem; }
-
-        .dropdown-item strong {
-            display: block;
-            font-size: 0.98rem;
-            margin-bottom: 2px;
-        }
-
-        .dropdown-item small {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            line-height: 1.5;
         }
 
         /* ===== التجاوب ===== */
@@ -604,33 +579,22 @@
                         <p>محاكاة القوى المؤثرة والاحتكاك على السطح الأفقي والسطح المائل.</p>
                     </a>
 
-                    <!-- ✅ القائمة المنسدلة: القياسات بالأدوات الدقيقة -->
+                    <!-- بطاقة القياس بالأدوات الدقيقة (مع قائمة منسدلة) -->
                     <div class="sub-card mechanics-card dropdown-card">
-                        <button type="button" class="dropdown-toggle" aria-expanded="false" aria-controls="measurementsMenu">
-                            <span class="card-icon">📏</span>
-                            <h3>القياسات بالأدوات الدقيقة</h3>
-                            <p>محاكاة تفاعلية القدمة (الورنية) والميكرومتر — اسحب على الرسم لتغيير القياس وقراءة النتيجة.</p>
-                            <span class="dropdown-arrow">▾</span>
+                        <span class="card-icon">📏</span>
+                        <h3>القياسات بالأدوات الدقيقة</h3>
+                        <p>محاكاة تفاعلية القدمة (الورنية) والميكرومتر — اختر المحاكاة المطلوبة.</p>
+
+                        <button class="dropdown-toggle" type="button" aria-expanded="false" aria-controls="measurementsMenu">
+                            <span>اختر المحاكاة</span>
+                            <span class="chevron">▼</span>
                         </button>
 
                         <div class="dropdown-menu" id="measurementsMenu">
-                            <a href="mechanics/measurements/measurements.html" class="dropdown-item">
-                                <span class="item-icon">1️⃣</span>
-                                <span>
-                                    <strong>القياس بالأدوات الدقيقة 1</strong>
-                                    <small>القدمة (الورنية) — قراءة القياس خطوة بخطوة</small>
-                                </span>
-                            </a>
-                            <a href="mechanics/measurements/measuring-tools.html" class="dropdown-item">
-                                <span class="item-icon">2️⃣</span>
-                                <span>
-                                    <strong>القياس بالأدوات الدقيقة 2</strong>
-                                    <small>الميكرومتر — تدريبات وقياسات تفاعلية</small>
-                                </span>
-                            </a>
+                            <a href="mechanics/measurements/measurements1.html">📏 القياس بالأدوات الدقيقة 1</a>
+                            <a href="mechanics/measurements/measurements2.html">📏 القياس بالأدوات الدقيقة 2</a>
                         </div>
                     </div>
-
                 </div>
             </section>
 
@@ -734,15 +698,6 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         });
 
-        // ===== القائمة المنسدلة للقياسات =====
-        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
-            toggle.addEventListener('click', () => {
-                const card = toggle.closest('.dropdown-card');
-                const isOpen = card.classList.toggle('open');
-                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            });
-        });
-
         // ===== البحث الفوري =====
         const searchInput = document.getElementById('searchInput');
         const allCards = document.querySelectorAll('.sub-card');
@@ -763,13 +718,6 @@
                         card.style.display = '';
                         sectionHasVisible = true;
                         visibleCount++;
-
-                        // فتح القائمة المنسدلة تلقائياً عند وجود بحث مطابق
-                        if (card.classList.contains('dropdown-card') && query !== '') {
-                            card.classList.add('open');
-                            const t = card.querySelector('.dropdown-toggle');
-                            if (t) t.setAttribute('aria-expanded', 'true');
-                        }
                     } else {
                         card.style.display = 'none';
                     }
@@ -778,16 +726,43 @@
                 section.style.display = sectionHasVisible ? '' : 'none';
             });
 
-            // إغلاق القائمة عند مسح البحث
-            if (query === '') {
-                document.querySelectorAll('.dropdown-card.open').forEach(card => {
-                    card.classList.remove('open');
-                    const t = card.querySelector('.dropdown-toggle');
-                    if (t) t.setAttribute('aria-expanded', 'false');
-                });
-            }
-
             noResults.classList.toggle('visible', visibleCount === 0 && query !== '');
+        });
+
+        // ===== القوائم المنسدلة =====
+        const dropdownCards = document.querySelectorAll('.dropdown-card');
+
+        function closeAllDropdowns(except) {
+            dropdownCards.forEach(card => {
+                if (card === except) return;
+                card.classList.remove('open');
+                const btn = card.querySelector('.dropdown-toggle');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        dropdownCards.forEach(card => {
+            const btn = card.querySelector('.dropdown-toggle');
+            if (!btn) return;
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const willOpen = !card.classList.contains('open');
+                closeAllDropdowns(card);
+                card.classList.toggle('open', willOpen);
+                btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            });
+        });
+
+        // إغلاق القائمة عند النقر خارجها
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-card')) closeAllDropdowns(null);
+        });
+
+        // إغلاق القائمة بمفتاح Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAllDropdowns(null);
         });
 
         // ===== زر العودة للأعلى =====
