@@ -406,6 +406,110 @@
             transform: translateY(0);
         }
 
+        /* ================================================
+           القائمة المنسدلة — القياسات بالأدوات الدقيقة
+           ================================================ */
+        .dropdown-card {
+            padding: 0;
+            cursor: default;
+        }
+
+        .dropdown-card::after { content: none; }
+
+        .dropdown-toggle {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            padding: 22px;
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-family: inherit;
+            text-align: right;
+            cursor: pointer;
+            position: relative;
+            border-radius: 14px;
+        }
+
+        .dropdown-toggle h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.2rem;
+            line-height: 1.4;
+            color: var(--text-color);
+        }
+
+        .dropdown-toggle p {
+            margin: 0;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .dropdown-arrow {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.95rem;
+            color: var(--accent-cyan);
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-card.open .dropdown-arrow { transform: rotate(180deg); }
+
+        .dropdown-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            padding: 0 22px;
+            transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.35s ease;
+        }
+
+        .dropdown-card.open .dropdown-menu {
+            max-height: 500px;
+            opacity: 1;
+            padding: 0 22px 20px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-color);
+            background: rgba(0, 0, 0, 0.18);
+            border: 1px solid var(--border-soft);
+            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        body.light-mode .dropdown-item { background: rgba(0, 0, 0, 0.04); }
+
+        .dropdown-item:hover {
+            background: var(--sub-card-hover);
+            border-color: var(--accent-cyan);
+            transform: translateX(-4px);
+        }
+
+        .dropdown-item .item-icon { font-size: 1.3rem; }
+
+        .dropdown-item strong {
+            display: block;
+            font-size: 0.98rem;
+            margin-bottom: 2px;
+        }
+
+        .dropdown-item small {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
         /* ===== التجاوب ===== */
         @media (max-width: 768px) {
             header h1 { font-size: 1.7rem; }
@@ -499,11 +603,34 @@
                         <h3>القوى والاحتكاك</h3>
                         <p>محاكاة القوى المؤثرة والاحتكاك على السطح الأفقي والسطح المائل.</p>
                     </a>
-                    <a href="mechanics/measurements/measurements.html" class="sub-card mechanics-card">
-                        <span class="card-icon">📏</span>
-                        <h3>القياسات بالأدوات الدقيقة</h3>
-                        <p>محاكاة تفاعلية القدمة  (الورنية) والميكرومتر — اسحب على الرسم لتغيير القياس وقراءة النتيجة.</p>
-                    </a>
+
+                    <!-- ✅ القائمة المنسدلة: القياسات بالأدوات الدقيقة -->
+                    <div class="sub-card mechanics-card dropdown-card">
+                        <button type="button" class="dropdown-toggle" aria-expanded="false" aria-controls="measurementsMenu">
+                            <span class="card-icon">📏</span>
+                            <h3>القياسات بالأدوات الدقيقة</h3>
+                            <p>محاكاة تفاعلية القدمة (الورنية) والميكرومتر — اسحب على الرسم لتغيير القياس وقراءة النتيجة.</p>
+                            <span class="dropdown-arrow">▾</span>
+                        </button>
+
+                        <div class="dropdown-menu" id="measurementsMenu">
+                            <a href="mechanics/measurements/measurements1.html" class="dropdown-item">
+                                <span class="item-icon">1️⃣</span>
+                                <span>
+                                    <strong>القياس بالأدوات الدقيقة 1</strong>
+                                    <small>القدمة (الورنية) — قراءة القياس خطوة بخطوة</small>
+                                </span>
+                            </a>
+                            <a href="mechanics/measurements/measurements2.html" class="dropdown-item">
+                                <span class="item-icon">2️⃣</span>
+                                <span>
+                                    <strong>القياس بالأدوات الدقيقة 2</strong>
+                                    <small>الميكرومتر — تدريبات وقياسات تفاعلية</small>
+                                </span>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 
@@ -607,6 +734,15 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         });
 
+        // ===== القائمة المنسدلة للقياسات =====
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const card = toggle.closest('.dropdown-card');
+                const isOpen = card.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+        });
+
         // ===== البحث الفوري =====
         const searchInput = document.getElementById('searchInput');
         const allCards = document.querySelectorAll('.sub-card');
@@ -627,6 +763,13 @@
                         card.style.display = '';
                         sectionHasVisible = true;
                         visibleCount++;
+
+                        // فتح القائمة المنسدلة تلقائياً عند وجود بحث مطابق
+                        if (card.classList.contains('dropdown-card') && query !== '') {
+                            card.classList.add('open');
+                            const t = card.querySelector('.dropdown-toggle');
+                            if (t) t.setAttribute('aria-expanded', 'true');
+                        }
                     } else {
                         card.style.display = 'none';
                     }
@@ -634,6 +777,15 @@
                 
                 section.style.display = sectionHasVisible ? '' : 'none';
             });
+
+            // إغلاق القائمة عند مسح البحث
+            if (query === '') {
+                document.querySelectorAll('.dropdown-card.open').forEach(card => {
+                    card.classList.remove('open');
+                    const t = card.querySelector('.dropdown-toggle');
+                    if (t) t.setAttribute('aria-expanded', 'false');
+                });
+            }
 
             noResults.classList.toggle('visible', visibleCount === 0 && query !== '');
         });
