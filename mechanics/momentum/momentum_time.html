@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>محاكاة الزخم الخطي والزمن | الأستاذ ماجد شلالدة</title>
+<style>
+:root{
+  --bg-color:#0b1329; --main-card-bg:#1c2541; --sub-card-bg:#3a506b;
+  --accent-orange:#f77f00; --accent-gold:#ffd166;
+  --border-soft:rgba(255,255,255,0.08);
+  --shadow-soft:0 10px 30px rgba(0,0,0,0.3);
+  /* متغيرات المحاكاة (تقرؤها الرسومات) */
+  --bg:#0b1329; --panel:#1c2541; --ink:#eef1f7; --mute:#c0c8d8; --line:rgba(255,255,255,0.16);
+  --a:#ffb454; --b:#6ea8ff; --c:#ff7aa8;
+  --accent:#f77f00; --accent-text:#ffd166;
+}
+body.light-mode{
+  --bg-color:#f0f4f8; --main-card-bg:#ffffff; --sub-card-bg:#e8eef5;
+  --border-soft:rgba(0,0,0,0.08);
+  --shadow-soft:0 10px 30px rgba(0,0,0,0.08);
+  --bg:#f0f4f8; --panel:#ffffff; --ink:#1a202c; --mute:#4a5568; --line:#d6dbe7;
+  --a:#b85c00; --b:#1f5fd6; --c:#c2255c;
+  --accent:#f77f00; --accent-text:#b45309;
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;position:relative;
+  background:var(--bg-color);color:var(--ink);
+  font-family:'Segoe UI',system-ui,-apple-system,Tahoma,Arial,sans-serif;
+  line-height:1.7;transition:background .3s,color .3s;
+}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ===== شريط التنقل ===== */
+#navbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 24px;padding-top:calc(12px + env(safe-area-inset-top,0px));
+  min-height:56px;
+  background:rgba(28,37,65,0.92);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border-soft);
+}
+body.light-mode #navbar{background:rgba(255,255,255,0.92)}
+.nav-brand{font-size:1.05rem;font-weight:bold;color:var(--accent);display:flex;align-items:center;gap:8px}
+body.light-mode .nav-brand{color:#c2410c}
+.nav-links{display:flex;gap:6px;flex-wrap:wrap}
+.nav-links a{color:var(--ink);text-decoration:none;padding:8px 14px;border-radius:8px;font-size:.88rem;transition:.2s}
+.nav-links a:hover{background:var(--accent);color:#000}
+.theme-toggle{
+  background:transparent;border:1px solid var(--border-soft);color:var(--ink);
+  font-size:1.1rem;width:36px;height:36px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg)}
+
+/* ===== مسار التنقل ===== */
+#breadcrumb{
+  align-self:center;margin:14px 12px 0;
+  display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;
+  padding:8px 18px;font-size:12px;color:var(--mute);
+  background:var(--main-card-bg);border:1px solid var(--border-soft);border-radius:10px;
+}
+#breadcrumb a{color:var(--accent-text);text-decoration:none}
+body.light-mode #breadcrumb a{color:#c2410c}
+#breadcrumb .sep{opacity:.5}
+#breadcrumb .cur{color:var(--ink);font-weight:600}
+
+/* ===== الترويسة ===== */
+#siteHeader{display:flex;align-items:center;justify-content:center;padding:4px 20px 2px;min-height:120px}
+#logoWrap{position:absolute;top:calc(70px + env(safe-area-inset-top,0px));right:18px;z-index:30;display:flex;justify-content:center;align-items:center}
+#logoWrap img{
+  width:192px;height:192px;border-radius:50%;background:#fff;object-fit:cover;
+  box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);
+  border:3px solid rgba(255,255,255,.2);
+}
+body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
+#logoFallback{
+  display:none;width:192px;height:192px;border-radius:50%;
+  background:linear-gradient(135deg,#f77f00,#00b4d8);
+  align-items:center;justify-content:center;font-size:6.1rem;color:#fff;
+}
+#titleBlock{text-align:center}
+#titleBlock h1{margin:0;font-size:20px;line-height:1.4;color:var(--accent-text)}
+.sub{color:var(--mute);margin:2px 0 0;font-size:13px}
+
+/* ===== التبويبات ===== */
+.tabs{display:flex;gap:8px;justify-content:center;align-items:center;padding:12px 16px 10px;flex-wrap:wrap}
+.tabs button{
+  font:inherit;font-size:13px;font-weight:bold;padding:8px 22px;border-radius:20px;
+  border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);
+  cursor:pointer;transition:.2s;
+}
+.tabs button:hover{background:var(--sub-card-bg)}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#000}
+
+/* ===== منطقة المحاكاة ===== */
+main{flex:1 1 auto;display:flex;flex-direction:column;margin:0 18px;min-height:0}
+section{display:none;background:var(--panel);border:1px solid var(--border-soft);border-radius:16px;padding:16px;box-shadow:var(--shadow-soft)}
+section.on{display:flex;flex-direction:column;flex:1}
+.wrap{position:relative;flex:1;min-height:320px}
+p.note{margin:0 0 10px;color:var(--mute)}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;border-radius:8px;background:var(--bg)}
+.ctl{display:flex;align-items:center;gap:10px;margin:12px 0 4px;flex-wrap:wrap}
+.ctl label{min-width:150px;font-weight:600}
+.ctl input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.ctl output{min-width:90px;direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.read div{border:1px solid var(--border-soft);background:var(--sub-card-bg);border-radius:8px;padding:8px 10px}
+body:not(.light-mode) .read div{background:rgba(255,255,255,0.04)}
+.read small{display:block;color:var(--mute)}
+.read b{direction:ltr;display:inline-block;font-variant-numeric:tabular-nums}
+.btn{font:inherit;font-weight:bold;padding:8px 16px;border-radius:20px;border:1px solid var(--accent);background:var(--accent);color:#000;cursor:pointer;margin-inline-end:8px}
+.btn.alt{background:transparent;color:var(--accent-text)}
+body.light-mode .btn.alt{color:#c2410c}
+.key{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0;color:var(--mute);font-size:.9rem}
+.key i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-inline-end:6px}
+
+/* ===== التذييل ===== */
+#footer{
+  padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));
+  text-align:center;font-size:11px;color:var(--mute);
+}
+#footer strong{color:var(--accent)}
+body.light-mode #footer strong{color:#c2410c}
+
+@media(max-width:650px){
+  #navbar{flex-wrap:wrap;gap:10px;padding:10px 15px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .nav-links{order:3;width:100%;justify-content:center}
+  .nav-links a{padding:6px 10px;font-size:.8rem}
+  .nav-brand span{display:none}
+  #breadcrumb{font-size:10px;padding:5px 12px}
+  #logoWrap{position:static}
+  #siteHeader{flex-direction:column;gap:8px;padding:12px 12px 2px;min-height:0}
+  #logoWrap img,#logoFallback{width:154px;height:154px}
+  #logoFallback{font-size:4.8rem}
+  #titleBlock h1{font-size:16px}
+  main{margin:0 8px}
+  section{padding:12px}
+  .ctl label{min-width:100%}
+  #footer{font-size:9.5px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none !important}}
+
+.chips{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:0 16px 10px;font-size:13px;color:var(--mute)}
+.chips button{font:inherit;font-size:12.5px;font-weight:bold;padding:6px 16px;border-radius:20px;border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);cursor:pointer;transition:.2s}
+.chips button:hover{background:var(--sub-card-bg)}
+.chips button.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent-text)}
+body.light-mode .chips button.on{color:#c2410c}
+.read .txt b{direction:rtl;display:block;font-weight:600;font-size:.92rem;line-height:1.6}
+.read.wide{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.ctl .btn{margin:0}
+
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;min-height:320px}
+.duo .wrap{min-height:260px}
+@media(max-width:760px){.duo{grid-template-columns:1fr}.duo .wrap{min-height:260px}}
+.sel{font:inherit;padding:8px 12px;border-radius:8px;border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);min-width:160px}
+.read .eq b{direction:ltr;unicode-bidi:isolate;display:block;font-size:1.05rem;font-weight:600;line-height:1.7}
+sup,sub{line-height:0}
+
+.credit{margin:6px 0 0;font-size:13px;color:var(--mute)}
+.credit .lead{color:var(--accent-text)}
+body.light-mode .credit .lead{color:#b45309}
+.credit strong{color:var(--ink)}
+.credit .bar{opacity:.5;margin:0 6px}
+.credit .ph{direction:ltr;unicode-bidi:isolate}
+#shared{margin:0 18px 12px;background:var(--panel);border:1px solid var(--border-soft);border-radius:16px;padding:10px 16px 6px;box-shadow:var(--shadow-soft)}
+#shared .ctl{margin:6px 0}
+.sw{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-inline-end:6px;border:1px solid rgba(255,255,255,.4)}
+
+#breadcrumb{margin-top:8px;padding:6px 16px}
+.tabs{padding:6px 16px 8px}
+#shared{padding:8px 16px 4px;margin-bottom:8px}
+#shared .ctl{margin:4px 0}
+#shared .ctl label{min-width:110px}
+section{padding:12px 16px}
+p.note{margin:0 0 6px;font-size:.92rem;line-height:1.55}
+.wrap{min-height:230px}
+.ctl{margin:8px 0 2px}
+.read{margin-top:8px;gap:6px}
+.read div{padding:4px 8px}
+.read small{font-size:.8rem;line-height:1.4}
+.read b{font-size:.95rem}
+.chips{padding-bottom:6px}
+#footer{padding:8px 20px calc(10px + env(safe-area-inset-bottom,0px))}
+@media(min-width:761px){
+ #shared{display:grid;grid-template-columns:1fr 1fr;column-gap:28px}
+ #shared .chips{grid-column:1/-1}
+ #exp .read.wide{grid-template-columns:repeat(9,1fr)}
+ #exp .read .txt{grid-column:span 2}
+ #graphs .read.wide{grid-template-columns:repeat(3,1fr)}
+ #ein .read.wide{grid-template-columns:repeat(4,1fr)}
+}
+
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);column-gap:26px;margin-top:4px}
+.cgrid.c2{grid-template-columns:repeat(2,1fr)}
+.cgrid .ctl{margin:3px 0}
+.cgrid .ctl label{min-width:96px;font-size:.92rem}
+.cgrid .ctl output{min-width:72px}
+.stack{display:grid;grid-template-rows:1fr 1fr;gap:8px;flex:1;min-height:340px}
+.stack .wrap{min-height:150px}
+.duo .wrap{min-height:240px}
+.read.m{grid-template-columns:repeat(auto-fit,minmax(135px,1fr))}
+@media(max-width:760px){.cgrid,.cgrid.c2{grid-template-columns:1fr}.stack{min-height:400px}}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-brand">⚛️ <span>فيزياء ماجد شلالدة</span></div>
+  <div class="nav-links">
+    <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+    <a href="../../index.html#electricity">⚡ الكهرباء</a>
+    <a href="../../index.html#magnetism">🧲 المغناطيسية</a>
+    <a href="../../index.html#modern">🔬 الحديثة</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="تبديل الوضع الليلي/النهاري" title="تبديل الوضع">🌙</button>
+</nav>
+
+<div id="breadcrumb">
+  <a href="../../index.html">🏠 الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="../../index.html#mechanics">⚙️ الميكانيكا</a>
+  <span class="sep">›</span>
+  <span class="cur">📈 الزخم الخطي والدفع</span>
+</div>
+
+<header id="siteHeader">
+  <div id="logoWrap">
+    <img src="../../logo.png" alt="شعار الأستاذ ماجد شلالدة"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+    <div id="logoFallback">⚛️</div>
+  </div>
+  <div id="titleBlock">
+    <h1>محاكاة الزخم الخطي والزمن</h1>
+    <p class="sub">رسم العلاقة بين الزخم الخطي لجسم والزمن، ونظرية الدفع والزخم</p>
+    <p class="credit"><span class="lead">إعداد وتطوير:</span> <strong>الأستاذ ماجد شلالدة</strong> <span class="bar">|</span> <span class="ph">0599870176</span></p>
+  </div>
+</header>
+
+<div class="tabs" role="tablist">
+<button role="tab" aria-selected="true" data-t="c1">قوة ثابتة</button>
+<button role="tab" aria-selected="false" data-t="c2">قوة متغيرة والدفع</button>
+<button role="tab" aria-selected="false" data-t="c3">التصادم</button>
+</div>
+
+<main id="stage">
+
+<section id="c1" class="on">
+<p class="note">الزخم الخطي p = m·v. عندما تؤثر قوة محصلة F على جسم يتغير زخمه بمعدل F، أي <bdi dir="ltr">p(t) = p₀ + F·t</bdi>، فيكون منحنى (الزخم – الزمن) خطًا مستقيمًا ميله يساوي القوة المحصلة.</p>
+<div class="chips" style="padding:0 0 6px;justify-content:flex-start"><button class="on" data-sp="1">×1</button><button data-sp="2">×2</button><button data-sp="4">×4</button></div>
+<div class="duo">
+<div class="wrap"><canvas id="c1a"></canvas></div>
+<div class="wrap"><canvas id="c1b"></canvas></div>
+</div>
+<div class="cgrid">
+<div class="ctl"><label for="s1m">الكتلة m</label><input id="s1m" type="range" min="0.5" max="10" step="0.5" value="2"><output id="o1m"></output></div>
+<div class="ctl"><label for="s1v">السرعة الابتدائية v₀</label><input id="s1v" type="range" min="-10" max="10" step="1" value="2"><output id="o1v"></output></div>
+<div class="ctl"><label for="s1f">القوة المحصلة F</label><input id="s1f" type="range" min="-20" max="20" step="1" value="4"><output id="o1f"></output></div>
+</div>
+<div class="ctl" style="margin-top:2px"><button class="btn" id="p1">إيقاف مؤقت</button><button class="btn alt" id="r1">إعادة</button></div>
+<div class="read m">
+<div><small>الزمن t</small><b id="a1t"></b></div>
+<div><small>السرعة v</small><b id="a1v"></b></div>
+<div><small>الزخم p = m·v</small><b id="a1p"></b></div>
+<div><small>الزخم الابتدائي p₀</small><b id="a1p0"></b></div>
+<div><small>التغير في الزخم Δp = F·t</small><b id="a1d"></b></div>
+<div><small>ميل المنحنى (= F)</small><b id="a1s"></b></div>
+</div>
+</section>
+
+<section id="c2">
+<p class="note">ميل منحنى الزخم–الزمن عند أي لحظة يساوي القوة اللحظية، والمساحة تحت منحنى القوة–الزمن (الدفع) تساوي التغير في الزخم: <bdi dir="ltr">J = ∫F dt = Δp</bdi>. اختر شكل القوة وحرّك الزمن.</p>
+<div class="chips" style="padding:0 0 6px;justify-content:flex-start">
+<button class="on" data-pf="const">قوة ثابتة</button><button data-pf="pulse">نبضة (دفعة)</button><button data-pf="ramp">تزداد خطيًا</button><button data-pf="alt">متناوبة</button>
+<span style="margin-inline:8px">|</span><button class="on" data-sp="1">×1</button><button data-sp="2">×2</button><button data-sp="4">×4</button>
+</div>
+<div class="stack">
+<div class="wrap"><canvas id="c2f"></canvas></div>
+<div class="wrap"><canvas id="c2p"></canvas></div>
+</div>
+<div class="cgrid">
+<div class="ctl"><label for="s2m">الكتلة m</label><input id="s2m" type="range" min="0.5" max="10" step="0.5" value="2"><output id="o2m"></output></div>
+<div class="ctl"><label for="s2v">السرعة الابتدائية v₀</label><input id="s2v" type="range" min="-10" max="10" step="1" value="2"><output id="o2v"></output></div>
+<div class="ctl"><label for="s2f">مقدار القوة F₀</label><input id="s2f" type="range" min="-20" max="20" step="1" value="6"><output id="o2f"></output></div>
+<div class="ctl" id="k1"><label for="s2a">بداية النبضة t₁</label><input id="s2a" type="range" min="0" max="9" step="0.5" value="2"><output id="o2a"></output></div>
+<div class="ctl" id="k2"><label for="s2b">نهاية النبضة t₂</label><input id="s2b" type="range" min="0.5" max="10" step="0.5" value="5"><output id="o2b"></output></div>
+<div class="ctl"><label for="s2t">الزمن t</label><input id="s2t" type="range" min="0" max="200" step="1" value="0"><output id="o2t"></output></div>
+</div>
+<div class="ctl" style="margin-top:2px"><button class="btn" id="p2">إيقاف مؤقت</button><button class="btn alt" id="r2">إعادة</button></div>
+<div class="read m">
+<div><small>الزمن t</small><b id="a2t"></b></div>
+<div><small>القوة F(t)</small><b id="a2f"></b></div>
+<div><small>الزخم p(t)</small><b id="a2p"></b></div>
+<div><small>الزخم الابتدائي p₀</small><b id="a2p0"></b></div>
+<div><small>الدفع J (المساحة) = Δp</small><b id="a2d"></b></div>
+<div><small>السرعة v(t)</small><b id="a2v"></b></div>
+</div>
+</section>
+
+<section id="c3">
+<p class="note">أثناء التصادم تؤثر قوتان متبادلتان متساويتان في المقدار ومتعاكستان في الاتجاه، فيتغير زخم كل جسم لكن الزخم الكلي يبقى ثابتًا. معامل الارتداد e: يساوي 1 في التصادم المرن و0 في عديم المرونة.</p>
+<div class="chips" style="padding:0 0 6px;justify-content:flex-start">
+<button class="on" data-e="1">مرن (e = 1)</button><button data-e="0.5">غير مرن جزئيًا (e = 0.5)</button><button data-e="0">عديم المرونة (e = 0)</button>
+<span style="margin-inline:8px">|</span><button class="on" data-sp="1">×1</button><button data-sp="2">×2</button><button data-sp="4">×4</button>
+</div>
+<div class="duo">
+<div class="wrap"><canvas id="c3a"></canvas></div>
+<div class="wrap"><canvas id="c3b"></canvas></div>
+</div>
+<div class="cgrid c2">
+<div class="ctl"><label for="s3a">كتلة الجسم 1</label><input id="s3a" type="range" min="1" max="10" step="1" value="2"><output id="o3a"></output></div>
+<div class="ctl"><label for="s3b">كتلة الجسم 2</label><input id="s3b" type="range" min="1" max="10" step="1" value="4"><output id="o3b"></output></div>
+<div class="ctl"><label for="s3c">سرعة الجسم 1</label><input id="s3c" type="range" min="-6" max="6" step="1" value="4"><output id="o3c"></output></div>
+<div class="ctl"><label for="s3d">سرعة الجسم 2</label><input id="s3d" type="range" min="-6" max="6" step="1" value="-1"><output id="o3d"></output></div>
+</div>
+<div class="ctl" style="margin-top:2px"><button class="btn" id="p3">إيقاف مؤقت</button><button class="btn alt" id="r3">إعادة</button></div>
+<div class="read m">
+<div class="txt"><small>المرحلة</small><b id="a3s"></b></div>
+<div><small>الزخم الكلي الآن</small><b id="a3n"></b></div>
+<div><small>الزخم الكلي قبل / بعد</small><b id="a3t"></b></div>
+<div><small>السرعتان بعد التصادم</small><b id="a3v"></b></div>
+<div><small>الطاقة الحركية قبل → بعد</small><b id="a3k"></b></div>
+<div><small>الدفع على الجسم 1 / 2</small><b id="a3j"></b></div>
+</div>
+</section>
+
+</main>
+
+<div id="footer">
+  © 2025 المنصة التفاعلية للمحاكاة الفيزيائية — إعداد
+  <strong>الأستاذ ماجد شلالدة</strong> — 📱 0599870176
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.body).getPropertyValue(n).trim();
+const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const B=t=>'<bdi dir="ltr">'+t+'</bdi>';
+const LRI=s=>'\u2066'+s+'\u2069';
+const lerp=(a,b,t)=>a+(b-a)*t;
+function setup(cv){const d=window.devicePixelRatio||1,w=cv.clientWidth,hh=cv.clientHeight;
+ if(cv.width!==Math.round(w*d)||cv.height!==Math.round(hh*d)){cv.width=Math.round(w*d);cv.height=Math.round(hh*d)}
+ const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,w,hh);return{x,w,h:hh}}
+function lbl(x,s,X,Y,al,dir){x.direction=dir||'rtl';x.textAlign=al||'center';x.fillText(s,X,Y)}
+function niceTicks(a,b,n){const r=b-a,raw=r/n,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p,s=(f<1.5?1:f<3?2:f<7?5:10)*p,o=[];
+ for(let v=Math.ceil(a/s-1e-9)*s;v<=b+1e-9;v+=s)o.push(+v.toFixed(6));return o}
+const f1=v=>(Math.abs(v)<5e-3?0:v).toFixed(2);
+function axes(x,w,H,gm,xr,yr,px,py,xl,yl,showX){
+ x.font='11px sans-serif';
+ niceTicks(yr[0],yr[1],5).forEach(v=>{const z=v===0;x.strokeStyle=z?css('--mute'):css('--line');x.lineWidth=z?1.5:1;x.beginPath();x.moveTo(gm.l,py(v));x.lineTo(w-gm.r,py(v));x.stroke();x.fillStyle=css('--mute');lbl(x,String(v),gm.l-6,py(v)+4,'right','ltr')});
+ if(showX)niceTicks(xr[0],xr[1],10).forEach(v=>{x.fillStyle=css('--mute');lbl(x,String(v),px(v),H-gm.b+14,'center','ltr')});
+ x.strokeStyle=css('--mute');x.globalAlpha=.7;x.lineWidth=1;x.beginPath();x.moveTo(gm.l,gm.t);x.lineTo(gm.l,H-gm.b);x.lineTo(w-gm.r,H-gm.b);x.stroke();x.globalAlpha=1;
+ x.fillStyle=css('--mute');x.font='12px sans-serif';
+ if(xl)lbl(x,xl,gm.l+(w-gm.l-gm.r)/2,H-5,'center','rtl');
+ x.save();x.translate(13,gm.t+(H-gm.t-gm.b)/2);x.rotate(-Math.PI/2);lbl(x,yl,0,0,'center','rtl');x.restore()}
+function rangeY(vals,padf){let lo=Math.min(0,...vals),hi=Math.max(0,...vals);if(hi-lo<2){hi+=1;lo-=1}const p=(hi-lo)*(padf||.12);return[lo<0?lo-p:lo,hi>0?hi+p:hi]}
+function arrow(x,X0,Y,dx,col,lw){if(Math.abs(dx)<1)return;x.strokeStyle=col;x.fillStyle=col;x.lineWidth=lw||3;x.beginPath();x.moveTo(X0,Y);x.lineTo(X0+dx,Y);x.stroke();
+ const s=Math.sign(dx);x.beginPath();x.moveTo(X0+dx,Y);x.lineTo(X0+dx-s*9,Y-5);x.lineTo(X0+dx-s*9,Y+5);x.fill()}
+function ticksGround(x,w,ground,xc,sc,cM){x.strokeStyle=cM;x.lineWidth=2;x.beginPath();x.moveTo(0,ground);x.lineTo(w,ground);x.stroke();
+ x.font='11px sans-serif';const a=xc-w/2/sc,b=xc+w/2/sc;
+ for(let k=Math.ceil(a);k<=Math.floor(b);k++){const X=w/2+(k-xc)*sc,big=k%5===0;x.strokeStyle=cM;x.lineWidth=1;x.beginPath();x.moveTo(X,ground);x.lineTo(X,ground+(big?10:5));x.stroke();if(big){x.fillStyle=cM;lbl(x,String(k),X,ground+24,'center','ltr')}}}
+let spd=1,cur='c1';
+document.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{spd=+b.dataset.sp;document.querySelectorAll('[data-sp]').forEach(o=>o.classList.toggle('on',+o.dataset.sp===spd))});
+const GM={l:58,r:16,t:14,b:42};
+const pLab='الزخم '+LRI('p (kg·m/s)'),tLab='الزمن (ثانية)';
+
+/* ============ 1) قوة ثابتة ============ */
+const T1=10;
+let m1=2,v01=2,F1=4,t1=still?T1:0,run1=!still;
+const pOf=t=>m1*v01+F1*t,xOf=t=>v01*t+.5*F1/m1*t*t;
+function draw1(){
+ { const{x,w,h:H}=setup($('c1a'));const xc=xOf(t1),sc=Math.min(26,w/22),ground=H*.7,cw=Math.min(w*.4,50+14*m1),ch=42,cx=w/2;
+  const cB=css('--b'),cA=css('--a'),cC=css('--c'),cM=css('--mute'),cI=css('--ink');
+  ticksGround(x,w,ground,xc,sc,cM);
+  const Xs=w/2+(0-xc)*sc;if(Xs>6&&Xs<w-6){x.setLineDash([4,4]);x.strokeStyle=cM;x.beginPath();x.moveTo(Xs,ground);x.lineTo(Xs,ground-60);x.stroke();x.setLineDash([]);x.fillStyle=cM;x.font='11px sans-serif';lbl(x,'البداية',Xs,ground-66,'center','rtl')}
+  x.fillStyle=cB;x.beginPath();x.roundRect(cx-cw/2,ground-ch-10,cw,ch,6);x.fill();
+  x.fillStyle='#1e293b';[-1,1].forEach(s=>{x.beginPath();x.arc(cx+s*cw*.3,ground-5,6,0,7);x.fill()});
+  x.fillStyle='#fff';x.font='bold 12px sans-serif';lbl(x,m1+' kg',cx,ground-ch/2-5,'center','ltr');
+  const v=v01+F1*t1/m1,vy=ground-ch-38;
+  arrow(x,cx,vy,Math.max(-w*.4,Math.min(w*.4,v*9)),cA,3.5);
+  x.fillStyle=cA;x.font='bold 12px sans-serif';lbl(x,'v = '+f1(v)+' m/s',cx,vy-12,'center','ltr');
+  if(F1!==0){const s=Math.sign(F1),L=Math.min(w*.3,Math.abs(F1)*4+12);arrow(x,cx+s*(cw/2+3),ground-ch/2-10,s*L,cC,4);x.fillStyle=cC;lbl(x,'F = '+F1+' N',cx+s*(cw/2+3+L/2),ground-ch/2-24,'center','ltr')}
+  x.fillStyle=cI;x.font='bold 14px sans-serif';lbl(x,'p = m·v = '+f1(m1*v)+' kg·m/s',w/2,22,'center','ltr') }
+ { const{x,w,h:H}=setup($('c1b'));const gm=GM,p0=m1*v01,pe=pOf(T1),yr=rangeY([p0,pe]);
+  const px=t=>gm.l+(w-gm.l-gm.r)*t/T1,py=p=>H-gm.b-(H-gm.t-gm.b)*(p-yr[0])/(yr[1]-yr[0]);
+  axes(x,w,H,gm,[0,T1],yr,px,py,tLab,pLab,true);
+  x.setLineDash([6,5]);x.strokeStyle=css('--b');x.lineWidth=2;x.beginPath();x.moveTo(px(0),py(p0));x.lineTo(px(T1),py(pe));x.stroke();x.setLineDash([]);
+  x.strokeStyle=css('--a');x.lineWidth=3.2;x.beginPath();x.moveTo(px(0),py(p0));x.lineTo(px(t1),py(pOf(t1)));x.stroke();
+  x.fillStyle=css('--a');x.strokeStyle='#000';x.lineWidth=1;x.beginPath();x.arc(px(t1),py(pOf(t1)),6,0,7);x.fill();x.stroke();
+  x.fillStyle=css('--b');x.font='bold 12px sans-serif';lbl(x,'الميل = '+LRI('F = '+F1+' N'),gm.l+(w-gm.l-gm.r)*.5,gm.t+16,'center','rtl') }
+}
+function upd1(){const v=v01+F1*t1/m1;
+ $('o1m').innerHTML=B(m1+' kg');$('o1v').innerHTML=B(v01+' m/s');$('o1f').innerHTML=B(F1+' N');
+ $('a1t').innerHTML=B(t1.toFixed(1)+' s');$('a1v').innerHTML=B(f1(v)+' m/s');$('a1p').innerHTML=B(f1(m1*v)+' kg·m/s');
+ $('a1p0').innerHTML=B(f1(m1*v01)+' kg·m/s');$('a1d').innerHTML=B(f1(F1*t1)+' kg·m/s');$('a1s').innerHTML=B(F1+' N')}
+function reset1(){t1=0;run1=true;$('p1').textContent='إيقاف مؤقت'}
+['s1m','s1v','s1f'].forEach(id=>$(id).oninput=()=>{m1=+$('s1m').value;v01=+$('s1v').value;F1=+$('s1f').value;reset1()});
+$('p1').onclick=()=>{if(t1>=T1){reset1();return}run1=!run1;$('p1').textContent=run1?'إيقاف مؤقت':'تشغيل'};
+$('r1').onclick=reset1;
+function step1(dt){t1=Math.min(T1,t1+dt);if(t1>=T1){run1=false;$('p1').textContent='تشغيل'}}
+
+/* ============ 2) قوة متغيرة ============ */
+const T2=10,N2=500;
+let prof='const',m2=2,v02=2,F2=6,tp1=2,tp2=5,tc=still?T2:0,run2=!still,FA=[],PA=[];
+function Fat(t){switch(prof){case'const':return F2;case'pulse':return(t>=tp1&&t<tp2)?F2:0;case'ramp':return F2*t/T2;default:return F2*Math.sin(2*Math.PI*t/6)}}
+function rec2(){FA=[];PA=[];let p=m2*v02;const dt=T2/N2;for(let i=0;i<=N2;i++){const t=dt*i;FA.push(Fat(t));if(i>0)p+=Fat(t-dt/2)*dt;PA.push(p)}}
+const pAt=t=>{const i=Math.min(N2-1e-9,t/T2*N2),k=Math.floor(i);return lerp(PA[k],PA[Math.min(N2,k+1)],i-k)};
+function draw2(){
+ const gmT={l:58,r:16,t:14,b:12},gmB={l:58,r:16,t:12,b:42};
+ { const{x,w,h:H}=setup($('c2f'));const gm=gmT,yr=rangeY(FA);
+  const px=t=>gm.l+(w-gm.l-gm.r)*t/T2,py=v=>H-gm.b-(H-gm.t-gm.b)*(v-yr[0])/(yr[1]-yr[0]);
+  axes(x,w,H,gm,[0,T2],yr,px,py,null,'القوة '+LRI('F (N)'),false);
+  const n=Math.floor(tc/T2*N2);x.globalAlpha=.3;x.fillStyle=css('--c');x.beginPath();x.moveTo(px(0),py(0));for(let i=0;i<=n;i++)x.lineTo(px(T2*i/N2),py(FA[i]));x.lineTo(px(tc),py(Fat(tc)));x.lineTo(px(tc),py(0));x.closePath();x.fill();x.globalAlpha=1;
+  x.strokeStyle=css('--c');x.lineWidth=2.6;x.beginPath();FA.forEach((v,i)=>i?x.lineTo(px(T2*i/N2),py(v)):x.moveTo(px(0),py(v)));x.stroke();
+  x.setLineDash([4,4]);x.strokeStyle=css('--ink');x.lineWidth=1.2;x.beginPath();x.moveTo(px(tc),gm.t);x.lineTo(px(tc),H-gm.b);x.stroke();x.setLineDash([]);
+  x.fillStyle=css('--c');x.font='bold 12px sans-serif';lbl(x,'المساحة المظللة = الدفع J',gm.l+10,gm.t+14,'left','rtl') }
+ { const{x,w,h:H}=setup($('c2p'));const gm=gmB,yr=rangeY(PA);
+  const px=t=>gm.l+(w-gm.l-gm.r)*t/T2,py=v=>H-gm.b-(H-gm.t-gm.b)*(v-yr[0])/(yr[1]-yr[0]);
+  axes(x,w,H,gm,[0,T2],yr,px,py,tLab,pLab,true);
+  x.strokeStyle=css('--b');x.globalAlpha=.4;x.lineWidth=2;x.beginPath();PA.forEach((v,i)=>i?x.lineTo(px(T2*i/N2),py(v)):x.moveTo(px(0),py(v)));x.stroke();x.globalAlpha=1;
+  const n=Math.floor(tc/T2*N2);x.strokeStyle=css('--a');x.lineWidth=3.2;x.beginPath();x.moveTo(px(0),py(PA[0]));for(let i=1;i<=n;i++)x.lineTo(px(T2*i/N2),py(PA[i]));x.lineTo(px(tc),py(pAt(tc)));x.stroke();
+  const pc=pAt(tc),Fc=Fat(tc);x.strokeStyle=css('--ink');x.lineWidth=2;x.beginPath();x.moveTo(px(tc-.7),py(pc-Fc*.7));x.lineTo(px(tc+.7),py(pc+Fc*.7));x.stroke();
+  x.setLineDash([4,4]);x.lineWidth=1.2;x.beginPath();x.moveTo(px(tc),gm.t);x.lineTo(px(tc),H-gm.b);x.stroke();x.setLineDash([]);
+  x.fillStyle=css('--a');x.strokeStyle='#000';x.lineWidth=1;x.beginPath();x.arc(px(tc),py(pc),6,0,7);x.fill();x.stroke();
+  x.fillStyle=css('--ink');x.font='bold 12px sans-serif';lbl(x,'المماس: الميل = القوة اللحظية',gm.l+10,gm.t+14,'left','rtl') }
+}
+function upd2(){const pc=pAt(tc),p0=m2*v02;
+ $('o2m').innerHTML=B(m2+' kg');$('o2v').innerHTML=B(v02+' m/s');$('o2f').innerHTML=B(F2+' N');$('o2a').innerHTML=B(tp1+' s');$('o2b').innerHTML=B(tp2+' s');$('o2t').innerHTML=B(tc.toFixed(1)+' s');
+ $('s2t').value=Math.round(tc*20);
+ $('a2t').innerHTML=B(tc.toFixed(1)+' s');$('a2f').innerHTML=B(f1(Fat(tc))+' N');$('a2p').innerHTML=B(f1(pc)+' kg·m/s');
+ $('a2p0').innerHTML=B(f1(p0)+' kg·m/s');$('a2d').innerHTML=B(f1(pc-p0)+' N·s');$('a2v').innerHTML=B(f1(pc/m2)+' m/s');
+ $('k1').style.display=$('k2').style.display=prof==='pulse'?'flex':'none'}
+function reset2(){tc=0;run2=true;$('p2').textContent='إيقاف مؤقت'}
+function in2(){m2=+$('s2m').value;v02=+$('s2v').value;F2=+$('s2f').value;tp1=+$('s2a').value;tp2=+$('s2b').value;if(tp2<=tp1){tp2=Math.min(10,tp1+.5);if(tp2<=tp1){tp1=tp2-.5}$('s2a').value=tp1;$('s2b').value=tp2}rec2();reset2()}
+['s2m','s2v','s2f','s2a','s2b'].forEach(id=>$(id).oninput=in2);
+$('s2t').oninput=()=>{tc=+$('s2t').value/20;run2=false;$('p2').textContent='تشغيل'};
+$('p2').onclick=()=>{if(tc>=T2){reset2();return}run2=!run2;$('p2').textContent=run2?'إيقاف مؤقت':'تشغيل'};
+$('r2').onclick=reset2;
+document.querySelectorAll('[data-pf]').forEach(b=>b.onclick=()=>{prof=b.dataset.pf;document.querySelectorAll('[data-pf]').forEach(o=>o.classList.toggle('on',o===b));rec2();reset2()});
+function step2(dt){tc=Math.min(T2,tc+dt);if(tc>=T2){run2=false;$('p2').textContent='تشغيل'}}
+
+/* ============ 3) التصادم ============ */
+const T3=8,H3=1/240,TAU=.25;
+let m31=2,m32=4,u1=4,u2=-1,ee=1,run3=!still,acc3=0,C=null;
+const bw=m=>1.2+.18*m;
+function post(){return{v1:((m31-ee*m32)*u1+(1+ee)*m32*u2)/(m31+m32),v2:((m32-ee*m31)*u2+(1+ee)*m31*u1)/(m31+m32)}}
+function reset3(){const rel=u1-u2,will=rel>.05,d=will?Math.min(15,Math.max(3,rel*1.5)):6,P=post();
+ const tcol=will?d/rel:0,sepEnd=will?Math.max(d,Math.abs(P.v2-P.v1)*Math.max(0,T3-tcol)+3):d+Math.abs(rel)*T3;
+ C={t:0,x1:0,x2:d,v1:u1,v2:u2,phase:'before',cs:0,will,J1:m31*(P.v1-u1),view:Math.min(50,Math.max(24,sepEnd*1.45)),h:[[0,m31*u1,m32*u2]]};run3=!still;acc3=0;$('p3').textContent=run3?'إيقاف مؤقت':'تشغيل';
+ if(still){while(C.t<T3)step3(H3);run3=false;$('p3').textContent='تشغيل'}}
+function step3(h){const c=C;let F=0;
+ if(c.phase==='before'&&c.will&&(c.x2-c.x1)<=(bw(m31)+bw(m32))/2){c.phase='contact';c.cs=0}
+ if(c.phase==='contact'){F=c.J1*Math.PI/(2*TAU)*Math.sin(Math.PI*c.cs/TAU);c.cs+=h;if(c.cs>=TAU){c.phase='after';const P=post();c.v1=P.v1;c.v2=P.v2;F=0}}
+ c.v1+=F/m31*h;c.v2-=F/m32*h;c.x1+=c.v1*h;c.x2+=c.v2*h;c.t+=h;c.h.push([c.t,m31*c.v1,m32*c.v2])}
+function adv3(dt){acc3+=dt;let n=0;while(acc3>=H3&&n<240){if(C.t>=T3){run3=false;$('p3').textContent='تشغيل';break}step3(H3);acc3-=H3;n++}}
+function draw3(){
+ { const{x,w,h:H}=setup($('c3a'));const sc=w/C.view,ground=H*.62,xcm=(m31*C.x1+m32*C.x2)/(m31+m32);
+  const cB=css('--b'),cA=css('--a'),cM=css('--mute'),cI=css('--ink');
+  ticksGround(x,w,ground,xcm,sc,cM);
+  const a1=bw(m31),a2=bw(m32),gap=(C.x2-C.x1)-(a1+a2)/2;let d1=C.x1,d2=C.x2;if(gap<0){d1+=gap/2;d2-=gap/2}
+  const X1=w/2+(d1-xcm)*sc,X2=w/2+(d2-xcm)*sc,bh=34;
+  [[X1,Math.max(14,a1*sc),cB,'1',C.v1,m31],[X2,Math.max(14,a2*sc),cA,'2',C.v2,m32]].forEach(q=>{x.fillStyle=q[2];x.beginPath();x.roundRect(q[0]-q[1]/2,ground-bh-8,q[1],bh,5);x.fill();
+   x.fillStyle='#1e293b';[-1,1].forEach(s=>{x.beginPath();x.arc(q[0]+s*q[1]*.3,ground-4,5,0,7);x.fill()});
+   x.fillStyle='#000';x.font='bold 13px sans-serif';lbl(x,q[3],q[0],ground-bh/2-4,'center','ltr');
+   const vy=ground-bh-34;arrow(x,q[0],vy,Math.max(-70,Math.min(70,q[4]*10)),q[2],3.5);
+   x.fillStyle=q[2];x.font='bold 11px sans-serif';lbl(x,'v = '+f1(q[4]),q[0],vy-10,'center','ltr');
+   x.fillStyle=cM;lbl(x,'m = '+q[5]+' kg',q[0],ground+44,'center','ltr')});
+  if(C.phase==='contact'){const Xc=(X1+X2)/2,Yc=ground-bh/2-8;x.strokeStyle='#facc15';x.lineWidth=2.5;for(let k=0;k<8;k++){const a=k*Math.PI/4;x.beginPath();x.moveTo(Xc+Math.cos(a)*10,Yc+Math.sin(a)*10);x.lineTo(Xc+Math.cos(a)*22,Yc+Math.sin(a)*22);x.stroke()}}
+  x.fillStyle=cI;x.font='bold 13px sans-serif';
+  lbl(x,C.will?(C.phase==='before'?'قبل التصادم':C.phase==='contact'?'أثناء التصادم':'بعد التصادم'):'لا يوجد تصادم: الجسم 1 لا يلحق بالجسم 2',w/2,20,'center','rtl') }
+ { const{x,w,h:H}=setup($('c3b'));const gm=GM,P=post();
+  const yr=rangeY([m31*u1,m32*u2,m31*u1+m32*u2,m31*P.v1,m32*P.v2],.15);
+  const px=t=>gm.l+(w-gm.l-gm.r)*t/T3,py=v=>H-gm.b-(H-gm.t-gm.b)*(v-yr[0])/(yr[1]-yr[0]);
+  axes(x,w,H,gm,[0,T3],yr,px,py,tLab,pLab,true);
+  const line=(k,col,dash,lw)=>{x.beginPath();x.strokeStyle=col;x.lineWidth=lw;x.setLineDash(dash||[]);C.h.forEach((q,i)=>{const v=k===3?q[1]+q[2]:q[k],X=px(q[0]),Y=py(v);i?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke();x.setLineDash([])};
+  line(1,css('--b'),null,2.8);line(2,css('--a'),null,2.8);line(3,css('--ink'),[7,5],2);
+  const L=C.h[C.h.length-1];[[1,css('--b')],[2,css('--a')]].forEach(q=>{x.fillStyle=q[1];x.beginPath();x.arc(px(L[0]),py(L[q[0]]),5,0,7);x.fill()});
+  [['الجسم 1',css('--b'),null],['الجسم 2',css('--a'),null],['الزخم الكلي',css('--ink'),[7,5]]].forEach((it,i)=>{const y=gm.t+14+i*19;x.strokeStyle=it[1];x.lineWidth=2.6;x.setLineDash(it[2]||[]);x.beginPath();x.moveTo(gm.l+14,y);x.lineTo(gm.l+42,y);x.stroke();x.setLineDash([]);x.fillStyle=css('--ink');x.font='12px sans-serif';lbl(x,it[0],gm.l+50,y+4,'left','rtl')}) }
+}
+function upd3(){const P=post(),pn=m31*C.v1+m32*C.v2,p0=m31*u1+m32*u2,Kb=.5*m31*u1*u1+.5*m32*u2*u2,Ka=.5*m31*P.v1*P.v1+.5*m32*P.v2*P.v2,J=m31*(P.v1-u1);
+ $('o3a').innerHTML=B(m31+' kg');$('o3b').innerHTML=B(m32+' kg');$('o3c').innerHTML=B(u1+' m/s');$('o3d').innerHTML=B(u2+' m/s');
+ $('a3s').textContent=C.will?(C.phase==='before'?'قبل التصادم':C.phase==='contact'?'أثناء التصادم':'بعد التصادم'):'لا يوجد تصادم';
+ $('a3n').innerHTML=B(f1(pn)+' kg·m/s');
+ if(C.will){$('a3t').innerHTML=B(f1(p0)+' / '+f1(m31*P.v1+m32*P.v2));$('a3v').innerHTML=B(f1(P.v1)+' , '+f1(P.v2)+' m/s');$('a3k').innerHTML=B(f1(Kb)+' → '+f1(Ka)+' J');$('a3j').innerHTML=B(f1(J)+' / '+f1(-J)+' N·s')}
+ else{$('a3t').innerHTML=B(f1(p0));$('a3v').innerHTML='—';$('a3k').innerHTML=B(f1(Kb)+' J');$('a3j').innerHTML='—'}}
+['s3a','s3b','s3c','s3d'].forEach(id=>$(id).oninput=()=>{m31=+$('s3a').value;m32=+$('s3b').value;u1=+$('s3c').value;u2=+$('s3d').value;reset3()});
+document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ee=+b.dataset.e;document.querySelectorAll('[data-e]').forEach(o=>o.classList.toggle('on',o===b));reset3()});
+$('p3').onclick=()=>{if(C.t>=T3){reset3();return}run3=!run3;$('p3').textContent=run3?'إيقاف مؤقت':'تشغيل'};
+$('r3').onclick=reset3;
+
+/* ============ التحكم العام ============ */
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{cur=b.dataset.t;
+ document.querySelectorAll('.tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));
+ document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===cur))});
+let last=0;
+function loop(t){const dt=Math.min((t-last)/1000,.1);last=t;
+ if(cur==='c1'){if(run1)step1(dt*spd);draw1();upd1()}
+ else if(cur==='c2'){if(run2)step2(dt*spd);draw2();upd2()}
+ else{if(run3)adv3(dt*spd);draw3();upd3()}
+ requestAnimationFrame(loop)}
+(function(){
+ const t=$('themeToggle');let s=null;
+ try{s=localStorage.getItem('theme')}catch(e){}
+ if(s==='light'){document.body.classList.add('light-mode');t.textContent='☀️'}
+ t.addEventListener('click',()=>{
+  document.body.classList.toggle('light-mode');
+  const l=document.body.classList.contains('light-mode');
+  t.textContent=l?'☀️':'🌙';
+  try{localStorage.setItem('theme',l?'light':'dark')}catch(e){}
+ });
+})();
+rec2();reset3();
+if(still){$('p1').textContent='تشغيل';$('p2').textContent='تشغيل'}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
