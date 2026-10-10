@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>تحليل المتجهات وجمعها | المتجهات والحركة في بعدين | الأستاذ ماجد شلالدة</title>
 
-<!-- MathJax لعرض المعادلات (نفس المكتبة المستخدمة في الملفات الأصلية). إن تعذر تحميلها تظهر المعادلات بصيغة TeX نصية. -->
 <script>
   window.MathJax = {
     tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
@@ -14,19 +13,19 @@
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" onload="window.__mjLoaded&&window.__mjLoaded()"></script>
 <style>
-:root{--bg-color:#0b1329;--main-card-bg:#1c2541;--sub-card-bg:#3a506b;--accent:#f77f00;--gold:#ffd166;--accent-text:#ffd166;
+:root{--logo:clamp(109px,17vh,250px);--bg-color:#0b1329;--main-card-bg:#1c2541;--sub-card-bg:#3a506b;--accent:#f77f00;--gold:#ffd166;--accent-text:#ffd166;
  --border-soft:rgba(255,255,255,.08);--shadow-soft:0 10px 30px rgba(0,0,0,.3);--ink:#eef1f7;--mute:#c0c8d8;
  --inner:#0b1329;--formula:#111d3a;--edge:#334155;--eq:#facc15}
 body.light-mode{--bg-color:#f0f4f8;--main-card-bg:#fff;--sub-card-bg:#e8eef5;--border-soft:rgba(0,0,0,.08);--shadow-soft:0 10px 30px rgba(0,0,0,.08);
  --ink:#1a202c;--mute:#4a5568;--inner:#eef3f9;--formula:#f3f6fb;--edge:#cbd5e1;--eq:#92400e;--accent-text:#b45309}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg-color);color:var(--ink);font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",system-ui,sans-serif;line-height:1.8;min-height:100vh;
+#navbar,#breadcrumb,#siteHeader,.tabs,#footer{flex:none}
+body{background:var(--bg-color);color:var(--ink);font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",system-ui,sans-serif;line-height:1.8;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;
  padding-bottom:env(safe-area-inset-bottom,0);transition:background .3s,color .3s}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 [hidden]{display:none!important}
 
-/* ===== النظام الموحد: شريط التنقل ===== */
 #navbar{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:12px 24px;padding-top:calc(12px + env(safe-area-inset-top,0px));min-height:56px;
  background:rgba(28,37,65,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border-soft)}
 body.light-mode #navbar{background:rgba(255,255,255,.92)}
@@ -37,39 +36,37 @@ body.light-mode .nav-brand{color:#c2410c}
 .nav-links a:hover{background:var(--accent);color:#000}
 .theme-toggle{background:transparent;border:1px solid var(--border-soft);color:var(--ink);font-size:1.1rem;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
 .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg)}
-#breadcrumb{width:max-content;max-width:calc(100% - 24px);margin:14px auto 0;display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;padding:6px 18px;font-size:12px;color:var(--mute);background:var(--main-card-bg);border:1px solid var(--border-soft);border-radius:10px}
+#breadcrumb{width:max-content;max-width:calc(100% - 24px);margin:8px auto 0;display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;padding:5px 18px;font-size:12px;color:var(--mute);background:var(--main-card-bg);border:1px solid var(--border-soft);border-radius:10px}
 #breadcrumb a{color:var(--accent-text);text-decoration:none}
 body.light-mode #breadcrumb a{color:#c2410c}
 #breadcrumb .sep{opacity:.5}#breadcrumb #parentCrumb{color:var(--mute)}#breadcrumb a#parentCrumb{color:var(--accent-text)}#breadcrumb .cur{color:var(--ink);font-weight:600}
 
-/* ===== الترويسة والشعار والإعداد ===== */
-#siteHeader{position:relative;display:flex;align-items:center;justify-content:center;padding:4px 20px 2px;min-height:120px}
-#logoWrap{position:absolute;top:8px;right:18px;z-index:30;display:flex;justify-content:center;align-items:center}
-#logoWrap img{width:192px;height:192px;border-radius:50%;background:#fff;object-fit:cover;box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.2)}
+#siteHeader{position:relative;display:flex;align-items:center;justify-content:center;padding:4px 20px 2px;min-height:var(--logo)}
+#logoWrap{position:absolute;top:4px;right:18px;z-index:30;display:flex;justify-content:center;align-items:center}
+#logoWrap img{width:var(--logo);height:var(--logo);border-radius:50%;background:#fff;object-fit:cover;box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.2)}
 body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
-#logoFallback{display:none;width:192px;height:192px;border-radius:50%;background:linear-gradient(135deg,#f77f00,#00b4d8);align-items:center;justify-content:center;font-size:6.1rem;color:#fff}
+#logoFallback{display:none;width:var(--logo);height:var(--logo);border-radius:50%;background:linear-gradient(135deg,#f77f00,#00b4d8);align-items:center;justify-content:center;font-size:calc(var(--logo)*.32);color:#fff}
 #titleBlock{text-align:center}
 #titleBlock h1{margin:0;font-size:20px;line-height:1.4;color:var(--accent-text)}
 .sub{color:var(--mute);margin:2px 0 0;font-size:13px}
 .credit{margin:6px 0 0;font-size:13px;color:var(--mute)}
 .credit .lead{color:var(--accent-text)}.credit strong{color:var(--ink)}.credit .bar{opacity:.5;margin:0 6px}.credit .ph{direction:ltr;unicode-bidi:isolate}
 
-/* ===== التبويبات ===== */
-.tabs{display:flex;gap:8px;justify-content:center;align-items:center;padding:12px 16px 12px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;justify-content:center;align-items:center;padding:4px 16px 8px;flex-wrap:wrap}
 .tabs button{font:inherit;font-size:13px;font-weight:bold;padding:8px 22px;border-radius:20px;border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);cursor:pointer;transition:.2s}
 .tabs button:hover{background:var(--sub-card-bg)}
 .tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#000}
 
-/* ===== المحتوى ===== */
-.container{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;align-items:flex-start;padding:0 16px 16px;max-width:1300px;margin:0 auto}
-.canvas-col{width:600px;max-width:100%}
-canvas{display:block;width:100%;height:auto;max-width:600px;background:#0b1220;border-radius:16px;border:1px solid var(--border-soft);box-shadow:var(--shadow-soft);touch-action:none;user-select:none}
-.cv-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--mute)}
+.container{flex:1;min-height:0;width:100%;display:flex;gap:16px;justify-content:center;align-items:stretch;padding:0 16px 8px;max-width:1600px;margin:0 auto}
+.canvas-col{flex:0 0 auto;min-width:0;display:flex;flex-direction:column}
+.cv-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+canvas{display:block;flex:none;background:#0b1220;border-radius:16px;border:1px solid var(--border-soft);box-shadow:var(--shadow-soft);touch-action:none;user-select:none}
+.cv-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--mute)}
 .cv-tools label{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink)}
 .cv-tools .hint{flex:1;min-width:220px}
 input[type=checkbox]{accent-color:var(--accent)}
 
-.panel{background:var(--main-card-bg);border:1px solid var(--border-soft);padding:16px 20px;border-radius:16px;width:540px;max-width:100%;box-shadow:var(--shadow-soft);display:none}
+.panel{background:var(--main-card-bg);border:1px solid var(--border-soft);padding:16px 20px;border-radius:16px;flex:1 1 440px;min-width:380px;max-width:760px;height:100%;overflow-y:auto;scrollbar-width:thin;box-shadow:var(--shadow-soft);display:none}
 .panel.active{display:block}
 .panel h2{font-size:15px;color:var(--accent-text);margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--edge)}
 label.lb{display:block;margin:10px 0 4px;font-size:14px}
@@ -110,6 +107,9 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .legend{font-size:13px;margin-top:12px;color:var(--mute);line-height:1.9}
 .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:6px;vertical-align:middle}
 
+.vec-pair-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:bold;margin:12px 0 6px}
+.vec-pair-title .pt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
 .vec-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;margin:6px 0;background:var(--inner);border-radius:10px;border-right:4px solid var(--c,#94a3b8);transition:box-shadow .15s}
 .vec-row.drag{box-shadow:0 0 0 2px var(--c,var(--accent))}
 .vec-row .row-top{grid-column:1/-1;display:flex;align-items:center;gap:8px}
@@ -132,7 +132,7 @@ table.comp tr.total td{border-top:2px solid var(--edge);color:#16a34a;font-weigh
 .final{background:rgba(16,185,129,.14);border:1px solid #10b981;padding:10px 12px;border-radius:10px;margin-top:10px}
 mjx-container{color:var(--eq)!important}
 
-#footer{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));text-align:center;font-size:11px;color:var(--mute)}
+#footer{padding:4px 20px calc(4px + env(safe-area-inset-bottom,0px));text-align:center;font-size:11px;color:var(--mute)}
 #footer strong{color:var(--accent)}body.light-mode #footer strong{color:#c2410c}
 
 @media(max-width:760px){
@@ -140,9 +140,24 @@ mjx-container{color:var(--eq)!important}
  .nav-links{order:3;width:100%;justify-content:center}.nav-links a{padding:6px 10px;font-size:.8rem}.nav-brand span{display:none}
  #breadcrumb{font-size:10px;padding:5px 12px}
  #logoWrap{position:static}#siteHeader{flex-direction:column;gap:8px;padding:12px 12px 2px;min-height:0}
- #logoWrap img,#logoFallback{width:154px;height:154px}#logoFallback{font-size:4.8rem}
  #titleBlock h1{font-size:16px}
  .container{padding:0 8px 12px}.panel{padding:14px 12px}
+}
+@media(min-width:901px) and (max-height:820px){
+ :root{--logo:94px}
+ #titleBlock .sub{display:none}#titleBlock h1{font-size:17px}
+ #breadcrumb{margin-top:4px;padding:3px 14px}
+ #navbar{min-height:46px;padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:6px}
+ .tabs{padding:2px 16px 6px}.tabs button{padding:6px 18px}
+}
+@media(max-width:900px){
+ :root{--logo:156px}
+ body{height:auto;min-height:100vh;display:block;overflow:visible}
+ #logoWrap{position:static}#siteHeader{flex-direction:column;gap:8px;padding:12px 12px 2px;min-height:0}
+ .container{flex-direction:column;align-items:center;padding:0 10px 12px}
+ .canvas-col{width:100%;flex:none}
+ .cv-wrap{flex:none;width:100%;max-width:640px;aspect-ratio:1/1}
+ .panel{flex:none;width:100%;height:auto;overflow:visible;max-width:none}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -187,10 +202,10 @@ mjx-container{color:var(--eq)!important}
 
 <div class="container">
   <div class="canvas-col">
-    <canvas id="cv" width="600" height="600" aria-label="لوحة المتجهات: اسحب رأس السهم لتغييره"></canvas>
+    <div class="cv-wrap" id="cvWrap"><canvas id="cv" width="600" height="600" aria-label="لوحة المتجهات: اسحب رأس السهم لتغييره"></canvas></div>
     <div class="cv-tools">
       <label><input type="checkbox" id="snap" checked> تقريب القيم أثناء السحب</label>
-      <span class="hint">اسحب النقطة البيضاء عند رأس السهم. اضغط Shift أثناء السحب لتقريب الزاوية إلى مضاعفات 15°.</span>
+      <span class="hint">اسحب الحلقة الملوّنة عند رأس السهم. اضغط Shift أثناء السحب لتقريب الزاوية إلى مضاعفات 15°.</span>
     </div>
   </div>
 
@@ -226,15 +241,37 @@ mjx-container{color:var(--eq)!important}
   <!-- ===== 2) جمع متجهين ===== -->
   <div class="panel" id="p-two">
     <h2>المتجهان A و B</h2>
-    <label class="lb">مقدار المتجه الأول A: <span class="val" id="aVal">3.0</span></label>
-    <input type="range" id="aMag" min="0.5" max="8" step="0.1" value="3">
-    <label class="lb">زاوية A: <span class="val" id="aAngVal">0°</span></label>
-    <input type="range" id="aAng" min="0" max="360" step="1" value="0">
-    <label class="lb">مقدار المتجه الثاني B: <span class="val" id="bVal">4.0</span></label>
-    <input type="range" id="bMag" min="0.5" max="8" step="0.1" value="4">
-    <label class="lb">زاوية B: <span class="val" id="bAngVal">60°</span></label>
-    <input type="range" id="bAng" min="0" max="360" step="1" value="60">
+
+    <div class="vec-pair-title" style="color:#ef4444">
+      <span class="pt-dot" style="background:#ef4444"></span>
+      المتجه A
+    </div>
+    <div class="input-grid">
+      <div class="field"><label>الاسم</label><input type="text" id="aName" value="A" maxlength="10"></div>
+      <div class="field"><label>الوحدة</label><input type="text" id="aUnit" maxlength="8" placeholder="N, m, ..."></div>
+      <div class="field"><label>المقدار |A|</label><input type="number" id="aMagNum" value="3" step="0.1" min="0"></div>
+      <div class="field"><label>الزاوية (°)</label><input type="number" id="aAngNum" value="0" step="1"></div>
+    </div>
+    <input type="range" id="aMag" min="0.5" max="8" step="0.1" value="3" aria-label="مقدار A">
+    <input type="range" id="aAng" min="0" max="359" step="1" value="0" aria-label="زاوية A">
+
+    <div class="vec-pair-title" style="color:#22c55e">
+      <span class="pt-dot" style="background:#22c55e"></span>
+      المتجه B
+    </div>
+    <div class="input-grid">
+      <div class="field"><label>الاسم</label><input type="text" id="bName" value="B" maxlength="10"></div>
+      <div class="field"><label>الوحدة</label><input type="text" id="bUnit" maxlength="8" placeholder="N, m, ..."></div>
+      <div class="field"><label>المقدار |B|</label><input type="number" id="bMagNum" value="4" step="0.1" min="0"></div>
+      <div class="field"><label>الزاوية (°)</label><input type="number" id="bAngNum" value="60" step="1"></div>
+    </div>
+    <input type="range" id="bMag" min="0.5" max="8" step="0.1" value="4" aria-label="مقدار B">
+    <input type="range" id="bAng" min="0" max="359" step="1" value="60" aria-label="زاوية B">
+
+    <div class="angle-hint">الزوايا من +x عكس عقارب الساعة ↺</div>
+
     <div class="result" id="out2"><div id="n2"></div><div id="f2"></div></div>
+
     <div class="legend">
       <div><span class="dot" style="background:#ef4444"></span> المتجه A</div>
       <div><span class="dot" style="background:#22c55e"></span> المتجه B</div>
@@ -271,24 +308,39 @@ mjx-container{color:var(--eq)!important}
 
 <script>
 'use strict';
-/* =====================================================================
-   محاكاة المتجهات — ثلاثة أوضاع تشترك في لوحة رسم واحدة:
-   resolve: تحليل متجه إلى مركبتين   two: جمع متجهين بقاعدة الجيب   many: جمع عدة متجهات بالتحليل
-   السحب بالفأرة/اللمس يعدّل المقدار والاتجاه ويُزامن حقول الإدخال.
-   ===================================================================== */
 const $ = id => document.getElementById(id);
 const cv = $('cv'), ctx = cv.getContext('2d');
-const W = cv.width, H = cv.height, origin = { x: W / 2, y: H / 2 };
-ctx.direction = 'ltr';   // الصفحة RTL، لكن نصوص اللوحة (+x ، θ = 30° ، −1) يجب أن تُكتب من اليسار إلى اليمين
+const W = 600, H = 600, origin = { x: W / 2, y: H / 2 };
+ctx.direction = 'ltr';
+
+function fitCanvas() {
+  const cont = document.querySelector('.container'), col = document.querySelector('.canvas-col'), tools = document.querySelector('.cv-tools');
+  let size;
+  if (matchMedia('(max-width:900px)').matches) {
+    col.style.width = ''; size = Math.min(640, cont.clientWidth - 20);
+  } else {
+    const availH = cont.clientHeight - 8 - tools.offsetHeight - 6,
+          availW = cont.clientWidth - 32 - 16 - 440;
+    size = Math.min(availH, availW, 900); col.style.width = Math.max(240, Math.floor(size)) + 'px';
+  }
+  size = Math.max(240, Math.floor(size));
+  cv.style.width = cv.style.height = size + 'px';
+  const px = Math.round(size * (window.devicePixelRatio || 1));
+  if (cv.width !== px) { cv.width = cv.height = px; }
+  ctx.setTransform(px / W, 0, 0, px / H, 0, 0);
+  ctx.direction = 'ltr';
+  if (typeof requestDraw === 'function') requestDraw();
+}
+new ResizeObserver(fitCanvas).observe(document.querySelector('.container'));
+window.addEventListener('resize', fitCanvas);
+
 const PI = Math.PI;
 const norm360 = a => ((a % 360) + 360) % 360;
 const num = (v, d = 0) => { const n = parseFloat(v); return Number.isFinite(n) ? n : d; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const texEsc = s => String(s).replace(/[\\{}$%&#_^~]/g, c => '\\' + c);   // يمنع كسر المعادلات بمدخلات المستخدم
-/* رابط صفحة القسم الأم «المتجهات والحركة في بعدين».
-   ضعه هنا (مثل 'index.html' أو '../vectors/index.html') ليتحول عنصر مسار التصفح إلى رابط؛
-   وإن تُرك فارغًا يبقى نصًا عاديًا، حتى لا يشير إلى صفحة غير موجودة. */
-const PARENT_URL = 'vectors&projectile.html';   // صفحة القسم الأم في المجلد نفسه (غيّر الامتداد إن كان مختلفًا)
+const texEsc = s => String(s).replace(/[\\{}$%&#_^~]/g, c => '\\' + c);
+
+const PARENT_URL = 'vectors&projectile.html';
 (function () {
   if (!PARENT_URL) return;
   const old = $('parentCrumb'), a = document.createElement('a');
@@ -299,9 +351,11 @@ const hasMJ = () => !!(window.MathJax && MathJax.typesetPromise);
 const COLORS = ["#ef4444", "#22c55e", "#eab308", "#a855f7", "#06b6d4", "#f97316", "#ec4899", "#84cc16", "#14b8a6", "#8b5cf6"];
 const C_V = "#3b82f6", C_VX = "#ef4444", C_VY = "#22c55e", C_ARC = "#facc15", C_R = "#3b82f6", C_RC = "#60a5fa";
 
-/* ---------- حالة كل وضع ---------- */
 const S1 = { name: 'V', unit: 'm', mag: 5, ang: 40, showComp: true, showRect: true, showArc: true };
-const S2 = { aMag: 3, aAng: 0, bMag: 4, bAng: 60 };
+const S2 = {
+  aName: 'A', aUnit: '', aMag: 3, aAng: 0,
+  bName: 'B', bUnit: '', bMag: 4, bAng: 60
+};
 const LAYOUTS = [
   { name: "F₁", unit: "N", mag: 3, ang: 0, show: false },
   { name: "F₂", unit: "N", mag: 4, ang: 60, show: false },
@@ -313,10 +367,6 @@ let mode = 'resolve';
 const view = { scale: 40, target: 40 };
 let drag = null, hover = null, handles = [];
 
-/* =====================================================================
-   أدوات الرسم المشتركة
-   ===================================================================== */
-/** أصغر خطوة شبكة (بوحدات المتجه) بحيث لا تقل الخلية عن 34 بكسل */
 function niceStep(scale) {
   for (const s of [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500]) if (s * scale >= 34) return s;
   return 500;
@@ -329,7 +379,6 @@ function drawGrid(scale) {
   const kx = Math.ceil(origin.x / px), ky = Math.ceil(origin.y / px);
   for (let k = -kx; k <= kx; k++) { const x = origin.x + k * px; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
   for (let k = -ky; k <= ky; k++) { const y = origin.y + k * px; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-  // المحوران
   ctx.strokeStyle = "#475569"; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(0, origin.y); ctx.lineTo(W, origin.y); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(origin.x, 0); ctx.lineTo(origin.x, H); ctx.stroke();
@@ -337,7 +386,6 @@ function drawGrid(scale) {
   ctx.beginPath(); ctx.moveTo(W - 5, origin.y); ctx.lineTo(W - 15, origin.y - 5); ctx.lineTo(W - 15, origin.y + 5); ctx.closePath(); ctx.fill();
   ctx.beginPath(); ctx.moveTo(origin.x, 5); ctx.lineTo(origin.x - 5, 15); ctx.lineTo(origin.x + 5, 15); ctx.closePath(); ctx.fill();
   ctx.font = "bold 14px Segoe UI"; ctx.textAlign = "left"; ctx.fillText("+x", W - 32, origin.y - 10); ctx.fillText("+y", origin.x + 10, 20);
-  // أرقام المحاور (كل خطوة شبكة، وتُخفَّف إن ضاقت)
   ctx.fillStyle = "#64748b"; ctx.font = "10px Segoe UI";
   const every = px < 46 ? 2 : 1;
   for (let k = -kx; k <= kx; k++) {
@@ -371,22 +419,38 @@ function drawArrow(from, to, color, label, width = 3, dash = null, labelOffset =
   ctx.restore();
 }
 
-/** مقبض السحب عند رأس السهم. يُسجَّل في handles ليستعمله اختبار الإصابة بالفأرة */
+/* حلقة سحب مجوفة: شفافة من الداخل حتى لا تحجب رأس السهم */
 function addHandle(id, pt, color) {
   handles.push({ id, x: pt.x, y: pt.y, color });
   const active = (drag && drag.id === id) || (!drag && hover === id);
   ctx.save();
-  if (active) { ctx.fillStyle = color; ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(pt.x, pt.y, 17, 0, 2 * PI); ctx.fill(); ctx.globalAlpha = 1; }
-  ctx.fillStyle = "#f8fafc"; ctx.strokeStyle = color; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(pt.x, pt.y, active ? 8 : 6, 0, 2 * PI); ctx.fill(); ctx.stroke();
+
+  // هالة خفيفة تظهر فقط عند المرور أو السحب
+  if (active) {
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.22;
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, 16, 0, 2 * PI); ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // حلقة مجوفة (شفافة من الداخل) فلا تحجب رأس السهم
+  ctx.strokeStyle = color;
+  ctx.lineWidth = active ? 3 : 2.5;
+  ctx.beginPath();
+  ctx.arc(pt.x, pt.y, active ? 9 : 7, 0, 2 * PI);
+  ctx.stroke();
+
+  // نقطة صغيرة في المركز لتوضيح موقع المقبض بالضبط
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(pt.x, pt.y, active ? 2.2 : 1.6, 0, 2 * PI); ctx.fill();
+
   ctx.restore();
 }
 
-/** قوس زاوية من اتجاه a1 إلى a2 (بالدرجات الرياضية) بأقصر مسار */
 function drawArc(a1d, a2d, radius, color, label) {
-  let diff = ((a2d - a1d + 540) % 360) - 180;          // الفرق الموقّع في (−180,180]
+  let diff = ((a2d - a1d + 540) % 360) - 180;
   if (Math.abs(diff) < 0.05) return;
-  const s = -a1d * PI / 180, e = s - diff * PI / 180;   // y الشاشة معكوس
+  const s = -a1d * PI / 180, e = s - diff * PI / 180;
   ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(origin.x, origin.y, radius, s, e, diff > 0); ctx.stroke();
   if (label) {
@@ -400,9 +464,7 @@ function drawArc(a1d, a2d, radius, color, label) {
 
 const toScr = (x, y, s) => ({ x: origin.x + x * s, y: origin.y - y * s });
 
-/* =====================================================================
-   الوضع 1: تحليل متجه إلى مركبتيه
-   ===================================================================== */
+/* ===== الوضع 1 ===== */
 function calc1() {
   const mag = Math.max(0, S1.mag), ang = norm360(S1.ang), r = ang * PI / 180;
   return { mag, ang, Vx: mag * Math.cos(r), Vy: mag * Math.sin(r) };
@@ -419,7 +481,6 @@ function draw1() {
     ctx.beginPath(); ctx.moveTo(Py.x, Py.y); ctx.lineTo(end.x, end.y); ctx.stroke(); ctx.restore();
   }
   if (S1.showArc && c.mag > 0.01 && c.ang > 0.5) {
-    // قوس θ من +x عكس عقارب الساعة مع رأس سهم صغير
     const r = 48, rad = c.ang * PI / 180;
     ctx.save(); ctx.strokeStyle = C_ARC; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.arc(origin.x, origin.y, r, 0, -rad, true); ctx.stroke();
@@ -455,22 +516,30 @@ function formulas1() {
     </div>`;
 }
 
-/* =====================================================================
-   الوضع 2: جمع متجهين بقاعدة الجيب
-   ===================================================================== */
-/** الزاوية بين متجهين بالدرجات في [0,180] عبر atan2 (تعمل للحادة والمنفرجة معًا) */
+/* ===== الوضع 2 ===== */
 function angleBetween(ux, uy, vx, vy) {
   if (Math.hypot(ux, uy) < 1e-12 || Math.hypot(vx, vy) < 1e-12) return 0;
   return Math.atan2(Math.abs(ux * vy - uy * vx), ux * vx + uy * vy) * 180 / PI;
 }
 function calc2() {
-  const { aMag: a, aAng, bMag: b, bAng } = S2, ar = aAng * PI / 180, br = bAng * PI / 180;
-  const Ax = a * Math.cos(ar), Ay = a * Math.sin(ar), Bx = b * Math.cos(br), By = b * Math.sin(br);
+  const a = S2.aMag, b = S2.bMag, aAng = S2.aAng, bAng = S2.bAng;
+  const ar = aAng * PI / 180, br = bAng * PI / 180;
+  const Ax = a * Math.cos(ar), Ay = a * Math.sin(ar);
+  const Bx = b * Math.cos(br), By = b * Math.sin(br);
   const Rx = Ax + Bx, Ry = Ay + By, Rmag = Math.hypot(Rx, Ry);
   let theta = Math.abs(bAng - aAng) % 360; if (theta > 180) theta = 360 - theta;
-  const alpha = Rmag > 1e-9 ? angleBetween(Ax, Ay, Rx, Ry) : 0;       // بين R و A
-  const beta = Rmag > 1e-9 ? angleBetween(Bx, By, Rx, Ry) : 0;        // بين R و B
-  return { a, b, aAng, bAng, Ax, Ay, Bx, By, Rx, Ry, Rmag, theta, alpha, beta, angR: norm360(Math.atan2(Ry, Rx) * 180 / PI), sinT: Math.sin(theta * PI / 180) };
+  const alpha = Rmag > 1e-9 ? angleBetween(Ax, Ay, Rx, Ry) : 0;
+  const beta  = Rmag > 1e-9 ? angleBetween(Bx, By, Rx, Ry) : 0;
+  const unitLabel = (S2.aUnit && S2.aUnit === S2.bUnit) ? S2.aUnit : '';
+  return {
+    a, b, aAng, bAng,
+    aName: S2.aName || 'A', aUnit: S2.aUnit || '',
+    bName: S2.bName || 'B', bUnit: S2.bUnit || '',
+    Ax, Ay, Bx, By, Rx, Ry, Rmag, theta, alpha, beta,
+    angR: norm360(Math.atan2(Ry, Rx) * 180 / PI),
+    sinT: Math.sin(theta * PI / 180),
+    unitLabel
+  };
 }
 const target2 = c => Math.min(60, (W / 2 - 60) / Math.max(c.Rmag, c.a, c.b, 1));
 
@@ -486,22 +555,31 @@ function draw2() {
     drawArc(c.aAng, c.angR, 68, "#f97316", "α=" + c.alpha.toFixed(1) + "°");
     drawArc(c.angR, c.bAng, 90, "#a78bfa", "β=" + c.beta.toFixed(1) + "°");
   }
-  drawArrow(O, A, "#ef4444", "A"); drawArrow(O, B, "#22c55e", "B"); drawArrow(O, R, "#3b82f6", "R");
+  drawArrow(O, A, "#ef4444", c.aName);
+  drawArrow(O, B, "#22c55e", c.bName);
+  drawArrow(O, R, "#3b82f6", "R" + (c.unitLabel ? " (" + c.unitLabel + ")" : ""));
   addHandle('A', A, "#ef4444"); addHandle('B', B, "#22c55e");
 }
 function live2() {
   const c = calc2();
-  $('aVal').textContent = c.a.toFixed(1); $('aAngVal').textContent = c.aAng.toFixed(0) + "°";
-  $('bVal').textContent = c.b.toFixed(1); $('bAngVal').textContent = c.bAng.toFixed(0) + "°";
+  const ua = c.aUnit ? ' ' + esc(c.aUnit) : '';
+  const ub = c.bUnit ? ' ' + esc(c.bUnit) : '';
+  const ur = c.unitLabel ? ' ' + esc(c.unitLabel) : '';
   $('n2').innerHTML = `
-    <div class="row"><span class="ar">مقدار المتجه A :</span><span class="eq">|A| = ${c.a.toFixed(2)}</span><span class="ar">، مقدار المتجه B :</span><span class="eq">|B| = ${c.b.toFixed(2)}</span></div>
+    <div class="row">
+      <span class="ar">${esc(c.aName)} :</span>
+      <span class="eq">|${esc(c.aName)}| = ${c.a.toFixed(2)}${ua}</span>
+      <span class="ar">، ${esc(c.bName)} :</span>
+      <span class="eq">|${esc(c.bName)}| = ${c.b.toFixed(2)}${ub}</span>
+    </div>
     <div class="row"><span class="ar">الزاوية بين المتجهين :</span><span class="eq">θ = ${c.theta.toFixed(1)}°</span></div>
-    <div class="row"><span class="ar">مقدار المحصلة :</span><span class="eq">|R| = ${c.Rmag.toFixed(3)}</span></div>`;
+    <div class="row"><span class="ar">مقدار المحصلة :</span><span class="eq">|R| = ${c.Rmag.toFixed(3)}${ur}</span></div>`;
 }
 function formulas2() {
   const c = calc2();
+  const uR = c.unitLabel ? `\\;(${texEsc(c.unitLabel)})` : '';
   if (c.Rmag < 1e-9) return `<div class="section-title">تطبيق قاعدة الجيب</div><div class="note">المحصلة تساوي صفرًا: المتجهان متساويان في المقدار ومتعاكسان في الاتجاه، فلا تنطبق قاعدة الجيب (R = 0).</div>`;
-  if (Math.abs(c.sinT) < 1e-9) return `<div class="section-title">تطبيق قاعدة الجيب</div><div class="note">المتجهان على استقامة واحدة (θ = ${c.theta.toFixed(0)}°) فإن sin θ = 0 ولا تُستخدم قاعدة الجيب هنا؛ تُحسب المحصلة بالجمع الجبري ${c.theta < 90 ? '(المقداران يجتمعان)' : '(المقداران يُطرح أحدهما من الآخر)'}: |R| = ${c.Rmag.toFixed(3)}.</div>`;
+  if (Math.abs(c.sinT) < 1e-9) return `<div class="section-title">تطبيق قاعدة الجيب</div><div class="note">المتجهان على استقامة واحدة (θ = ${c.theta.toFixed(0)}°) فإن sin θ = 0 ولا تُستخدم قاعدة الجيب هنا؛ تُحسب المحصلة بالجمع الجبري ${c.theta < 90 ? '(المقداران يجتمعان)' : '(المقداران يُطرح أحدهما من الآخر)'}: |R| = ${c.Rmag.toFixed(3)}${c.unitLabel ? ' ' + esc(c.unitLabel) : ''}.</div>`;
   const sa = c.b * c.sinT / c.Rmag, sb = c.a * c.sinT / c.Rmag;
   const obtuse = x => x > 90.0001 ? `<div class="note">الزاوية منفرجة هنا (الجداء القياسي سالب)، فهي 180° − sin⁻¹(قيمة الجيب) وليست sin⁻¹ مباشرة.</div>` : '';
   return `<div class="section-title">تطبيق قاعدة الجيب</div>
@@ -510,12 +588,12 @@ function formulas2() {
     ${F(`\\sin\\alpha = \\frac{|\\vec{B}|\\,\\sin\\theta}{|\\vec{R}|} = ${sa.toFixed(4)} \\;\\Rightarrow\\; \\alpha = ${c.alpha.toFixed(2)}^{\\circ}`)}${obtuse(c.alpha)}
     <div class="row"><span class="ar">إيجاد الزاوية β بين R و B :</span></div>
     ${F(`\\sin\\beta = \\frac{|\\vec{A}|\\,\\sin\\theta}{|\\vec{R}|} = ${sb.toFixed(4)} \\;\\Rightarrow\\; \\beta = ${c.beta.toFixed(2)}^{\\circ}`)}${obtuse(c.beta)}
+    <div class="row"><span class="ar">مقدار المحصلة (قانون جيب التمام) :</span></div>
+    ${F(`|\\vec{R}| = \\sqrt{|A|^2 + |B|^2 + 2|A||B|\\cos\\theta} = ${c.Rmag.toFixed(3)}${uR}`)}
     <div class="row check"><span class="ar">تحقق :</span><span class="eq" style="color:#22c55e">${hasMJ() ? `$\\alpha + \\beta = ${c.alpha.toFixed(2)}^{\\circ} + ${c.beta.toFixed(2)}^{\\circ} = ${(c.alpha + c.beta).toFixed(2)}^{\\circ} = \\theta$` : `α + β = ${c.alpha.toFixed(2)}° + ${c.beta.toFixed(2)}° = ${(c.alpha + c.beta).toFixed(2)}° = θ`}</span></div>`;
 }
 
-/* =====================================================================
-   الوضع 3: جمع عدة متجهات بالتحليل
-   ===================================================================== */
+/* ===== الوضع 3 ===== */
 function calc3() {
   const comps = S3.vectors.map(v => { const r = v.ang * PI / 180; return { name: v.name || "V", unit: v.unit || "", mag: v.mag, ang: v.ang, x: v.mag * Math.cos(r), y: v.mag * Math.sin(r), show: v.show }; });
   const Rx = comps.reduce((s, c) => s + c.x, 0), Ry = comps.reduce((s, c) => s + c.y, 0);
@@ -550,7 +628,7 @@ function draw3() {
     ctx.beginPath(); ctx.moveTo(Px.x, Px.y); ctx.lineTo(Rend.x, Rend.y); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(Py.x, Py.y); ctx.lineTo(Rend.x, Rend.y); ctx.stroke(); ctx.restore();
   }
-  c.comps.forEach((v, i) => addHandle(i, toScr(v.x, v.y, s), COLORS[i % COLORS.length]));   // المقابض فوق كل شيء
+  c.comps.forEach((v, i) => addHandle(i, toScr(v.x, v.y, s), COLORS[i % COLORS.length]));
 }
 function live3() {
   const c = calc3(), ut = c.unitLabel ? ` ${esc(c.unitLabel)}` : '';
@@ -568,7 +646,6 @@ function formulas3() {
     ${F(`\\theta_R = \\tan^{-1}\\!\\left(\\frac{R_y}{R_x}\\right) = ${c.Rdir.toFixed(2)}^{\\circ}`)}`;
 }
 
-/* ---- قائمة المتجهات في وضع الجمع المتعدد ---- */
 function renderList() {
   const box = $('vecList'); box.innerHTML = '';
   S3.vectors.forEach((v, i) => {
@@ -617,9 +694,6 @@ $('addVec').addEventListener('click', () => {
 });
 $('resetVec').addEventListener('click', () => { S3.vectors = LAYOUTS.map(l => ({ ...l })); S3.showRcomp = false; syncGlobalToggles(); renderList(); changed(); });
 
-/* =====================================================================
-   المعادلات (MathJax) — تُحدَّث بتأخير قصير حتى لا تُبطئ السحب
-   ===================================================================== */
 function F(tex) { return hasMJ() ? `<div class="formula">$$${tex}$$</div>` : `<div class="formula raw"><code>${esc(tex)}</code></div>`; }
 const FORM = { resolve: [() => $('f1'), formulas1], two: [() => $('f2'), formulas2], many: [() => $('f3'), formulas3] };
 let fTimer = null;
@@ -631,9 +705,6 @@ function updateFormulas() {
 function scheduleFormulas(delay = 140) { clearTimeout(fTimer); fTimer = setTimeout(updateFormulas, delay); }
 window.__mjLoaded = () => updateFormulas();
 
-/* =====================================================================
-   حلقة الرسم: تسلسل الرسم + تسهيل تغيّر المقياس + التحديث الحي
-   ===================================================================== */
 let dirty = true, raf = 0;
 const MODES = { resolve: { calc: calc1, target: target1, draw: draw1, live: live1 }, two: { calc: calc2, target: target2, draw: draw2, live: live2 }, many: { calc: calc3, target: target3, draw: draw3, live: live3 } };
 function requestDraw() { if (!raf) raf = requestAnimationFrame(frame); }
@@ -642,7 +713,7 @@ function changed() { dirty = true; requestDraw(); scheduleFormulas(); }
 function frame() {
   raf = 0;
   const M = MODES[mode];
-  if (!drag) {                                   // أثناء السحب يثبت المقياس حتى يبقى السحب خطيًا ومتوقعًا
+  if (!drag) {
     view.target = M.target(M.calc());
     view.scale += (view.target - view.scale) * 0.3;
     if (Math.abs(view.target - view.scale) < 0.02) view.scale = view.target; else requestDraw();
@@ -651,11 +722,8 @@ function frame() {
   ctx.clearRect(0, 0, W, H); handles = []; M.draw();
 }
 
-/* =====================================================================
-   السحب بالفأرة/اللمس
-   ===================================================================== */
 const snapOn = () => $('snap').checked;
-const snapStep = () => view.scale >= 30 ? 0.1 : view.scale >= 12 ? 0.5 : 1;     // خطوة تقريب المقدار حسب المقياس
+const snapStep = () => view.scale >= 30 ? 0.1 : view.scale >= 12 ? 0.5 : 1;
 function cvPos(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height, k: W / r.width }; }
 function hit(p, touch) {
   const R = (touch ? 26 : 18) * p.k; let best = null, bd = R;
@@ -671,14 +739,17 @@ function applyDrag(p, shift) {
   if (snapOn()) { const st = snapStep(); mag = Math.round(mag / st) * st; ang = Math.round(ang / step) * step; }
   else if (shift) ang = Math.round(ang / 15) * 15;
   ang = norm360(ang % 360);
-  const keepAng = dist < 4;                              // قرب الأصل لا يُعرَّف الاتجاه: نُبقي الزاوية السابقة
+  const keepAng = dist < 4;
   if (mode === 'resolve') {
     S1.mag = Math.max(0, +mag.toFixed(3)); if (!keepAng) S1.ang = ang;
     $('vMag').value = +S1.mag.toFixed(2); $('vAng').value = +S1.ang.toFixed(1); $('vAngSlider').value = S1.ang;
   } else if (mode === 'two') {
     const k = drag.id === 'A' ? 'a' : 'b', m = Math.min(8, Math.max(0.5, mag));
     S2[k + 'Mag'] = +m.toFixed(3); if (!keepAng) S2[k + 'Ang'] = ang;
-    $(k + 'Mag').value = S2[k + 'Mag']; $(k + 'Ang').value = S2[k + 'Ang'];
+    $(k + 'Mag').value = S2[k + 'Mag'];
+    $(k + 'MagNum').value = +S2[k + 'Mag'].toFixed(2);
+    $(k + 'Ang').value = S2[k + 'Ang'];
+    $(k + 'AngNum').value = +S2[k + 'Ang'].toFixed(1);
   } else {
     const v = S3.vectors[drag.id]; v.mag = Math.max(0.1, +mag.toFixed(3)); if (!keepAng) v.ang = ang;
     const row = $('vecList').children[drag.id];
@@ -708,9 +779,6 @@ cv.addEventListener('pointerup', endDrag);
 cv.addEventListener('pointercancel', endDrag);
 cv.addEventListener('pointerleave', () => { if (!drag && hover !== null) { hover = null; cv.style.cursor = 'default'; requestDraw(); } });
 
-/* =====================================================================
-   ربط حقول الوضع 1 والوضع 2 والتبويبات
-   ===================================================================== */
 // الوضع 1
 $('vName').addEventListener('input', e => { S1.name = e.target.value || 'V'; changed(); });
 $('vUnit').addEventListener('input', e => { S1.unit = e.target.value; changed(); });
@@ -720,9 +788,21 @@ $('vAngSlider').addEventListener('input', e => { S1.ang = num(e.target.value); $
 [['tgComponents', 'showComp'], ['tgRectangle', 'showRect'], ['tgAngle', 'showArc']].forEach(([id, k]) => {
   $(id).addEventListener('click', e => { e.preventDefault(); S1[k] = !S1[k]; $(id).classList.toggle('active', S1[k]); changed(); });
 });
-// الوضع 2
-[['aMag', 'aMag'], ['aAng', 'aAng'], ['bMag', 'bMag'], ['bAng', 'bAng']].forEach(([id, k]) => $(id).addEventListener('input', e => { S2[k] = num(e.target.value); changed(); }));
-// التبويبات
+
+// الوضع 2 (مزامنة كاملة)
+$('aMag').addEventListener('input', e => { S2.aMag = num(e.target.value); $('aMagNum').value = +S2.aMag.toFixed(2); changed(); });
+$('aMagNum').addEventListener('input', e => { S2.aMag = Math.max(0, num(e.target.value)); $('aMag').value = Math.min(8, Math.max(0.5, S2.aMag)); changed(); });
+$('aAng').addEventListener('input', e => { S2.aAng = norm360(num(e.target.value)); $('aAngNum').value = +S2.aAng.toFixed(1); changed(); });
+$('aAngNum').addEventListener('input', e => { S2.aAng = norm360(num(e.target.value)); $('aAng').value = S2.aAng; changed(); });
+$('bMag').addEventListener('input', e => { S2.bMag = num(e.target.value); $('bMagNum').value = +S2.bMag.toFixed(2); changed(); });
+$('bMagNum').addEventListener('input', e => { S2.bMag = Math.max(0, num(e.target.value)); $('bMag').value = Math.min(8, Math.max(0.5, S2.bMag)); changed(); });
+$('bAng').addEventListener('input', e => { S2.bAng = norm360(num(e.target.value)); $('bAngNum').value = +S2.bAng.toFixed(1); changed(); });
+$('bAngNum').addEventListener('input', e => { S2.bAng = norm360(num(e.target.value)); $('bAng').value = S2.bAng; changed(); });
+$('aName').addEventListener('input', e => { S2.aName = e.target.value || 'A'; changed(); });
+$('aUnit').addEventListener('input', e => { S2.aUnit = e.target.value; changed(); });
+$('bName').addEventListener('input', e => { S2.bName = e.target.value || 'B'; changed(); });
+$('bUnit').addEventListener('input', e => { S2.bUnit = e.target.value; changed(); });
+
 document.querySelectorAll('.tabs button').forEach(t => t.addEventListener('click', () => {
   mode = t.dataset.mode; drag = null; hover = null; cv.style.cursor = 'default';
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === t));
@@ -730,7 +810,7 @@ document.querySelectorAll('.tabs button').forEach(t => t.addEventListener('click
   const M = MODES[mode]; view.scale = view.target = M.target(M.calc());
   changed(); updateFormulas();
 }));
-// الوضع الليلي/النهاري (يُحفظ الاختيار في المتصفح)
+
 (function () {
   const t = $('themeToggle'); let saved = null;
   try { saved = localStorage.getItem('theme'); } catch (e) {}
@@ -742,11 +822,10 @@ document.querySelectorAll('.tabs button').forEach(t => t.addEventListener('click
   });
 })();
 
-/* ---------- البدء ---------- */
-renderList(); syncGlobalToggles();
+fitCanvas(); renderList(); syncGlobalToggles();
 { const M = MODES[mode]; view.scale = view.target = M.target(M.calc()); }
 changed(); updateFormulas();
-window.__vectorSim = { get handles() { return handles; }, get scale() { return view.scale; }, S1, S2, S3, origin };   // للاختبار الآلي فقط
+window.__vectorSim = { get handles() { return handles; }, get scale() { return view.scale; }, S1, S2, S3, origin };
 </script>
 </body>
 </html>
