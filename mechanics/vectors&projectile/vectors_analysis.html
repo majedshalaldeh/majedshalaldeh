@@ -13,6 +13,7 @@
 </script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" onload="window.__mjLoaded&&window.__mjLoaded()"></script>
 <style>
+/* الشعار: 1.3× (القيمة السابقة) */
 :root{--logo:clamp(109px,17vh,250px);--bg-color:#0b1329;--main-card-bg:#1c2541;--sub-card-bg:#3a506b;--accent:#f77f00;--gold:#ffd166;--accent-text:#ffd166;
  --border-soft:rgba(255,255,255,.08);--shadow-soft:0 10px 30px rgba(0,0,0,.3);--ink:#eef1f7;--mute:#c0c8d8;
  --inner:#0b1329;--formula:#111d3a;--edge:#334155;--eq:#facc15}
@@ -36,128 +37,147 @@ body.light-mode .nav-brand{color:#c2410c}
 .nav-links a:hover{background:var(--accent);color:#000}
 .theme-toggle{background:transparent;border:1px solid var(--border-soft);color:var(--ink);font-size:1.1rem;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
 .theme-toggle:hover{transform:rotate(20deg);background:var(--sub-card-bg)}
-#breadcrumb{width:max-content;max-width:calc(100% - 24px);margin:8px auto 0;display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;padding:5px 18px;font-size:12px;color:var(--mute);background:var(--main-card-bg);border:1px solid var(--border-soft);border-radius:10px}
+#breadcrumb{width:max-content;max-width:calc(100% - 24px);margin:6px auto 0;display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;padding:4px 16px;font-size:12px;color:var(--mute);background:var(--main-card-bg);border:1px solid var(--border-soft);border-radius:10px}
 #breadcrumb a{color:var(--accent-text);text-decoration:none}
 body.light-mode #breadcrumb a{color:#c2410c}
 #breadcrumb .sep{opacity:.5}#breadcrumb #parentCrumb{color:var(--mute)}#breadcrumb a#parentCrumb{color:var(--accent-text)}#breadcrumb .cur{color:var(--ink);font-weight:600}
 
-#siteHeader{position:relative;display:flex;align-items:center;justify-content:center;padding:4px 20px 2px;min-height:var(--logo)}
-#logoWrap{position:absolute;top:4px;right:18px;z-index:30;display:flex;justify-content:center;align-items:center}
-#logoWrap img{width:var(--logo);height:var(--logo);border-radius:50%;background:#fff;object-fit:cover;box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.2)}
-body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
-#logoFallback{display:none;width:var(--logo);height:var(--logo);border-radius:50%;background:linear-gradient(135deg,#f77f00,#00b4d8);align-items:center;justify-content:center;font-size:calc(var(--logo)*.32);color:#fff}
+/* الترويسة: عنوان فقط، بحشوة رأسية ضيّقة */
+#siteHeader{display:flex;align-items:center;justify-content:center;padding:3px 20px 2px}
 #titleBlock{text-align:center}
-#titleBlock h1{margin:0;font-size:20px;line-height:1.4;color:var(--accent-text)}
-.sub{color:var(--mute);margin:2px 0 0;font-size:13px}
-.credit{margin:6px 0 0;font-size:13px;color:var(--mute)}
+#titleBlock h1{margin:0;font-size:19px;line-height:1.3;color:var(--accent-text)}
+.sub{color:var(--mute);margin:2px 0 0;font-size:12.5px}
+.credit{margin:3px 0 0;font-size:12.5px;color:var(--mute)}
 .credit .lead{color:var(--accent-text)}.credit strong{color:var(--ink)}.credit .bar{opacity:.5;margin:0 6px}.credit .ph{direction:ltr;unicode-bidi:isolate}
 
-.tabs{display:flex;gap:8px;justify-content:center;align-items:center;padding:4px 16px 8px;flex-wrap:wrap}
-.tabs button{font:inherit;font-size:13px;font-weight:bold;padding:8px 22px;border-radius:20px;border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);cursor:pointer;transition:.2s}
+/* التبويبات: حشوة رأسية أصغر لدفع المحتوى للأعلى */
+.tabs{display:flex;gap:8px;justify-content:center;align-items:center;padding:2px 16px 4px;flex-wrap:wrap}
+.tabs button{font:inherit;font-size:13px;font-weight:bold;padding:7px 20px;border-radius:20px;border:1px solid var(--border-soft);background:var(--main-card-bg);color:var(--ink);cursor:pointer;transition:.2s}
 .tabs button:hover{background:var(--sub-card-bg)}
 .tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#000}
 
-.container{flex:1;min-height:0;width:100%;display:flex;gap:16px;justify-content:center;align-items:stretch;padding:0 16px 8px;max-width:1600px;margin:0 auto}
-.canvas-col{flex:0 0 auto;min-width:0;display:flex;flex-direction:column}
+/* ====== ثلاثة أعمدة: تحكم (يمين) | مشهد (وسط) | قراءات (يسار) ====== */
+.container{flex:1;min-height:0;width:100%;display:flex;gap:10px;justify-content:center;align-items:stretch;padding:0 10px 8px;max-width:2600px;margin:0 auto}
+
+.side{flex:0 0 auto;min-width:0;height:100%;display:flex;flex-direction:column;gap:8px;justify-content:flex-start}
+.side-controls{flex:0 1 400px;min-width:320px;max-width:480px}
+.side-readings{flex:0 1 400px;min-width:320px;max-width:480px}
+
+/* رفع الشعار: لا حشوة علوية، حدّ أعلى نظيف */
+#logoWrap{flex:0 0 auto;display:flex;justify-content:center;align-items:center;padding:0}
+#logoWrap img{width:var(--logo);height:var(--logo);max-width:100%;border-radius:50%;background:#fff;object-fit:cover;
+ box-shadow:0 6px 30px rgba(0,0,0,.5),0 0 0 4px rgba(255,255,255,.08);border:3px solid rgba(255,255,255,.2)}
+body.light-mode #logoWrap img{box-shadow:0 6px 30px rgba(0,0,0,.2),0 0 0 4px rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}
+#logoFallback{display:none;width:var(--logo);height:var(--logo);max-width:100%;border-radius:50%;background:linear-gradient(135deg,#f77f00,#00b4d8);align-items:center;justify-content:center;font-size:calc(var(--logo)*.32);color:#fff}
+
+/* اللوحة تبدأ من أعلى العمود فوراً بعد الشعار */
+.side .panel{background:var(--main-card-bg);border:1px solid var(--border-soft);padding:14px 16px;border-radius:16px;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;box-shadow:var(--shadow-soft);display:none;width:100%}
+.side .panel.active{display:block}
+.side .panel h2{font-size:14px;color:var(--accent-text);margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--edge)}
+
+.canvas-col{flex:1 1 auto;min-width:280px;display:flex;flex-direction:column;overflow:hidden}
 .cv-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
 canvas{display:block;flex:none;background:#0b1220;border-radius:16px;border:1px solid var(--border-soft);box-shadow:var(--shadow-soft);touch-action:none;user-select:none}
 .cv-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--mute)}
 .cv-tools label{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink)}
-.cv-tools .hint{flex:1;min-width:220px}
+.cv-tools .hint{flex:1;min-width:180px}
 input[type=checkbox]{accent-color:var(--accent)}
 
-.panel{background:var(--main-card-bg);border:1px solid var(--border-soft);padding:16px 20px;border-radius:16px;flex:1 1 440px;min-width:380px;max-width:760px;height:100%;overflow-y:auto;scrollbar-width:thin;box-shadow:var(--shadow-soft);display:none}
-.panel.active{display:block}
-.panel h2{font-size:15px;color:var(--accent-text);margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--edge)}
 label.lb{display:block;margin:10px 0 4px;font-size:14px}
 input[type=range]{width:100%;accent-color:var(--accent)}
 .val{color:var(--accent-text);font-weight:bold}
-.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .field label{display:block;font-size:12px;color:var(--mute);margin-bottom:4px}
-.field input[type=text],.field input[type=number]{width:100%;background:var(--inner);color:var(--ink);border:1px solid var(--edge);border-radius:8px;padding:8px 10px;font-size:15px;font-family:inherit}
+.field input[type=text],.field input[type=number]{width:100%;background:var(--inner);color:var(--ink);border:1px solid var(--edge);border-radius:8px;padding:7px 9px;font-size:14px;font-family:inherit}
 .field input:focus,.vec-row input:focus{outline:none;border-color:var(--accent)}
-.angle-hint{font-size:12px;color:var(--accent-text);text-align:center;margin:2px 0 12px}
+.angle-hint{font-size:12px;color:var(--accent-text);text-align:center;margin:2px 0 10px}
 
 .toggle-comp{display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:6px 10px;background:var(--inner);border:1px solid var(--edge);border-radius:8px;font-size:13px;color:var(--mute);user-select:none;transition:all .15s}
 .toggle-comp:hover{border-color:var(--c,var(--accent))}
 .toggle-comp.active{background:var(--c,var(--accent));color:#000;border-color:var(--c,var(--accent));font-weight:bold}
 .toggle-comp input{display:none}
-.view-opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.view-opts .toggle-comp{flex:1;min-width:120px}.view-opts .lab{width:100%;font-size:12px;color:var(--mute)}
+.view-opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.view-opts .toggle-comp{flex:1;min-width:110px}.view-opts .lab{width:100%;font-size:12px;color:var(--mute)}
 
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.stat{background:var(--inner);padding:10px 8px;border-radius:10px;text-align:center;border-top:3px solid var(--edge)}
-.stat .lbl{font-size:11px;color:var(--mute)}.stat .vv{font-size:17px;font-weight:bold;direction:ltr}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.stat{background:var(--inner);padding:10px 6px;border-radius:10px;text-align:center;border-top:3px solid var(--edge)}
+.stat .lbl{font-size:11px;color:var(--mute)}.stat .vv{font-size:16px;font-weight:bold;direction:ltr;word-break:break-all}
 .stat.vx{border-top-color:#ef4444}.stat.vx .vv{color:#ef4444}
 .stat.vy{border-top-color:#22c55e}.stat.vy .vv{color:#16a34a}
 .stat.v{border-top-color:#3b82f6}.stat.v .vv{color:#3b82f6}
 
-.result{margin-top:12px;background:var(--inner);padding:14px 16px;border-radius:12px;font-size:15px;overflow-x:auto}
-.result h3{color:var(--accent-text);font-size:15px;margin:4px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--edge)}
-.row{display:flex;align-items:center;gap:10px;padding:5px 0;flex-wrap:wrap}
+.result{margin-top:10px;background:var(--inner);padding:12px 14px;border-radius:12px;font-size:14px;overflow-x:hidden}
+.result h3{color:var(--accent-text);font-size:14px;margin:4px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--edge)}
+.row{display:flex;align-items:center;gap:8px;padding:4px 0;flex-wrap:wrap}
 .row .ar{white-space:nowrap}
 .eq{direction:ltr;unicode-bidi:isolate;color:var(--eq)}
-.section-title{color:var(--accent);font-weight:bold;margin:12px 0 6px;padding-top:10px;border-top:1px solid var(--edge)}
-.formula{direction:ltr;text-align:center;margin:6px 0;padding:8px;background:var(--formula);border-radius:8px;border-right:3px solid var(--accent);overflow-x:auto}
-.formula.raw code{color:var(--eq);font-size:13px;white-space:pre-wrap}
-.note{font-size:13px;color:var(--ink);background:rgba(245,158,11,.16);border:1px solid #f59e0b;border-radius:8px;padding:6px 10px;margin:4px 0}
-.check{color:#16a34a;font-weight:bold}
-.explain{background:var(--inner);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;color:var(--ink)}
-.explain b{color:var(--accent-text)}
-.legend{font-size:13px;margin-top:12px;color:var(--mute);line-height:1.9}
-.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:6px;vertical-align:middle}
+.section-title{color:var(--accent);font-weight:bold;margin:10px 0 6px;padding-top:8px;border-top:1px solid var(--edge)}
 
-.vec-pair-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:bold;margin:12px 0 6px}
+.formula{direction:ltr;text-align:center;margin:6px 0;padding:8px 10px;background:var(--formula);border-radius:8px;border-right:3px solid var(--accent);overflow-x:auto;overflow-y:hidden}
+.formula mjx-container{max-width:100%!important;overflow-x:auto;overflow-y:hidden}
+.formula.raw code{color:var(--eq);font-size:12px;white-space:pre-wrap;word-break:break-word}
+.note{font-size:12px;color:var(--ink);background:rgba(245,158,11,.16);border:1px solid #f59e0b;border-radius:8px;padding:6px 10px;margin:4px 0}
+.check{color:#16a34a;font-weight:bold}
+.explain{background:var(--inner);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:var(--ink)}
+.explain b{color:var(--accent-text)}
+.legend{font-size:12px;margin-top:10px;color:var(--mute);line-height:1.8}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-left:6px;vertical-align:middle}
+
+.vec-pair-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:bold;margin:10px 0 6px}
 .vec-pair-title .pt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 
-.vec-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;margin:6px 0;background:var(--inner);border-radius:10px;border-right:4px solid var(--c,#94a3b8);transition:box-shadow .15s}
+.vec-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px;margin:6px 0;background:var(--inner);border-radius:10px;border-right:4px solid var(--c,#94a3b8);transition:box-shadow .15s}
 .vec-row.drag{box-shadow:0 0 0 2px var(--c,var(--accent))}
 .vec-row .row-top{grid-column:1/-1;display:flex;align-items:center;gap:8px}
 .badge{font-weight:bold;color:var(--c);background:var(--formula);border:1px solid var(--c);padding:2px 10px;border-radius:20px;font-size:12px;min-width:20px;text-align:center}
-.fields{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.fields{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
 .vec-row label.s{font-size:11px;color:var(--mute);display:block;margin-bottom:2px}
-.vec-row input[type=number],.vec-row input[type=text]{background:var(--main-card-bg);color:var(--ink);border:1px solid var(--edge);border-radius:6px;padding:4px 6px;font-size:14px;font-family:inherit}
-.vec-row input[type=number]{width:72px}.vec-row .name-inp{width:70px}.vec-row .unit-inp{width:60px}
-.del{background:#7f1d1d;color:#fecaca;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font:inherit;font-size:13px;margin-right:auto}
+.vec-row input[type=number],.vec-row input[type=text]{background:var(--main-card-bg);color:var(--ink);border:1px solid var(--edge);border-radius:6px;padding:4px 6px;font-size:13px;font-family:inherit}
+.vec-row input[type=number]{width:64px}.vec-row .name-inp{width:64px}.vec-row .unit-inp{width:54px}
+.del{background:#7f1d1d;color:#fecaca;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font:inherit;font-size:12px;margin-right:auto}
 .del:hover{background:#991b1b}
-.actions{display:flex;gap:8px;margin:8px 0 12px;flex-wrap:wrap}
-.actions button{flex:1;padding:9px 12px;border:none;border-radius:20px;cursor:pointer;font:inherit;font-size:14px;font-weight:bold;color:#000;background:var(--accent);min-width:120px}
+.actions{display:flex;gap:8px;margin:8px 0 4px;flex-wrap:wrap}
+.actions button{flex:1;padding:9px 12px;border:none;border-radius:20px;cursor:pointer;font:inherit;font-size:13px;font-weight:bold;color:#000;background:var(--accent);min-width:110px}
 .actions button.ghost{background:var(--sub-card-bg);color:var(--ink)}
 .actions button:hover{opacity:.9}
-table.comp{width:100%;border-collapse:collapse;direction:ltr;font-size:14px;margin:8px 0}
-table.comp th,table.comp td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--edge)}
-table.comp th{color:var(--accent-text);background:var(--formula)}
+
+table.comp{width:100%;border-collapse:collapse;direction:ltr;font-size:12.5px;margin:8px 0;table-layout:fixed}
+table.comp th,table.comp td{padding:5px 4px;text-align:center;border-bottom:1px solid var(--edge);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+table.comp th{color:var(--accent-text);background:var(--formula);font-size:11.5px}
 table.comp td.name{font-weight:bold}
 table.comp tr.total td{border-top:2px solid var(--edge);color:#16a34a;font-weight:bold;background:var(--formula)}
 .final{background:rgba(16,185,129,.14);border:1px solid #10b981;padding:10px 12px;border-radius:10px;margin-top:10px}
 mjx-container{color:var(--eq)!important}
 
-#footer{padding:4px 20px calc(4px + env(safe-area-inset-bottom,0px));text-align:center;font-size:11px;color:var(--mute)}
+#footer{padding:2px 20px calc(2px + env(safe-area-inset-bottom,0px));text-align:center;font-size:11px;color:var(--mute)}
 #footer strong{color:var(--accent)}body.light-mode #footer strong{color:#c2410c}
 
 @media(max-width:760px){
  #navbar{flex-wrap:wrap;gap:10px;padding:10px 15px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
  .nav-links{order:3;width:100%;justify-content:center}.nav-links a{padding:6px 10px;font-size:.8rem}.nav-brand span{display:none}
- #breadcrumb{font-size:10px;padding:5px 12px}
- #logoWrap{position:static}#siteHeader{flex-direction:column;gap:8px;padding:12px 12px 2px;min-height:0}
+ #breadcrumb{font-size:10px;padding:4px 12px;margin-top:4px}
+ #siteHeader{flex-direction:column;gap:4px;padding:8px 12px 2px}
  #titleBlock h1{font-size:16px}
- .container{padding:0 8px 12px}.panel{padding:14px 12px}
+ .container{padding:0 8px 12px}.side .panel{padding:12px}
 }
-@media(min-width:901px) and (max-height:820px){
+@media(min-width:1001px) and (max-height:820px){
  :root{--logo:94px}
  #titleBlock .sub{display:none}#titleBlock h1{font-size:17px}
- #breadcrumb{margin-top:4px;padding:3px 14px}
- #navbar{min-height:46px;padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:6px}
- .tabs{padding:2px 16px 6px}.tabs button{padding:6px 18px}
+ #breadcrumb{margin-top:3px;padding:2px 12px}
+ #navbar{min-height:44px;padding-top:calc(5px + env(safe-area-inset-top,0px));padding-bottom:5px}
+ .tabs{padding:1px 16px 3px}.tabs button{padding:5px 16px}
 }
-@media(max-width:900px){
+
+@media(max-width:1000px){
  :root{--logo:156px}
  body{height:auto;min-height:100vh;display:block;overflow:visible}
- #logoWrap{position:static}#siteHeader{flex-direction:column;gap:8px;padding:12px 12px 2px;min-height:0}
- .container{flex-direction:column;align-items:center;padding:0 10px 12px}
- .canvas-col{width:100%;flex:none}
- .cv-wrap{flex:none;width:100%;max-width:640px;aspect-ratio:1/1}
- .panel{flex:none;width:100%;height:auto;overflow:visible;max-width:none}
+ #siteHeader{flex-direction:column;gap:4px;padding:8px 12px 2px}
+ .container{flex-direction:column;align-items:center;padding:0 10px 12px;gap:12px}
+ .canvas-col{order:1;width:100%;max-width:760px;flex:none}
+ .cv-wrap{flex:none;width:100%;aspect-ratio:1/1}
+ .side{order:2;width:100%;max-width:760px;min-width:0;flex:none;height:auto}
+ .side-readings{order:3}
+ .side .panel{flex:none;height:auto;overflow:visible;max-height:none}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -183,10 +203,6 @@ mjx-container{color:var(--eq)!important}
 </div>
 
 <header id="siteHeader">
-  <div id="logoWrap">
-    <img src="../../logo.png" alt="شعار الأستاذ ماجد شلالدة" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-    <div id="logoFallback">⚛️</div>
-  </div>
   <div id="titleBlock">
     <h1>محاكاة المتجهات: التحليل والجمع</h1>
     <p class="sub">اسحب رأس أي سهم لتغيير المتجه، والزاوية تُقاس من +x عكس عقارب الساعة</p>
@@ -201,103 +217,119 @@ mjx-container{color:var(--eq)!important}
 </div>
 
 <div class="container">
+
+  <aside class="side side-controls">
+    <div id="logoWrap">
+      <img src="../../logo.png" alt="شعار الأستاذ ماجد شلالدة" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div id="logoFallback">⚛️</div>
+    </div>
+
+    <div class="panel active" id="c-resolve">
+      <h2>بيانات المتجه</h2>
+      <div class="input-grid">
+        <div class="field"><label>اسم المتجه</label><input type="text" id="vName" value="V" maxlength="10"></div>
+        <div class="field"><label>الوحدة</label><input type="text" id="vUnit" value="m" maxlength="8" placeholder="N, m, m/s ..."></div>
+        <div class="field"><label>المقدار |V|</label><input type="number" id="vMag" value="5" step="0.1" min="0"></div>
+        <div class="field"><label>الزاوية θ (بالدرجات)</label><input type="number" id="vAng" value="40" step="1"></div>
+      </div>
+      <input type="range" id="vAngSlider" min="0" max="360" step="1" value="40">
+      <div class="angle-hint">θ محسوبة من +x عكس عقارب الساعة ↺</div>
+      <div class="view-opts">
+        <label class="toggle-comp active" id="tgComponents"><input type="checkbox" checked> إظهار المركبتين</label>
+        <label class="toggle-comp active" id="tgRectangle"><input type="checkbox" checked> إظهار المستطيل</label>
+        <label class="toggle-comp active" id="tgAngle"><input type="checkbox" checked> إظهار الزاوية</label>
+      </div>
+    </div>
+
+    <div class="panel" id="c-two">
+      <h2>المتجهان A و B</h2>
+      <div class="vec-pair-title" style="color:#ef4444">
+        <span class="pt-dot" style="background:#ef4444"></span> المتجه A
+      </div>
+      <div class="input-grid">
+        <div class="field"><label>الاسم</label><input type="text" id="aName" value="A" maxlength="10"></div>
+        <div class="field"><label>الوحدة</label><input type="text" id="aUnit" maxlength="8" placeholder="N, m, ..."></div>
+        <div class="field"><label>المقدار |A|</label><input type="number" id="aMagNum" value="3" step="0.1" min="0"></div>
+        <div class="field"><label>الزاوية (°)</label><input type="number" id="aAngNum" value="0" step="1"></div>
+      </div>
+      <input type="range" id="aMag" min="0.5" max="8" step="0.1" value="3" aria-label="مقدار A">
+      <input type="range" id="aAng" min="0" max="359" step="1" value="0" aria-label="زاوية A">
+
+      <div class="vec-pair-title" style="color:#22c55e;margin-top:14px">
+        <span class="pt-dot" style="background:#22c55e"></span> المتجه B
+      </div>
+      <div class="input-grid">
+        <div class="field"><label>الاسم</label><input type="text" id="bName" value="B" maxlength="10"></div>
+        <div class="field"><label>الوحدة</label><input type="text" id="bUnit" maxlength="8" placeholder="N, m, ..."></div>
+        <div class="field"><label>المقدار |B|</label><input type="number" id="bMagNum" value="4" step="0.1" min="0"></div>
+        <div class="field"><label>الزاوية (°)</label><input type="number" id="bAngNum" value="60" step="1"></div>
+      </div>
+      <input type="range" id="bMag" min="0.5" max="8" step="0.1" value="4" aria-label="مقدار B">
+      <input type="range" id="bAng" min="0" max="359" step="1" value="60" aria-label="زاوية B">
+
+      <div class="angle-hint">الزوايا من +x عكس عقارب الساعة ↺</div>
+    </div>
+
+    <div class="panel" id="c-many">
+      <h2>المتجهات</h2>
+      <div class="view-opts">
+        <div class="lab">خيارات العرض :</div>
+        <label class="toggle-comp" id="tgAllVec"><input type="checkbox"> مركبات كل المتجهات</label>
+        <label class="toggle-comp" id="tgRcomp"><input type="checkbox"> مركبتا المحصلة Rx , Ry</label>
+      </div>
+      <div id="vecList"></div>
+      <div class="actions">
+        <button id="addVec">➕ إضافة متجه</button>
+        <button id="resetVec" class="ghost">↺ إعادة تعيين</button>
+      </div>
+    </div>
+  </aside>
+
   <div class="canvas-col">
     <div class="cv-wrap" id="cvWrap"><canvas id="cv" width="600" height="600" aria-label="لوحة المتجهات: اسحب رأس السهم لتغييره"></canvas></div>
     <div class="cv-tools">
       <label><input type="checkbox" id="snap" checked> تقريب القيم أثناء السحب</label>
-      <span class="hint">اسحب الحلقة الملوّنة عند رأس السهم. اضغط Shift أثناء السحب لتقريب الزاوية إلى مضاعفات 15°.</span>
+      <span class="hint">اسحب الحلقة الملوّنة عند رأس السهم. اضغط Shift لتقريب الزاوية إلى مضاعفات 15°.</span>
     </div>
   </div>
 
-  <!-- ===== 1) تحليل متجه ===== -->
-  <div class="panel active" id="p-resolve">
-    <h2>بيانات المتجه</h2>
-    <div class="input-grid">
-      <div class="field"><label>اسم المتجه</label><input type="text" id="vName" value="V" maxlength="10"></div>
-      <div class="field"><label>الوحدة</label><input type="text" id="vUnit" value="m" maxlength="8" placeholder="N, m, m/s ..."></div>
-      <div class="field"><label>المقدار |V|</label><input type="number" id="vMag" value="5" step="0.1" min="0"></div>
-      <div class="field"><label>الزاوية θ (بالدرجات)</label><input type="number" id="vAng" value="40" step="1"></div>
-    </div>
-    <input type="range" id="vAngSlider" min="0" max="360" step="1" value="40">
-    <div class="angle-hint">θ محسوبة من +x عكس عقارب الساعة ↺</div>
-    <div class="view-opts">
-      <label class="toggle-comp active" id="tgComponents"><input type="checkbox" checked> إظهار المركبتين</label>
-      <label class="toggle-comp active" id="tgRectangle"><input type="checkbox" checked> إظهار المستطيل</label>
-      <label class="toggle-comp active" id="tgAngle"><input type="checkbox" checked> إظهار الزاوية</label>
-    </div>
-    <div class="stats">
-      <div class="stat vx"><div class="lbl">V<sub>x</sub></div><div class="vv" id="statVx">—</div></div>
-      <div class="stat vy"><div class="lbl">V<sub>y</sub></div><div class="vv" id="statVy">—</div></div>
-      <div class="stat v"><div class="lbl">|V|</div><div class="vv" id="statV">—</div></div>
-    </div>
-    <div id="f1"></div>
-    <div class="legend">
-      <div><span class="dot" style="background:#3b82f6"></span> المتجه الأصلي</div>
-      <div><span class="dot" style="background:#ef4444"></span> المركبة الأفقية V<sub>x</sub></div>
-      <div><span class="dot" style="background:#22c55e"></span> المركبة الرأسية V<sub>y</sub></div>
-    </div>
-  </div>
+  <aside class="side side-readings">
 
-  <!-- ===== 2) جمع متجهين ===== -->
-  <div class="panel" id="p-two">
-    <h2>المتجهان A و B</h2>
+    <div class="panel active" id="r-resolve">
+      <h2>القراءات الحية</h2>
+      <div class="stats">
+        <div class="stat vx"><div class="lbl">V<sub>x</sub></div><div class="vv" id="statVx">—</div></div>
+        <div class="stat vy"><div class="lbl">V<sub>y</sub></div><div class="vv" id="statVy">—</div></div>
+        <div class="stat v"><div class="lbl">|V|</div><div class="vv" id="statV">—</div></div>
+      </div>
+      <div id="f1"></div>
+      <div class="legend">
+        <div><span class="dot" style="background:#3b82f6"></span> المتجه الأصلي</div>
+        <div><span class="dot" style="background:#ef4444"></span> المركبة الأفقية V<sub>x</sub></div>
+        <div><span class="dot" style="background:#22c55e"></span> المركبة الرأسية V<sub>y</sub></div>
+      </div>
+    </div>
 
-    <div class="vec-pair-title" style="color:#ef4444">
-      <span class="pt-dot" style="background:#ef4444"></span>
-      المتجه A
+    <div class="panel" id="r-two">
+      <h2>القراءات والنتائج</h2>
+      <div class="result" id="out2"><div id="n2"></div><div id="f2"></div></div>
+      <div class="legend">
+        <div><span class="dot" style="background:#ef4444"></span> المتجه A</div>
+        <div><span class="dot" style="background:#22c55e"></span> المتجه B</div>
+        <div><span class="dot" style="background:#3b82f6"></span> المحصلة R = A + B</div>
+        <div><span class="dot" style="background:#facc15"></span> الزاوية θ بين A و B</div>
+        <div><span class="dot" style="background:#f97316"></span> الزاوية α بين R و A</div>
+        <div><span class="dot" style="background:#a78bfa"></span> الزاوية β بين R و B</div>
+        <div><span class="dot" style="background:#94a3b8"></span> متوازي الأضلاع</div>
+      </div>
     </div>
-    <div class="input-grid">
-      <div class="field"><label>الاسم</label><input type="text" id="aName" value="A" maxlength="10"></div>
-      <div class="field"><label>الوحدة</label><input type="text" id="aUnit" maxlength="8" placeholder="N, m, ..."></div>
-      <div class="field"><label>المقدار |A|</label><input type="number" id="aMagNum" value="3" step="0.1" min="0"></div>
-      <div class="field"><label>الزاوية (°)</label><input type="number" id="aAngNum" value="0" step="1"></div>
-    </div>
-    <input type="range" id="aMag" min="0.5" max="8" step="0.1" value="3" aria-label="مقدار A">
-    <input type="range" id="aAng" min="0" max="359" step="1" value="0" aria-label="زاوية A">
 
-    <div class="vec-pair-title" style="color:#22c55e">
-      <span class="pt-dot" style="background:#22c55e"></span>
-      المتجه B
+    <div class="panel" id="r-many">
+      <h2>القراءات والنتائج</h2>
+      <div class="result" id="out3"><div id="t3"></div><div id="f3"></div></div>
+      <div class="legend">الأسهم الملونة تمثل المتجهات، والسهم الأزرق السميك يمثل المحصلة. يمكنك تغيير <b>الاسم</b> و<b>الوحدة</b> لكل متجه، أو سحب رأسه بالفأرة.</div>
     </div>
-    <div class="input-grid">
-      <div class="field"><label>الاسم</label><input type="text" id="bName" value="B" maxlength="10"></div>
-      <div class="field"><label>الوحدة</label><input type="text" id="bUnit" maxlength="8" placeholder="N, m, ..."></div>
-      <div class="field"><label>المقدار |B|</label><input type="number" id="bMagNum" value="4" step="0.1" min="0"></div>
-      <div class="field"><label>الزاوية (°)</label><input type="number" id="bAngNum" value="60" step="1"></div>
-    </div>
-    <input type="range" id="bMag" min="0.5" max="8" step="0.1" value="4" aria-label="مقدار B">
-    <input type="range" id="bAng" min="0" max="359" step="1" value="60" aria-label="زاوية B">
-
-    <div class="angle-hint">الزوايا من +x عكس عقارب الساعة ↺</div>
-
-    <div class="result" id="out2"><div id="n2"></div><div id="f2"></div></div>
-
-    <div class="legend">
-      <div><span class="dot" style="background:#ef4444"></span> المتجه A</div>
-      <div><span class="dot" style="background:#22c55e"></span> المتجه B</div>
-      <div><span class="dot" style="background:#3b82f6"></span> المحصلة R = A + B</div>
-      <div><span class="dot" style="background:#facc15"></span> الزاوية θ بين A و B</div>
-      <div><span class="dot" style="background:#f97316"></span> الزاوية α بين R و A</div>
-      <div><span class="dot" style="background:#a78bfa"></span> الزاوية β بين R و B</div>
-      <div><span class="dot" style="background:#94a3b8"></span> متوازي الأضلاع</div>
-    </div>
-  </div>
-
-  <!-- ===== 3) جمع عدة متجهات ===== -->
-  <div class="panel" id="p-many">
-    <div class="view-opts">
-      <div class="lab">خيارات العرض :</div>
-      <label class="toggle-comp" id="tgAllVec"><input type="checkbox"> مركبات كل المتجهات</label>
-      <label class="toggle-comp" id="tgRcomp"><input type="checkbox"> مركبتا المحصلة R<sub>x</sub> , R<sub>y</sub></label>
-    </div>
-    <div id="vecList"></div>
-    <div class="actions">
-      <button id="addVec">➕ إضافة متجه</button>
-      <button id="resetVec" class="ghost">↺ إعادة تعيين</button>
-    </div>
-    <div class="result" id="out3"><div id="t3"></div><div id="f3"></div></div>
-    <div class="legend">الأسهم الملونة تمثل المتجهات، والسهم الأزرق السميك يمثل المحصلة. يمكنك تغيير <b>الاسم</b> و<b>الوحدة</b> لكل متجه، أو سحب رأسه بالفأرة.</div>
-  </div>
+  </aside>
 </div>
 
 
@@ -316,12 +348,12 @@ ctx.direction = 'ltr';
 function fitCanvas() {
   const cont = document.querySelector('.container'), col = document.querySelector('.canvas-col'), tools = document.querySelector('.cv-tools');
   let size;
-  if (matchMedia('(max-width:900px)').matches) {
-    col.style.width = ''; size = Math.min(640, cont.clientWidth - 20);
+  if (matchMedia('(max-width:1000px)').matches) {
+    size = Math.min(760, cont.clientWidth - 20);
   } else {
-    const availH = cont.clientHeight - 8 - tools.offsetHeight - 6,
-          availW = cont.clientWidth - 32 - 16 - 440;
-    size = Math.min(availH, availW, 900); col.style.width = Math.max(240, Math.floor(size)) + 'px';
+    const availH = cont.clientHeight - 8 - tools.offsetHeight - 6;
+    const availW = Math.max(280, col.clientWidth - 2);
+    size = Math.min(availH, availW, 1500);
   }
   size = Math.max(240, Math.floor(size));
   cv.style.width = cv.style.height = size + 'px';
@@ -332,6 +364,7 @@ function fitCanvas() {
   if (typeof requestDraw === 'function') requestDraw();
 }
 new ResizeObserver(fitCanvas).observe(document.querySelector('.container'));
+new ResizeObserver(fitCanvas).observe(document.querySelector('.canvas-col'));
 window.addEventListener('resize', fitCanvas);
 
 const PI = Math.PI;
@@ -419,31 +452,23 @@ function drawArrow(from, to, color, label, width = 3, dash = null, labelOffset =
   ctx.restore();
 }
 
-/* حلقة سحب مجوفة: شفافة من الداخل حتى لا تحجب رأس السهم */
 function addHandle(id, pt, color) {
   handles.push({ id, x: pt.x, y: pt.y, color });
   const active = (drag && drag.id === id) || (!drag && hover === id);
   ctx.save();
-
-  // هالة خفيفة تظهر فقط عند المرور أو السحب
   if (active) {
     ctx.fillStyle = color;
     ctx.globalAlpha = 0.22;
     ctx.beginPath(); ctx.arc(pt.x, pt.y, 16, 0, 2 * PI); ctx.fill();
     ctx.globalAlpha = 1;
   }
-
-  // حلقة مجوفة (شفافة من الداخل) فلا تحجب رأس السهم
   ctx.strokeStyle = color;
   ctx.lineWidth = active ? 3 : 2.5;
   ctx.beginPath();
   ctx.arc(pt.x, pt.y, active ? 9 : 7, 0, 2 * PI);
   ctx.stroke();
-
-  // نقطة صغيرة في المركز لتوضيح موقع المقبض بالضبط
   ctx.fillStyle = color;
   ctx.beginPath(); ctx.arc(pt.x, pt.y, active ? 2.2 : 1.6, 0, 2 * PI); ctx.fill();
-
   ctx.restore();
 }
 
@@ -503,7 +528,7 @@ function live1() {
 }
 function formulas1() {
   const c = calc1(), ul = S1.unit ? `\\;\\text{${texEsc(S1.unit)}}` : '';
-  return `<h2 style="margin-top:16px">خطوات التحليل</h2>
+  return `<h2 style="margin-top:14px">خطوات التحليل</h2>
     ${F(`V_x = |\\vec{V}|\\cos\\theta = ${c.mag.toFixed(2)} \\times \\cos(${c.ang.toFixed(1)}^{\\circ}) = ${c.Vx.toFixed(3)}${ul}`)}
     ${F(`V_y = |\\vec{V}|\\sin\\theta = ${c.mag.toFixed(2)} \\times \\sin(${c.ang.toFixed(1)}^{\\circ}) = ${c.Vy.toFixed(3)}${ul}`)}
     <div class="explain"><b>الزاوية θ :</b> مقيسة من محور السينات الموجب (+x) عكس عقارب الساعة ↺
@@ -640,7 +665,7 @@ function live3() {
 }
 function formulas3() {
   const c = calc3(), ut = c.unitLabel ? `\\;(${texEsc(c.unitLabel)})` : '';
-  return `<h3 style="margin-top:14px">٢) حساب المحصلة</h3>
+  return `<h3 style="margin-top:12px">٢) حساب المحصلة</h3>
     ${F(`R_x = \\sum V_{ix} = ${c.Rx.toFixed(3)}${ut}`)}${F(`R_y = \\sum V_{iy} = ${c.Ry.toFixed(3)}${ut}`)}
     ${F(`|\\vec{R}| = \\sqrt{R_x^2 + R_y^2} = ${c.Rmag.toFixed(3)}${ut}`)}
     ${F(`\\theta_R = \\tan^{-1}\\!\\left(\\frac{R_y}{R_x}\\right) = ${c.Rdir.toFixed(2)}^{\\circ}`)}`;
@@ -789,7 +814,7 @@ $('vAngSlider').addEventListener('input', e => { S1.ang = num(e.target.value); $
   $(id).addEventListener('click', e => { e.preventDefault(); S1[k] = !S1[k]; $(id).classList.toggle('active', S1[k]); changed(); });
 });
 
-// الوضع 2 (مزامنة كاملة)
+// الوضع 2
 $('aMag').addEventListener('input', e => { S2.aMag = num(e.target.value); $('aMagNum').value = +S2.aMag.toFixed(2); changed(); });
 $('aMagNum').addEventListener('input', e => { S2.aMag = Math.max(0, num(e.target.value)); $('aMag').value = Math.min(8, Math.max(0.5, S2.aMag)); changed(); });
 $('aAng').addEventListener('input', e => { S2.aAng = norm360(num(e.target.value)); $('aAngNum').value = +S2.aAng.toFixed(1); changed(); });
@@ -806,9 +831,12 @@ $('bUnit').addEventListener('input', e => { S2.bUnit = e.target.value; changed()
 document.querySelectorAll('.tabs button').forEach(t => t.addEventListener('click', () => {
   mode = t.dataset.mode; drag = null; hover = null; cv.style.cursor = 'default';
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === t));
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'p-' + mode));
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'c-' + mode || p.id === 'r-' + mode);
+  });
   const M = MODES[mode]; view.scale = view.target = M.target(M.calc());
   changed(); updateFormulas();
+  requestAnimationFrame(fitCanvas);
 }));
 
 (function () {
